@@ -1,0 +1,7 @@
+services:
+  asterisk:
+    image: andrius/asterisk:21.10.2
+    network_mode: host
+    volumes:
+      - ./asterisk/etc/asterisk:/etc/asterisk
+    restart: unless-stopped
