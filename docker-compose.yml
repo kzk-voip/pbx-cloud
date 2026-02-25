@@ -3,5 +3,6 @@ services:
     image: andrius/asterisk:21
     network_mode: host
     volumes:
-      - ./asterisk/etc/asterisk:/etc/asterisk
+      - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
+      - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
     restart: unless-stopped
