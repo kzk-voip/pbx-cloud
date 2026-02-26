@@ -1,6 +1,6 @@
 services:
   asterisk:
-    build: andrius/asterisk:21
+    build: ./asterisk
     network_mode: host
     depends_on:
       postgres:
