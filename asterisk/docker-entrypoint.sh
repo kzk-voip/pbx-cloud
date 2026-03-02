@@ -8,15 +8,9 @@ for f in /etc/asterisk/*.conf; do
     cp "/tmp/$(basename "$f")" "$f"
 done
 
-# Generate res_config_pgsql.conf from scratch (avoids bind mount issues)
-cat > /etc/asterisk/res_config_pgsql.conf << EOF
-[general]
-dbhost=127.0.0.1
-dbport=5432
-dbname=pbx
-dbuser=pbx_user
-dbpass=${POSTGRES_PASSWORD}
-requirements=warn
-EOF
+# Substitute POSTGRES_PASSWORD in res_pgsql.conf
+sed "s/\${POSTGRES_PASSWORD}/$POSTGRES_PASSWORD/g" \
+    /etc/asterisk/res_pgsql.conf > /tmp/res_pgsql.conf
+cp /tmp/res_pgsql.conf /etc/asterisk/res_pgsql.conf
 
 exec asterisk -f
