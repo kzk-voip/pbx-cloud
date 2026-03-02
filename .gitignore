@@ -1,6 +1,8 @@
 # Environment
 .env
 
+specs.md 
+
 # Logs
 *.log
 
