@@ -1,9 +1,13 @@
 #!/bin/sh
 set -e
 
-sed "s/\${POSTGRES_PASSWORD}/$POSTGRES_PASSWORD/g" \
-    /etc/asterisk/res_config_pgsql.conf > /tmp/res_config_pgsql.conf
+# Fix Windows CRLF line endings for all mounted config files
+for f in /etc/asterisk/*.conf; do
+    sed -i 's/\r$//' "$f"
+done
 
-cp /tmp/res_config_pgsql.conf /etc/asterisk/res_config_pgsql.conf
+# Substitute POSTGRES_PASSWORD in res_config_pgsql.conf
+sed -i "s/\${POSTGRES_PASSWORD}/$POSTGRES_PASSWORD/g" \
+    /etc/asterisk/res_config_pgsql.conf
 
 exec asterisk -f
