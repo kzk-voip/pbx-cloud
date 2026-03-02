@@ -11,6 +11,7 @@ services:
       - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
       - ./asterisk/etc/asterisk/extconfig.conf:/etc/asterisk/extconfig.conf
+      - ./asterisk/etc/asterisk/res_pgsql.conf:/etc/asterisk/res_pgsql.conf
       - ./asterisk/etc/asterisk/sorcery.conf:/etc/asterisk/sorcery.conf
     restart: unless-stopped
 
