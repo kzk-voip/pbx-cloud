@@ -124,6 +124,7 @@ CREATE TABLE ps_contacts (
     path TEXT,
     user_agent VARCHAR(255),
     qualify_timeout FLOAT,
+    qualify_2xx_only BOOLEAN,
     reg_server VARCHAR(20),
     authenticate_qualify BOOLEAN,
     via_addr VARCHAR(40),
