@@ -13,6 +13,9 @@ services:
       - ./asterisk/etc/asterisk/extconfig.conf:/etc/asterisk/extconfig.conf
       - ./asterisk/etc/asterisk/res_pgsql.conf:/etc/asterisk/res_pgsql.conf
       - ./asterisk/etc/asterisk/sorcery.conf:/etc/asterisk/sorcery.conf
+      - ./asterisk/etc/asterisk/voicemail.conf:/etc/asterisk/voicemail.conf
+      - ./asterisk/etc/asterisk/features.conf:/etc/asterisk/features.conf
+      - ./asterisk/etc/asterisk/musiconhold.conf:/etc/asterisk/musiconhold.conf
     restart: unless-stopped
 
   postgres:
