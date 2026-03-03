@@ -6,7 +6,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     asterisk-moh-opsound-wav \
     asterisk-core-sounds-en-wav && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    ln -sf /usr/share/asterisk/sounds/en_US_f_Allison /var/lib/asterisk/sounds/en
 USER asterisk
 
 COPY --chmod=755 docker-entrypoint.sh /docker-entrypoint.sh
