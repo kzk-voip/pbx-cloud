@@ -1,0 +1,41 @@
+services:
+  asterisk:
+    build: ./asterisk
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
+      - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
+      - ./asterisk/etc/asterisk/extconfig.conf:/etc/asterisk/extconfig.conf
+      - ./asterisk/etc/asterisk/res_pgsql.conf:/etc/asterisk/res_pgsql.conf
+      - ./asterisk/etc/asterisk/sorcery.conf:/etc/asterisk/sorcery.conf
+      - ./asterisk/etc/asterisk/voicemail.conf:/etc/asterisk/voicemail.conf
+      - ./asterisk/etc/asterisk/features.conf:/etc/asterisk/features.conf
+      - ./asterisk/etc/asterisk/musiconhold.conf:/etc/asterisk/musiconhold.conf
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: pbx
+      POSTGRES_USER: pbx_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./asterisk/sql:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pbx_user -d pbx"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
