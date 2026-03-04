@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS version (
 );
 
 -- auth_db expects subscriber-like table version
-INSERT INTO version (table_name, table_version) VALUES ('ps_auths', 8);
+INSERT INTO version (table_name, table_version) VALUES ('ps_auths', 7);
