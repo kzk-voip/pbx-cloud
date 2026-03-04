@@ -9,6 +9,7 @@ services:
         condition: service_started
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - EXTERNAL_IP=${EXTERNAL_IP}
     restart: unless-stopped
 
   asterisk:
