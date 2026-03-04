@@ -105,8 +105,8 @@ INSERT INTO ps_auths (id, auth_type, username, password, tenant_id) VALUES
     ('t1_101', 'userpass', 't1_101', 'pass101', 't1'),
     ('t1_102', 'userpass', 't1_102', 'pass102', 't1');
 INSERT INTO ps_endpoints (id, aors, auth, context, disallow, allow, direct_media, force_rport, rewrite_contact, rtp_symmetric, transport, tenant_id) VALUES
-    ('t1_101', 't1_101', 't1_101', 'tenant_t1', 'all', 'ulaw', false, true, true, true, 'transport-udp', 't1'),
-    ('t1_102', 't1_102', 't1_102', 'tenant_t1', 'all', 'ulaw', false, true, true, true, 'transport-udp', 't1');
+    ('t1_101', 't1_101', 't1_101', 'from-kamailio', 'all', 'ulaw', false, true, true, true, 'transport-udp', 't1'),
+    ('t1_102', 't1_102', 't1_102', 'from-kamailio', 'all', 'ulaw', false, true, true, true, 'transport-udp', 't1');
 
 -- Beta Inc (t2): endpoints t2_101, t2_102
 INSERT INTO ps_aors (id, max_contacts, tenant_id) VALUES
@@ -115,5 +115,5 @@ INSERT INTO ps_auths (id, auth_type, username, password, tenant_id) VALUES
     ('t2_101', 'userpass', 't2_101', 'pass101', 't2'),
     ('t2_102', 'userpass', 't2_102', 'pass102', 't2');
 INSERT INTO ps_endpoints (id, aors, auth, context, disallow, allow, direct_media, force_rport, rewrite_contact, rtp_symmetric, transport, tenant_id) VALUES
-    ('t2_101', 't2_101', 't2_101', 'tenant_t2', 'all', 'ulaw', false, true, true, true, 'transport-udp', 't2'),
-    ('t2_102', 't2_102', 't2_102', 'tenant_t2', 'all', 'ulaw', false, true, true, true, 'transport-udp', 't2');
+    ('t2_101', 't2_101', 't2_101', 'from-kamailio', 'all', 'ulaw', false, true, true, true, 'transport-udp', 't2'),
+    ('t2_102', 't2_102', 't2_102', 'from-kamailio', 'all', 'ulaw', false, true, true, true, 'transport-udp', 't2');
