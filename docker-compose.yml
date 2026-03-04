@@ -1,4 +1,16 @@
 services:
+  kamailio:
+    build: ./kamailio
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+      asterisk:
+        condition: service_started
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: unless-stopped
+
   asterisk:
     build: ./asterisk
     network_mode: host
@@ -38,4 +50,3 @@ services:
 
 volumes:
   postgres_data:
-
