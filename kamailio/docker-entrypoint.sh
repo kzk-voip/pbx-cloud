@@ -9,8 +9,9 @@ for f in /etc/kamailio/*; do
     fi
 done
 
-# Substitute POSTGRES_PASSWORD in kamailio.cfg
-sed "s/POSTGRES_PASSWORD_PLACEHOLDER/$POSTGRES_PASSWORD/g" \
+# Substitute placeholders in kamailio.cfg
+sed -e "s/POSTGRES_PASSWORD_PLACEHOLDER/$POSTGRES_PASSWORD/g" \
+    -e "s/EXTERNAL_IP_PLACEHOLDER/$EXTERNAL_IP/g" \
     /etc/kamailio/kamailio.cfg > /tmp/kamailio.cfg
 cp /tmp/kamailio.cfg /etc/kamailio/kamailio.cfg
 
