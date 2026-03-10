@@ -10,6 +10,9 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - EXTERNAL_IP=${EXTERNAL_IP}
+    volumes:
+      - ./kamailio/etc/kamailio/kamailio.cfg:/etc/kamailio/kamailio.cfg
+      - ./kamailio/etc/kamailio/dispatcher.list:/etc/kamailio/dispatcher.list
     restart: unless-stopped
 
   asterisk:
@@ -43,7 +46,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pbx_user -d pbx"]
+      test: [ "CMD-SHELL", "pg_isready -U pbx_user -d pbx" ]
       interval: 5s
       timeout: 5s
       retries: 5
