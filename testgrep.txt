@@ -1,12 +1,12 @@
-2026/03/10 00:19:19.310406 100.80.69.96:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:09.872373 100.80.69.96:5060 -> 100.88.43.14:5060
 INVITE sip:102@100.88.43.14 SIP/2.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj3ad3eb531c824eaaacdee5e556bcf5e3
+Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj4475d59b6da94deda8e061b453f76bc5
 Max-Forwards: 70
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
 To: <sip:102@100.88.43.14>
 Contact: <sip:t1_101@100.80.69.96:5060;ob>
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6598 INVITE
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13213 INVITE
 Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
 Supported: replaces, 100rel, timer, norefersub
 Session-Expires: 1800
@@ -16,7 +16,7 @@ Content-Type: application/sdp
 Content-Length:   371
 
 v=0
-o=- 3982090761 3982090761 IN IP4 192.168.0.233
+o=- 3982146251 3982146251 IN IP4 192.168.0.233
 s=pjmedia
 b=AS:84
 t=0 0
@@ -31,54 +31,54 @@ a=rtpmap:0 PCMU/8000
 a=rtpmap:18 G729/8000
 a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-16
-a=ssrc:1013717592 cname:202b2bdd46c82478
+a=ssrc:1793032175 cname:7e2f046d35d63b5f
 
 
-2026/03/10 00:19:19.310613 100.88.43.14:5060 -> 100.80.69.96:5060
+2026/03/10 15:44:09.872744 100.88.43.14:5060 -> 100.80.69.96:5060
 SIP/2.0 401 Unauthorized
-Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj3ad3eb531c824eaaacdee5e556bcf5e3;rport=5060
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=bf8638324618dc61059d4c604476fea1.b5daac78
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6598 INVITE
-WWW-Authenticate: Digest realm="pbx", nonce="aa9Ik2mvR2fg/sTxha5Ud2jx4e9qTaZ6", qop="auth"
+Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj4475d59b6da94deda8e061b453f76bc5;rport=5060
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=bf8638324618dc61059d4c604476fea1.5aced56b
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13213 INVITE
+WWW-Authenticate: Digest realm="pbx", nonce="abAhVWmwICl5qkr/7cNCpBtxQX1weWjI", qop="auth"
 Server: kamailio (5.8.8 (x86_64/linux))
 Content-Length: 0
 
 
 
-2026/03/10 00:19:19.313631 100.80.69.96:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:09.875529 100.80.69.96:5060 -> 100.88.43.14:5060
 ACK sip:102@100.88.43.14 SIP/2.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj3ad3eb531c824eaaacdee5e556bcf5e3
+Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj4475d59b6da94deda8e061b453f76bc5
 Max-Forwards: 70
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=bf8638324618dc61059d4c604476fea1.b5daac78
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6598 ACK
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=bf8638324618dc61059d4c604476fea1.5aced56b
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13213 ACK
 Content-Length:  0
 
 
 
-2026/03/10 00:19:19.313654 100.80.69.96:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:09.875543 100.80.69.96:5060 -> 100.88.43.14:5060
 INVITE sip:102@100.88.43.14 SIP/2.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPjd89d2d931f7f444494ea17120d32ce1c
+Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPjd1ee1581a33241ca865f4d69e94941b0
 Max-Forwards: 70
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
 To: <sip:102@100.88.43.14>
 Contact: <sip:t1_101@100.80.69.96:5060;ob>
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6599 INVITE
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13214 INVITE
 Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
 Supported: replaces, 100rel, timer, norefersub
 Session-Expires: 1800
 Min-SE: 90
 User-Agent: MicroSIP/3.21.6
-Authorization: Digest username="t1_101", realm="pbx", nonce="aa9Ik2mvR2fg/sTxha5Ud2jx4e9qTaZ6", uri="sip:102@100.88.43.14", response="46a78060b4334636ef2458644102696e", cnonce="24da9d53e58746f68d5adc69e02aa0e4", qop=auth, nc=00000001
+Authorization: Digest username="t1_101", realm="pbx", nonce="abAhVWmwICl5qkr/7cNCpBtxQX1weWjI", uri="sip:102@100.88.43.14", response="b41af893bb55e93204e6cdc49dcbcf3c", cnonce="371ecb13b4dc40f5b4e5573e3bf323fe", qop=auth, nc=00000001
 Content-Type: application/sdp
 Content-Length:   371
 
 v=0
-o=- 3982090761 3982090761 IN IP4 192.168.0.233
+o=- 3982146251 3982146251 IN IP4 192.168.0.233
 s=pjmedia
 b=AS:84
 t=0 0
@@ -93,31 +93,31 @@ a=rtpmap:0 PCMU/8000
 a=rtpmap:18 G729/8000
 a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-16
-a=ssrc:1013717592 cname:202b2bdd46c82478
+a=ssrc:1793032175 cname:7e2f046d35d63b5f
 
 
-2026/03/10 00:19:19.353337 100.88.43.14:5060 -> 100.80.69.96:5060
+2026/03/10 15:44:09.917076 100.88.43.14:5060 -> 100.80.69.96:5060
 SIP/2.0 100 trying -- your call is important to us
-Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPjd89d2d931f7f444494ea17120d32ce1c;rport=5060
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
+Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPjd1ee1581a33241ca865f4d69e94941b0;rport=5060
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
 To: <sip:102@100.88.43.14>
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6599 INVITE
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13214 INVITE
 Server: kamailio (5.8.8 (x86_64/linux))
 Content-Length: 0
 
 
 
-2026/03/10 00:19:19.353462 127.0.0.1:5060 -> 127.0.0.1:5080
+2026/03/10 15:44:09.917185 127.0.0.1:5060 -> 127.0.0.1:5080
 INVITE sip:102@100.88.43.14 SIP/2.0
-Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK38e3.695b9f97dc41efcffd5af29f2e3fb28a.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd89d2d931f7f444494ea17120d32ce1c
+Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK8ce2.044e1cc569c47bdae3846adaeb0d679e.0
+Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd1ee1581a33241ca865f4d69e94941b0
 Max-Forwards: 69
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
 To: <sip:102@100.88.43.14>
 Contact: <sip:t1_101@100.80.69.96:5060;ob>
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6599 INVITE
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13214 INVITE
 Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
 Supported: replaces, 100rel, timer, norefersub
 Session-Expires: 1800
@@ -128,7 +128,7 @@ Content-Length:   371
 X-Tenant-ID: t1
 
 v=0
-o=- 3982090761 3982090761 IN IP4 192.168.0.233
+o=- 3982146251 3982146251 IN IP4 192.168.0.233
 s=pjmedia
 b=AS:84
 t=0 0
@@ -143,30 +143,30 @@ a=rtpmap:0 PCMU/8000
 a=rtpmap:18 G729/8000
 a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-16
-a=ssrc:1013717592 cname:202b2bdd46c82478
+a=ssrc:1793032175 cname:7e2f046d35d63b5f
 
 
-2026/03/10 00:19:19.354229 127.0.0.1:5080 -> 127.0.0.1:5060
+2026/03/10 15:44:09.918012 127.0.0.1:5080 -> 127.0.0.1:5060
 SIP/2.0 100 Trying
-Via: SIP/2.0/UDP 100.88.43.14:5060;rport=5060;received=127.0.0.1;branch=z9hG4bK38e3.695b9f97dc41efcffd5af29f2e3fb28a.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd89d2d931f7f444494ea17120d32ce1c
-Call-ID: 9aee111f378d4635a9f7389728b77721
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
+Via: SIP/2.0/UDP 100.88.43.14:5060;rport=5060;received=127.0.0.1;branch=z9hG4bK8ce2.044e1cc569c47bdae3846adaeb0d679e.0
+Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd1ee1581a33241ca865f4d69e94941b0
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
 To: <sip:102@100.88.43.14>
-CSeq: 6599 INVITE
+CSeq: 13214 INVITE
 Server: Asterisk PBX 21.12.1
 Content-Length:  0
 
 
 
-2026/03/10 00:19:19.384442 127.0.0.1:5080 -> 127.0.0.1:5060
+2026/03/10 15:44:09.978712 127.0.0.1:5080 -> 127.0.0.1:5060
 SIP/2.0 180 Ringing
-Via: SIP/2.0/UDP 100.88.43.14:5060;rport=5060;received=127.0.0.1;branch=z9hG4bK38e3.695b9f97dc41efcffd5af29f2e3fb28a.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd89d2d931f7f444494ea17120d32ce1c
-Call-ID: 9aee111f378d4635a9f7389728b77721
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
-CSeq: 6599 INVITE
+Via: SIP/2.0/UDP 100.88.43.14:5060;rport=5060;received=127.0.0.1;branch=z9hG4bK8ce2.044e1cc569c47bdae3846adaeb0d679e.0
+Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd1ee1581a33241ca865f4d69e94941b0
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
+CSeq: 13214 INVITE
 Server: Asterisk PBX 21.12.1
 Contact: <sip:100.88.43.14:5080>
 Allow: OPTIONS, REGISTER, SUBSCRIBE, NOTIFY, PUBLISH, INVITE, ACK, BYE, CANCEL, UPDATE, PRACK, INFO, MESSAGE, REFER
@@ -174,13 +174,13 @@ Content-Length:  0
 
 
 
-2026/03/10 00:19:19.384610 100.88.43.14:5060 -> 100.80.69.96:5060
+2026/03/10 15:44:09.978800 100.88.43.14:5060 -> 100.80.69.96:5060
 SIP/2.0 180 Ringing
-Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd89d2d931f7f444494ea17120d32ce1c
-Call-ID: 9aee111f378d4635a9f7389728b77721
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
-CSeq: 6599 INVITE
+Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd1ee1581a33241ca865f4d69e94941b0
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
+CSeq: 13214 INVITE
 Server: Asterisk PBX 21.12.1
 Contact: <sip:100.88.43.14:5080>
 Allow: OPTIONS, REGISTER, SUBSCRIBE, NOTIFY, PUBLISH, INVITE, ACK, BYE, CANCEL, UPDATE, PRACK, INFO, MESSAGE, REFER
@@ -188,14 +188,14 @@ Content-Length:  0
 
 
 
-2026/03/10 00:19:20.355734 127.0.0.1:5080 -> 127.0.0.1:5060
+2026/03/10 15:44:11.423148 127.0.0.1:5080 -> 127.0.0.1:5060
 SIP/2.0 200 OK
-Via: SIP/2.0/UDP 100.88.43.14:5060;rport=5060;received=127.0.0.1;branch=z9hG4bK38e3.695b9f97dc41efcffd5af29f2e3fb28a.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd89d2d931f7f444494ea17120d32ce1c
-Call-ID: 9aee111f378d4635a9f7389728b77721
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
-CSeq: 6599 INVITE
+Via: SIP/2.0/UDP 100.88.43.14:5060;rport=5060;received=127.0.0.1;branch=z9hG4bK8ce2.044e1cc569c47bdae3846adaeb0d679e.0
+Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd1ee1581a33241ca865f4d69e94941b0
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
+CSeq: 13214 INVITE
 Server: Asterisk PBX 21.12.1
 Allow: OPTIONS, REGISTER, SUBSCRIBE, NOTIFY, PUBLISH, INVITE, ACK, BYE, CANCEL, UPDATE, PRACK, INFO, MESSAGE, REFER
 Contact: <sip:100.88.43.14:5080>
@@ -206,11 +206,11 @@ Content-Type: application/sdp
 Content-Length:   261
 
 v=0
-o=- 3982090761 3982090763 IN IP4 100.88.43.14
+o=- 3982146251 3982146253 IN IP4 100.88.43.14
 s=Asterisk
 c=IN IP4 100.88.43.14
 t=0 0
-m=audio 14888 RTP/AVP 0 8 101
+m=audio 13076 RTP/AVP 0 8 101
 a=rtpmap:0 PCMU/8000
 a=rtpmap:8 PCMA/8000
 a=rtpmap:101 telephone-event/8000
@@ -220,13 +220,13 @@ a=maxptime:140
 a=sendrecv
 
 
-2026/03/10 00:19:20.355854 100.88.43.14:5060 -> 100.80.69.96:5060
+2026/03/10 15:44:11.423276 100.88.43.14:5060 -> 100.80.69.96:5060
 SIP/2.0 200 OK
-Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd89d2d931f7f444494ea17120d32ce1c
-Call-ID: 9aee111f378d4635a9f7389728b77721
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
-CSeq: 6599 INVITE
+Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;branch=z9hG4bKPjd1ee1581a33241ca865f4d69e94941b0
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
+CSeq: 13214 INVITE
 Server: Asterisk PBX 21.12.1
 Allow: OPTIONS, REGISTER, SUBSCRIBE, NOTIFY, PUBLISH, INVITE, ACK, BYE, CANCEL, UPDATE, PRACK, INFO, MESSAGE, REFER
 Contact: <sip:100.88.43.14:5080>
@@ -237,11 +237,11 @@ Content-Type: application/sdp
 Content-Length:   261
 
 v=0
-o=- 3982090761 3982090763 IN IP4 100.88.43.14
+o=- 3982146251 3982146253 IN IP4 100.88.43.14
 s=Asterisk
 c=IN IP4 100.88.43.14
 t=0 0
-m=audio 14888 RTP/AVP 0 8 101
+m=audio 13076 RTP/AVP 0 8 101
 a=rtpmap:0 PCMU/8000
 a=rtpmap:8 PCMA/8000
 a=rtpmap:101 telephone-event/8000
@@ -251,27 +251,27 @@ a=maxptime:140
 a=sendrecv
 
 
-2026/03/10 00:19:20.361083 100.80.69.96:5060 -> 100.88.43.14:5080
+2026/03/10 15:44:11.427794 100.80.69.96:5060 -> 100.88.43.14:5080
 ACK sip:100.88.43.14:5080 SIP/2.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj479d4d836fb14776babef28037443d34
+Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPjb5807cca1bcd4720bef9bea4b8e72eb8
 Max-Forwards: 70
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6599 ACK
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13214 ACK
 Content-Length:  0
 
 
 
-2026/03/10 00:19:20.361104 100.80.69.96:5060 -> 100.88.43.14:5080
+2026/03/10 15:44:11.427815 100.80.69.96:5060 -> 100.88.43.14:5080
 UPDATE sip:100.88.43.14:5080 SIP/2.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj38d37392e9b84eba846bbe9a049d21ef
+Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj5cf2f0ad78574fb7abff264c478ca0f9
 Max-Forwards: 70
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
 Contact: <sip:t1_101@100.80.69.96:5060;ob>
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6600 UPDATE
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13215 UPDATE
 Supported: replaces, 100rel, timer, norefersub
 Session-Expires: 1800;refresher=uac
 Min-SE: 90
@@ -279,7 +279,7 @@ Content-Type: application/sdp
 Content-Length:   321
 
 v=0
-o=- 3982090761 3982090762 IN IP4 192.168.0.233
+o=- 3982146251 3982146252 IN IP4 192.168.0.233
 s=pjmedia
 b=AS:84
 t=0 0
@@ -288,20 +288,20 @@ m=audio 10000 RTP/AVP 0 101
 c=IN IP4 192.168.0.233
 b=TIAS:64000
 a=rtcp:10001 IN IP4 192.168.0.233
-a=ssrc:1013717592 cname:202b2bdd46c82478
+a=ssrc:1793032175 cname:7e2f046d35d63b5f
 a=rtpmap:0 PCMU/8000
 a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-16
 a=sendrecv
 
 
-2026/03/10 00:19:20.361587 100.88.43.14:5080 -> 100.80.69.96:5060
+2026/03/10 15:44:11.428397 100.88.43.14:5080 -> 100.80.69.96:5060
 SIP/2.0 200 OK
-Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;received=100.80.69.96;branch=z9hG4bKPj38d37392e9b84eba846bbe9a049d21ef
-Call-ID: 9aee111f378d4635a9f7389728b77721
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
-CSeq: 6600 UPDATE
+Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;received=100.80.69.96;branch=z9hG4bKPj5cf2f0ad78574fb7abff264c478ca0f9
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
+CSeq: 13215 UPDATE
 Session-Expires: 1800;refresher=uac
 Require: timer
 Contact: <sip:100.88.43.14:5080>
@@ -312,11 +312,11 @@ Content-Type: application/sdp
 Content-Length:   237
 
 v=0
-o=- 3982090761 3982090764 IN IP4 100.88.43.14
+o=- 3982146251 3982146254 IN IP4 100.88.43.14
 s=Asterisk
 c=IN IP4 100.88.43.14
 t=0 0
-m=audio 14888 RTP/AVP 0 101
+m=audio 13076 RTP/AVP 0 101
 a=rtpmap:0 PCMU/8000
 a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-16
@@ -325,39 +325,39 @@ a=maxptime:140
 a=sendrecv
 
 
-2026/03/10 00:19:34.179084 100.80.69.96:5060 -> 100.88.43.14:5080
+2026/03/10 15:44:27.396513 100.80.69.96:5060 -> 100.88.43.14:5080
 BYE sip:100.88.43.14:5080 SIP/2.0
-Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj61a18f2a0d594075886cd936e4406716
+Via: SIP/2.0/UDP 100.80.69.96:5060;branch=z9hG4bKPj7099138cce2b42c2a8838d9a17156e3e
 Max-Forwards: 70
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
-Call-ID: 9aee111f378d4635a9f7389728b77721
-CSeq: 6601 BYE
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+CSeq: 13216 BYE
 User-Agent: MicroSIP/3.21.6
 Content-Length:  0
 
 
 
-2026/03/10 00:19:34.179394 100.88.43.14:5080 -> 100.80.69.96:5060
+2026/03/10 15:44:27.396823 100.88.43.14:5080 -> 100.80.69.96:5060
 SIP/2.0 200 OK
-Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;received=100.80.69.96;branch=z9hG4bKPj61a18f2a0d594075886cd936e4406716
-Call-ID: 9aee111f378d4635a9f7389728b77721
-From: <sip:t1_101@100.88.43.14>;tag=bd578513034e44f2a39d1b77b9b93c52
-To: <sip:102@100.88.43.14>;tag=e2e5b30c-14c2-482c-94f9-21315899cacb
-CSeq: 6601 BYE
+Via: SIP/2.0/UDP 100.80.69.96:5060;rport=5060;received=100.80.69.96;branch=z9hG4bKPj7099138cce2b42c2a8838d9a17156e3e
+Call-ID: dfd961efa5cd47cb94b04f601b6888a1
+From: <sip:t1_101@100.88.43.14>;tag=96088374c39a4910b0864c864c13aaab
+To: <sip:102@100.88.43.14>;tag=ca75b730-0586-42fc-8591-b6b2e17ba409
+CSeq: 13216 BYE
 Server: Asterisk PBX 21.12.1
 Content-Length:  0
 
 
 
-2026/03/10 00:19:19.358976 127.0.0.1:5080 -> 127.0.0.1:5060
+2026/03/10 15:44:09.922655 127.0.0.1:5080 -> 127.0.0.1:5060
 INVITE sip:t1_102@127.0.0.1:5060 SIP/2.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport;branch=z9hG4bKPjf2bf1f5b-5049-468b-b72f-7955c9567443
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport;branch=z9hG4bKPj5fdeef6a-b7e6-4105-8f53-8c7210c9f5ed
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
 To: <sip:t1_102@127.0.0.1>
 Contact: <sip:asterisk@100.88.43.14:5080>
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 5332 INVITE
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 29409 INVITE
 Allow: OPTIONS, REGISTER, SUBSCRIBE, NOTIFY, PUBLISH, INVITE, ACK, BYE, CANCEL, UPDATE, PRACK, INFO, MESSAGE, REFER
 Supported: 100rel, timer, replaces, norefersub, histinfo
 Session-Expires: 1800
@@ -368,11 +368,11 @@ Content-Type: application/sdp
 Content-Length:   259
 
 v=0
-o=- 166691911 166691911 IN IP4 100.88.43.14
+o=- 736796266 736796266 IN IP4 100.88.43.14
 s=Asterisk
 c=IN IP4 100.88.43.14
 t=0 0
-m=audio 16230 RTP/AVP 0 8 101
+m=audio 14906 RTP/AVP 0 8 101
 a=rtpmap:0 PCMU/8000
 a=rtpmap:8 PCMA/8000
 a=rtpmap:101 telephone-event/8000
@@ -382,28 +382,28 @@ a=maxptime:140
 a=sendrecv
 
 
-2026/03/10 00:19:19.359231 127.0.0.1:5060 -> 127.0.0.1:5080
+2026/03/10 15:44:09.923006 127.0.0.1:5060 -> 127.0.0.1:5080
 SIP/2.0 100 trying -- your call is important to us
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPjf2bf1f5b-5049-468b-b72f-7955c9567443
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj5fdeef6a-b7e6-4105-8f53-8c7210c9f5ed
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
 To: <sip:t1_102@127.0.0.1>
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 5332 INVITE
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 29409 INVITE
 Server: kamailio (5.8.8 (x86_64/linux))
 Content-Length: 0
 
 
 
-2026/03/10 00:19:19.359338 100.88.43.14:5060 -> 100.91.176.74:5060
+2026/03/10 15:44:09.923124 100.88.43.14:5060 -> 100.91.176.74:5060
 INVITE sip:t1_102@100.91.176.74:5060;ob SIP/2.0
 Record-Route: <sip:100.88.43.14;lr>
-Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK0b27.c63aca75598f693f867db825555308ec.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;received=127.0.0.1;rport=5080;branch=z9hG4bKPjf2bf1f5b-5049-468b-b72f-7955c9567443
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
+Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK666c.53a8f654814aca0f51fac5ac24a71b6a.0
+Via: SIP/2.0/UDP 100.88.43.14:5080;received=127.0.0.1;rport=5080;branch=z9hG4bKPj5fdeef6a-b7e6-4105-8f53-8c7210c9f5ed
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
 To: <sip:t1_102@127.0.0.1>
 Contact: <sip:asterisk@100.88.43.14:5080>
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 5332 INVITE
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 29409 INVITE
 Allow: OPTIONS, REGISTER, SUBSCRIBE, NOTIFY, PUBLISH, INVITE, ACK, BYE, CANCEL, UPDATE, PRACK, INFO, MESSAGE, REFER
 Supported: 100rel, timer, replaces, norefersub, histinfo
 Session-Expires: 1800
@@ -414,11 +414,11 @@ Content-Type: application/sdp
 Content-Length:   259
 
 v=0
-o=- 166691911 166691911 IN IP4 100.88.43.14
+o=- 736796266 736796266 IN IP4 100.88.43.14
 s=Asterisk
 c=IN IP4 100.88.43.14
 t=0 0
-m=audio 16230 RTP/AVP 0 8 101
+m=audio 14906 RTP/AVP 0 8 101
 a=rtpmap:0 PCMU/8000
 a=rtpmap:8 PCMA/8000
 a=rtpmap:101 telephone-event/8000
@@ -428,67 +428,67 @@ a=maxptime:140
 a=sendrecv
 
 
-2026/03/10 00:19:19.383849 100.91.176.74:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:09.978048 100.91.176.74:5060 -> 100.88.43.14:5060
 SIP/2.0 100 Trying
-Via: SIP/2.0/UDP 100.88.43.14:5060;received=100.88.43.14;branch=z9hG4bK0b27.c63aca75598f693f867db825555308ec.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPjf2bf1f5b-5049-468b-b72f-7955c9567443
+Via: SIP/2.0/UDP 100.88.43.14:5060;received=100.88.43.14;branch=z9hG4bK666c.53a8f654814aca0f51fac5ac24a71b6a.0
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj5fdeef6a-b7e6-4105-8f53-8c7210c9f5ed
 Record-Route: <sip:100.88.43.14;lr>
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
 To: <sip:t1_102@127.0.0.1>
-CSeq: 5332 INVITE
+CSeq: 29409 INVITE
 Content-Length:  0
 
 
 
-2026/03/10 00:19:19.383888 100.91.176.74:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:09.978067 100.91.176.74:5060 -> 100.88.43.14:5060
 SIP/2.0 180 Ringing
-Via: SIP/2.0/UDP 100.88.43.14:5060;received=100.88.43.14;branch=z9hG4bK0b27.c63aca75598f693f867db825555308ec.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPjf2bf1f5b-5049-468b-b72f-7955c9567443
+Via: SIP/2.0/UDP 100.88.43.14:5060;received=100.88.43.14;branch=z9hG4bK666c.53a8f654814aca0f51fac5ac24a71b6a.0
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj5fdeef6a-b7e6-4105-8f53-8c7210c9f5ed
 Record-Route: <sip:100.88.43.14;lr>
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-CSeq: 5332 INVITE
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+CSeq: 29409 INVITE
 Contact: <sip:t1_102@100.91.176.74:5060;ob>
 Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
 Content-Length:  0
 
 
 
-2026/03/10 00:19:19.384017 127.0.0.1:5060 -> 127.0.0.1:5080
+2026/03/10 15:44:09.978197 127.0.0.1:5060 -> 127.0.0.1:5080
 SIP/2.0 180 Ringing
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPjf2bf1f5b-5049-468b-b72f-7955c9567443
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj5fdeef6a-b7e6-4105-8f53-8c7210c9f5ed
 Record-Route: <sip:100.88.43.14;lr>
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-CSeq: 5332 INVITE
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+CSeq: 29409 INVITE
 Contact: <sip:t1_102@100.91.176.74:5060;ob>
 Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
 Content-Length:  0
 
 
 
-2026/03/10 00:19:20.354681 100.91.176.74:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:11.421543 100.91.176.74:5060 -> 100.88.43.14:5060
 SIP/2.0 200 OK
-Via: SIP/2.0/UDP 100.88.43.14:5060;received=100.88.43.14;branch=z9hG4bK0b27.c63aca75598f693f867db825555308ec.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPjf2bf1f5b-5049-468b-b72f-7955c9567443
+Via: SIP/2.0/UDP 100.88.43.14:5060;received=100.88.43.14;branch=z9hG4bK666c.53a8f654814aca0f51fac5ac24a71b6a.0
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj5fdeef6a-b7e6-4105-8f53-8c7210c9f5ed
 Record-Route: <sip:100.88.43.14;lr>
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-CSeq: 5332 INVITE
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+CSeq: 29409 INVITE
 Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
 Contact: <sip:t1_102@100.91.176.74:5060;ob>
 Supported: replaces, 100rel, timer, norefersub
 Session-Expires: 1800;refresher=uac
 Require: timer
 Content-Type: application/sdp
-Content-Length:   320
+Content-Length:   321
 
 v=0
-o=- 3982090760 3982090761 IN IP4 192.168.0.110
+o=- 3982146250 3982146251 IN IP4 192.168.0.110
 s=pjmedia
 b=AS:84
 t=0 0
@@ -501,27 +501,27 @@ a=sendrecv
 a=rtpmap:0 PCMU/8000
 a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-16
-a=ssrc:121130894 cname:1a6e31a053a86fe9
+a=ssrc:1169380541 cname:378630ef68b7338a
 
 
-2026/03/10 00:19:20.354911 127.0.0.1:5060 -> 127.0.0.1:5080
+2026/03/10 15:44:11.421901 127.0.0.1:5060 -> 127.0.0.1:5080
 SIP/2.0 200 OK
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPjf2bf1f5b-5049-468b-b72f-7955c9567443
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj5fdeef6a-b7e6-4105-8f53-8c7210c9f5ed
 Record-Route: <sip:100.88.43.14;lr>
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-CSeq: 5332 INVITE
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+CSeq: 29409 INVITE
 Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
 Contact: <sip:t1_102@100.91.176.74:5060;ob>
 Supported: replaces, 100rel, timer, norefersub
 Session-Expires: 1800;refresher=uac
 Require: timer
 Content-Type: application/sdp
-Content-Length:   320
+Content-Length:   321
 
 v=0
-o=- 3982090760 3982090761 IN IP4 192.168.0.110
+o=- 3982146250 3982146251 IN IP4 192.168.0.110
 s=pjmedia
 b=AS:84
 t=0 0
@@ -534,16 +534,16 @@ a=sendrecv
 a=rtpmap:0 PCMU/8000
 a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-16
-a=ssrc:121130894 cname:1a6e31a053a86fe9
+a=ssrc:1169380541 cname:378630ef68b7338a
 
 
-2026/03/10 00:19:20.355398 127.0.0.1:5080 -> 127.0.0.1:5060
+2026/03/10 15:44:11.422674 127.0.0.1:5080 -> 127.0.0.1:5060
 ACK sip:t1_102@100.91.176.74:5060;ob SIP/2.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport;branch=z9hG4bKPj1bca8068-6da3-4cf0-ad25-38ec05c4fd16
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 5332 ACK
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport;branch=z9hG4bKPjc1202c5d-c2de-4360-9979-ce76080d7697
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 29409 ACK
 Route: <sip:127.0.0.1:5060;lr>
 Max-Forwards: 70
 User-Agent: Asterisk PBX 21.12.1
@@ -551,80 +551,80 @@ Content-Length:  0
 
 
 
-2026/03/10 00:19:20.355745 100.88.43.14:5060 -> 100.91.176.74:5060
+2026/03/10 15:44:11.422911 100.88.43.14:5060 -> 100.91.176.74:5060
 ACK sip:t1_102@100.91.176.74:5060;ob SIP/2.0
-Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK0b27.a4404fc9f63d5e743cc02fe70a086f3b.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;received=127.0.0.1;rport=5080;branch=z9hG4bKPj1bca8068-6da3-4cf0-ad25-38ec05c4fd16
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 5332 ACK
+Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK666c.51e325ca5cb8fa39673d1e76f2c0f5d6.0
+Via: SIP/2.0/UDP 100.88.43.14:5080;received=127.0.0.1;rport=5080;branch=z9hG4bKPjc1202c5d-c2de-4360-9979-ce76080d7697
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 29409 ACK
 Max-Forwards: 69
 User-Agent: Asterisk PBX 21.12.1
 Content-Length:  0
 
 
 
-2026/03/10 00:19:31.002575 100.91.176.74:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:22.650582 100.91.176.74:5060 -> 100.88.43.14:5060
 BYE sip:asterisk@100.88.43.14:5080 SIP/2.0
-Via: SIP/2.0/UDP 100.91.176.74:5060;branch=z9hG4bKPj8da3886ce14a4b8a972b459b7db047a3
+Via: SIP/2.0/UDP 100.91.176.74:5060;branch=z9hG4bKPj1ccfc02e873b4db09e9cef81165c187f
 Max-Forwards: 70
-From: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-To: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 22837 BYE
+From: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+To: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 14713 BYE
 Route: <sip:100.88.43.14;lr>
 User-Agent: MicroSIP/3.21.6
 Content-Length:  0
 
 
 
-2026/03/10 00:19:31.002884 100.88.43.14:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:22.650926 100.88.43.14:5060 -> 100.88.43.14:5060
 BYE sip:100.88.43.14;lr SIP/2.0
-Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK2afb.4de7842077b120a8f93906c77aec0919.0
-Via: SIP/2.0/UDP 100.91.176.74:5060;rport=5060;branch=z9hG4bKPj8da3886ce14a4b8a972b459b7db047a3
+Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bKcbcc.1f0e0f9cc801fa841ccb75e49e44da23.0
+Via: SIP/2.0/UDP 100.91.176.74:5060;rport=5060;branch=z9hG4bKPj1ccfc02e873b4db09e9cef81165c187f
 Max-Forwards: 69
-From: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-To: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 22837 BYE
+From: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+To: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 14713 BYE
 User-Agent: MicroSIP/3.21.6
 Content-Length:  0
 
 
 
-2026/03/10 00:19:31.002970 100.88.43.14:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:22.651012 100.88.43.14:5060 -> 100.88.43.14:5060
 SIP/2.0 404 Not Found
-Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK2afb.4de7842077b120a8f93906c77aec0919.0;rport=5060
-Via: SIP/2.0/UDP 100.91.176.74:5060;rport=5060;branch=z9hG4bKPj8da3886ce14a4b8a972b459b7db047a3
-From: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-To: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 22837 BYE
+Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bKcbcc.1f0e0f9cc801fa841ccb75e49e44da23.0;rport=5060
+Via: SIP/2.0/UDP 100.91.176.74:5060;rport=5060;branch=z9hG4bKPj1ccfc02e873b4db09e9cef81165c187f
+From: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+To: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 14713 BYE
 Server: kamailio (5.8.8 (x86_64/linux))
 Content-Length: 0
 
 
 
-2026/03/10 00:19:31.003046 100.88.43.14:5060 -> 100.91.176.74:5060
+2026/03/10 15:44:22.651097 100.88.43.14:5060 -> 100.91.176.74:5060
 SIP/2.0 404 Not Found
-Via: SIP/2.0/UDP 100.91.176.74:5060;rport=5060;branch=z9hG4bKPj8da3886ce14a4b8a972b459b7db047a3
-From: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-To: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 22837 BYE
+Via: SIP/2.0/UDP 100.91.176.74:5060;rport=5060;branch=z9hG4bKPj1ccfc02e873b4db09e9cef81165c187f
+From: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+To: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 14713 BYE
 Server: kamailio (5.8.8 (x86_64/linux))
 Content-Length: 0
 
 
 
-2026/03/10 00:19:34.179878 127.0.0.1:5080 -> 127.0.0.1:5060
+2026/03/10 15:44:27.397446 127.0.0.1:5080 -> 127.0.0.1:5060
 BYE sip:t1_102@100.91.176.74:5060;ob SIP/2.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport;branch=z9hG4bKPj743d1a4c-cfd4-4262-93fc-6759fbaf80b9
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 5333 BYE
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport;branch=z9hG4bKPj2d7d4ba7-c377-47bc-8946-6ac754bfff45
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 29410 BYE
 Route: <sip:127.0.0.1:5060;lr>
 Reason: Q.850;cause=16
 Max-Forwards: 70
@@ -633,14 +633,14 @@ Content-Length:  0
 
 
 
-2026/03/10 00:19:34.180210 100.88.43.14:5060 -> 100.91.176.74:5060
+2026/03/10 15:44:27.397711 100.88.43.14:5060 -> 100.91.176.74:5060
 BYE sip:t1_102@100.91.176.74:5060;ob SIP/2.0
-Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bK1b27.0bcdfa0fb4937158c6f649d9e1217a0b.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;received=127.0.0.1;rport=5080;branch=z9hG4bKPj743d1a4c-cfd4-4262-93fc-6759fbaf80b9
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-CSeq: 5333 BYE
+Via: SIP/2.0/UDP 100.88.43.14:5060;branch=z9hG4bKf56c.1eee21f3356683348aac54b7d4ebe3a2.0
+Via: SIP/2.0/UDP 100.88.43.14:5080;received=127.0.0.1;rport=5080;branch=z9hG4bKPj2d7d4ba7-c377-47bc-8946-6ac754bfff45
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+CSeq: 29410 BYE
 Reason: Q.850;cause=16
 Max-Forwards: 69
 User-Agent: Asterisk PBX 21.12.1
@@ -648,25 +648,25 @@ Content-Length:  0
 
 
 
-2026/03/10 00:19:34.198215 100.91.176.74:5060 -> 100.88.43.14:5060
+2026/03/10 15:44:27.468713 100.91.176.74:5060 -> 100.88.43.14:5060
 SIP/2.0 200 OK
-Via: SIP/2.0/UDP 100.88.43.14:5060;received=100.88.43.14;branch=z9hG4bK1b27.0bcdfa0fb4937158c6f649d9e1217a0b.0
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj743d1a4c-cfd4-4262-93fc-6759fbaf80b9
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-CSeq: 5333 BYE
+Via: SIP/2.0/UDP 100.88.43.14:5060;received=100.88.43.14;branch=z9hG4bKf56c.1eee21f3356683348aac54b7d4ebe3a2.0
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj2d7d4ba7-c377-47bc-8946-6ac754bfff45
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+CSeq: 29410 BYE
 Content-Length:  0
 
 
 
-2026/03/10 00:19:34.198308 127.0.0.1:5060 -> 127.0.0.1:5080
+2026/03/10 15:44:27.468831 127.0.0.1:5060 -> 127.0.0.1:5080
 SIP/2.0 200 OK
-Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj743d1a4c-cfd4-4262-93fc-6759fbaf80b9
-Call-ID: e63ea2f9-e0ce-41e8-abbf-d5b8f1bc90b0
-From: <sip:t1_101@172.18.0.1>;tag=01f78ea2-d829-48b2-af0c-f27a2138718f
-To: <sip:t1_102@127.0.0.1>;tag=e2fe39074c294275b925c0c577e1d550
-CSeq: 5333 BYE
+Via: SIP/2.0/UDP 100.88.43.14:5080;rport=5080;received=127.0.0.1;branch=z9hG4bKPj2d7d4ba7-c377-47bc-8946-6ac754bfff45
+Call-ID: 4c82f6ee-a751-4586-b517-a7f94f891a36
+From: <sip:t1_101@172.18.0.1>;tag=a3593de5-4437-4ff0-a008-69a98adb8c52
+To: <sip:t1_102@127.0.0.1>;tag=f7575dfadcf6498182e1798313388b96
+CSeq: 29410 BYE
 Content-Length:  0
 
 
