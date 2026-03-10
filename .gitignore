@@ -2,6 +2,7 @@
 .env
 
 specs.md 
+testgrep.txt
 
 # Logs
 *.log
