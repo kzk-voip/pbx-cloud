@@ -1,3 +1,9 @@
+-- ============================================================
+-- 01_ara_schema.sql
+-- Asterisk Realtime Architecture (ARA) tables for PJSIP
+-- These tables are read directly by Asterisk via res_config_pgsql
+-- ============================================================
+
 -- AOR (Address of Record): Defines where endpoints register and how contacts are managed.
 CREATE TABLE ps_aors (
     id VARCHAR(40) PRIMARY KEY,
@@ -13,7 +19,9 @@ CREATE TABLE ps_aors (
     outbound_proxy VARCHAR(256),
     support_path BOOLEAN,
     qualify_timeout FLOAT,
-    voicemail_extension VARCHAR(40)
+    voicemail_extension VARCHAR(40),
+    -- Multi-tenant linkage (not used by Asterisk directly, used by our app layer)
+    tenant_id INT
 );
 
 -- AUTH: Stores credentials used for registration and SIP challenges.
@@ -24,7 +32,9 @@ CREATE TABLE ps_auths (
     md5_cred VARCHAR(40),
     password VARCHAR(80),
     realm VARCHAR(40),
-    username VARCHAR(40)
+    username VARCHAR(40),
+    -- Multi-tenant linkage
+    tenant_id INT
 );
 
 -- ENDPOINTS: The main configuration for SIP accounts/peers.
@@ -111,7 +121,9 @@ CREATE TABLE ps_endpoints (
     cos_video INT,
     message_context VARCHAR(40),
     force_avp_on_hold BOOLEAN,
-    rpid_immediate BOOLEAN
+    rpid_immediate BOOLEAN,
+    -- Multi-tenant linkage
+    tenant_id INT
 );
 
 -- CONTACTS: Active registrations (automatically populated and maintained by Asterisk)

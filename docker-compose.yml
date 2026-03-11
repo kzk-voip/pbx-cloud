@@ -1,7 +1,21 @@
 services:
+  kamailio:
+    build: ./kamailio
+    networks:
+      - dmz
+      - internal
+    ports:
+      - "5060:5060/udp"
+      - "5060:5060/tcp"
+    depends_on:
+      asterisk:
+        condition: service_started
+    restart: unless-stopped
+
   asterisk:
     build: ./asterisk
-    network_mode: host
+    networks:
+      - internal
     depends_on:
       postgres:
         condition: service_healthy
@@ -20,6 +34,8 @@ services:
 
   postgres:
     image: postgres:17
+    networks:
+      - internal
     environment:
       POSTGRES_DB: pbx
       POSTGRES_USER: pbx_user
@@ -36,6 +52,12 @@ services:
       retries: 5
     restart: unless-stopped
 
+networks:
+  dmz:
+    driver: bridge
+  internal:
+    driver: bridge
+    internal: true
+
 volumes:
   postgres_data:
-
