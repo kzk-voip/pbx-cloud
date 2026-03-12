@@ -116,12 +116,12 @@ VALUES
     ('202', 'userpass', '202', '202pass', 2);
 
 -- ---- ARA: PJSIP AORs ----
-INSERT INTO ps_aors (id, max_contacts, remove_existing, qualify_frequency, tenant_id, outbound_proxy)
+INSERT INTO ps_aors (id, max_contacts, remove_existing, qualify_frequency, tenant_id, support_path)
 VALUES
-    ('101', 1, true, 60, 1, 'sip:kamailio\;lr'),
-    ('102', 1, true, 60, 1, 'sip:kamailio\;lr'),
-    ('201', 1, true, 60, 2, 'sip:kamailio\;lr'),
-    ('202', 1, true, 60, 2, 'sip:kamailio\;lr');
+    ('101', 1, true, 60, 1, true),
+    ('102', 1, true, 60, 1, true),
+    ('201', 1, true, 60, 2, true),
+    ('202', 1, true, 60, 2, true);
 
 -- ---- Domain aliases for multi-tenant ----
 INSERT INTO ps_domain_aliases (id, domain)
