@@ -94,18 +94,18 @@ INSERT INTO ps_endpoints (id, transport, aors, auth, context, disallow, allow,
     direct_media, force_rport, rewrite_contact, rtp_symmetric, callerid, tenant_id, set_var)
 VALUES
     ('101', 'transport-udp', '101', '101', 'tenant-internal', 'all', 'ulaw',
-     FALSE, TRUE, TRUE, TRUE, '"Acme 101" <101>', 1, 'TENANT_ID=1'),
+     FALSE, TRUE, FALSE, TRUE, '"Acme 101" <101>', 1, 'TENANT_ID=1'),
     ('102', 'transport-udp', '102', '102', 'tenant-internal', 'all', 'ulaw',
-     FALSE, TRUE, TRUE, TRUE, '"Acme 102" <102>', 1, 'TENANT_ID=1');
+     FALSE, TRUE, FALSE, TRUE, '"Acme 102" <102>', 1, 'TENANT_ID=1');
 
 -- Globex endpoints
 INSERT INTO ps_endpoints (id, transport, aors, auth, context, disallow, allow,
     direct_media, force_rport, rewrite_contact, rtp_symmetric, callerid, tenant_id, set_var)
 VALUES
     ('201', 'transport-udp', '201', '201', 'tenant-internal', 'all', 'ulaw',
-     FALSE, TRUE, TRUE, TRUE, '"Globex 201" <201>', 2, 'TENANT_ID=2'),
+     FALSE, TRUE, FALSE, TRUE, '"Globex 201" <201>', 2, 'TENANT_ID=2'),
     ('202', 'transport-udp', '202', '202', 'tenant-internal', 'all', 'ulaw',
-     FALSE, TRUE, TRUE, TRUE, '"Globex 202" <202>', 2, 'TENANT_ID=2');
+     FALSE, TRUE, FALSE, TRUE, '"Globex 202" <202>', 2, 'TENANT_ID=2');
 
 -- ---- ARA: PJSIP Auth ----
 INSERT INTO ps_auths (id, auth_type, username, password, tenant_id)
@@ -116,12 +116,12 @@ VALUES
     ('202', 'userpass', '202', '202pass', 2);
 
 -- ---- ARA: PJSIP AORs ----
-INSERT INTO ps_aors (id, max_contacts, remove_existing, qualify_frequency, tenant_id)
+INSERT INTO ps_aors (id, max_contacts, remove_existing, qualify_frequency, tenant_id, outbound_proxy)
 VALUES
-    ('101', 1, true, 60, 1),
-    ('102', 1, true, 60, 1),
-    ('201', 1, true, 60, 2),
-    ('202', 1, true, 60, 2);
+    ('101', 1, true, 60, 1, 'sip:kamailio\;lr'),
+    ('102', 1, true, 60, 1, 'sip:kamailio\;lr'),
+    ('201', 1, true, 60, 2, 'sip:kamailio\;lr'),
+    ('202', 1, true, 60, 2, 'sip:kamailio\;lr');
 
 -- ---- Domain aliases for multi-tenant ----
 INSERT INTO ps_domain_aliases (id, domain)
