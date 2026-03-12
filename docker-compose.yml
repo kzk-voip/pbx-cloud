@@ -1,12 +1,7 @@
 services:
   kamailio:
     build: ./kamailio
-    networks:
-      - dmz
-      - internal
-    ports:
-      - "5060:5060/udp"
-      - "5060:5060/tcp"
+    network_mode: "host"
     depends_on:
       postgres:
         condition: service_healthy
@@ -25,6 +20,9 @@ services:
         condition: service_healthy
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5080:5060/udp"
+      - "5080:5060/tcp"
     volumes:
       - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
