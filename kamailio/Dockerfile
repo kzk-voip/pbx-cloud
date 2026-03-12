@@ -1,9 +1,7 @@
-FROM ghcr.io/kamailio/kamailio:5.7
+FROM alpine:3.19
 
-# Install PostgreSQL client for tenant config loading
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends postgresql-client && \
-    rm -rf /var/lib/apt/lists/*
+# Install Kamailio and PostgreSQL client for tenant config loading
+RUN apk add --no-cache kamailio kamailio-postgres postgresql-client
 
 # Copy configuration files
 COPY etc/kamailio/kamailio.cfg /etc/kamailio/kamailio.cfg
