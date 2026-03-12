@@ -6,7 +6,7 @@ set -e
 # Loads tenant configuration from PostgreSQL before starting.
 # ============================================================
 
-DB_HOST="${POSTGRES_HOST:-127.0.0.1}"
+DB_HOST="${POSTGRES_HOST:-host.docker.internal}"
 DB_USER="${POSTGRES_USER:-pbx_user}"
 DB_NAME="${POSTGRES_DB:-pbx}"
 DB_PASS="${POSTGRES_PASSWORD}"

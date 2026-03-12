@@ -2,6 +2,8 @@ services:
   kamailio:
     build: ./kamailio
     network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
