@@ -116,12 +116,12 @@ VALUES
     ('202', 'userpass', '202', '202pass', 2);
 
 -- ---- ARA: PJSIP AORs ----
-INSERT INTO ps_aors (id, max_contacts, tenant_id)
+INSERT INTO ps_aors (id, max_contacts, qualify_frequency, tenant_id)
 VALUES
-    ('101', 1, 1),
-    ('102', 1, 1),
-    ('201', 1, 2),
-    ('202', 1, 2);
+    ('101', 1, 60, 1),
+    ('102', 1, 60, 1),
+    ('201', 1, 60, 2),
+    ('202', 1, 60, 2);
 
 -- ---- Domain aliases for multi-tenant ----
 INSERT INTO ps_domain_aliases (id, domain)
