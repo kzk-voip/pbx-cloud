@@ -1,4 +1,4 @@
-FROM kamailio/kamailio:5.7.4-bullseye
+FROM ghcr.io/kamailio/kamailio:5.7
 
 # Install PostgreSQL client for tenant config loading
 RUN apt-get update && \
