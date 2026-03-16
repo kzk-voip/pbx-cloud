@@ -51,5 +51,13 @@ echo "--- Tenant htable ---"
 cat /etc/kamailio/tenant_htable.cfg
 echo "--- Tenant configuration loaded ---"
 
+# --- Apply External IP ---
+if [ -n "$EXTERNAL_IP" ]; then
+    echo "Configuring Kamailio to advertise EXTERNAL_IP = $EXTERNAL_IP"
+    sed -i "s/EXTERNAL_IP_PLACEHOLDER/$EXTERNAL_IP/g" /etc/kamailio/kamailio.cfg
+else
+    echo "WARNING: EXTERNAL_IP not set in environment. NAT routing may fail."
+fi
+
 # --- Start Kamailio ---
 exec kamailio -DD -E -m 64 -M 8
