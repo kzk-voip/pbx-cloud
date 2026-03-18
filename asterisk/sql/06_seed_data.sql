@@ -23,8 +23,8 @@ VALUES
 -- AUTH
 INSERT INTO ps_auths (id, auth_type, username, password, tenant_id)
 VALUES
-    ('t1_101', 'userpass', 't1_101', 't1_101pass', 1),
-    ('t1_102', 'userpass', 't1_102', 't1_102pass', 1);
+    ('t1_101', 'userpass', '101', 't1_101pass', 1),
+    ('t1_102', 'userpass', '102', 't1_102pass', 1);
 
 -- ENDPOINTS
 INSERT INTO ps_endpoints (id, transport, aors, auth, context, disallow, allow,
@@ -54,8 +54,8 @@ VALUES
 -- AUTH
 INSERT INTO ps_auths (id, auth_type, username, password, tenant_id)
 VALUES
-    ('t2_101', 'userpass', 't2_101', 't2_101pass', 2),
-    ('t2_102', 'userpass', 't2_102', 't2_102pass', 2);
+    ('t2_101', 'userpass', '101', 't2_101pass', 2),
+    ('t2_102', 'userpass', '102', 't2_102pass', 2);
 
 -- ENDPOINTS
 INSERT INTO ps_endpoints (id, transport, aors, auth, context, disallow, allow,
