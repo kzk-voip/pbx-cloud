@@ -1,4 +1,4 @@
-FROM kamailio/kamailio:5.7-bookworm
+FROM ghcr.io/kamailio/kamailio:5.8.7-bookworm
 
 USER root
 
