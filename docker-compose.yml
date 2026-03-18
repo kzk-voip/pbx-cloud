@@ -1,7 +1,19 @@
 services:
+  kamailio:
+    build: ./kamailio
+    ports:
+      - "5060:5060/udp"
+    networks:
+      - sip-net
+    depends_on:
+      asterisk:
+        condition: service_started
+    restart: unless-stopped
+
   asterisk:
     build: ./asterisk
-    network_mode: host
+    networks:
+      - sip-net
     depends_on:
       postgres:
         condition: service_healthy
@@ -24,11 +36,11 @@ services:
       POSTGRES_DB: pbx
       POSTGRES_USER: pbx_user
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - sip-net
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./asterisk/sql:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U pbx_user -d pbx"]
       interval: 5s
@@ -36,6 +48,9 @@ services:
       retries: 5
     restart: unless-stopped
 
+networks:
+  sip-net:
+    driver: bridge
+
 volumes:
   postgres_data:
-
