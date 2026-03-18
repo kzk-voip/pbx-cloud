@@ -14,11 +14,11 @@ VALUES
 -- Tenant 1 (Acme Corp) — extensions 101, 102
 -- ============================================================
 
--- AOR
-INSERT INTO ps_aors (id, max_contacts, qualify_frequency, tenant_id)
+-- AOR (support_path=TRUE so Asterisk routes outbound calls via Kamailio Path)
+INSERT INTO ps_aors (id, max_contacts, qualify_frequency, support_path, tenant_id)
 VALUES
-    ('t1_101', 1, 30, 1),
-    ('t1_102', 1, 30, 1);
+    ('t1_101', 1, 30, TRUE, 1),
+    ('t1_102', 1, 30, TRUE, 1);
 
 -- AUTH
 INSERT INTO ps_auths (id, auth_type, username, password, tenant_id)
@@ -47,10 +47,10 @@ VALUES
 -- ============================================================
 
 -- AOR
-INSERT INTO ps_aors (id, max_contacts, qualify_frequency, tenant_id)
+INSERT INTO ps_aors (id, max_contacts, qualify_frequency, support_path, tenant_id)
 VALUES
-    ('t2_101', 1, 30, 2),
-    ('t2_102', 1, 30, 2);
+    ('t2_101', 1, 30, TRUE, 2),
+    ('t2_102', 1, 30, TRUE, 2);
 
 -- AUTH
 INSERT INTO ps_auths (id, auth_type, username, password, tenant_id)
