@@ -14,11 +14,11 @@ VALUES
 -- Tenant 1 (Acme Corp) — extensions 101, 102
 -- ============================================================
 
--- AOR (support_path=TRUE so Asterisk routes outbound calls via Kamailio Path)
-INSERT INTO ps_aors (id, max_contacts, qualify_frequency, support_path, tenant_id)
+-- AOR
+INSERT INTO ps_aors (id, max_contacts, qualify_frequency, tenant_id)
 VALUES
-    ('t1_101', 1, 30, TRUE, 1),
-    ('t1_102', 1, 30, TRUE, 1);
+    ('t1_101', 1, 30, 1),
+    ('t1_102', 1, 30, 1);
 
 -- AUTH
 INSERT INTO ps_auths (id, auth_type, username, password, tenant_id)
@@ -32,9 +32,9 @@ INSERT INTO ps_endpoints (id, transport, aors, context, disallow, allow,
     direct_media, force_rport, rewrite_contact, rtp_symmetric, callerid, tenant_id)
 VALUES
     ('t1_101', 'transport-udp', 't1_101', 'from-kamailio', 'all', 'ulaw',
-     FALSE, TRUE, FALSE, TRUE, '"Acme 101" <101>', 1),
+     FALSE, TRUE, TRUE, TRUE, '"Acme 101" <101>', 1),
     ('t1_102', 'transport-udp', 't1_102', 'from-kamailio', 'all', 'ulaw',
-     FALSE, TRUE, FALSE, TRUE, '"Acme 102" <102>', 1);
+     FALSE, TRUE, TRUE, TRUE, '"Acme 102" <102>', 1);
 
 -- Application-level extension metadata
 INSERT INTO extensions (tenant_id, extension, display_name)
@@ -47,10 +47,10 @@ VALUES
 -- ============================================================
 
 -- AOR
-INSERT INTO ps_aors (id, max_contacts, qualify_frequency, support_path, tenant_id)
+INSERT INTO ps_aors (id, max_contacts, qualify_frequency, tenant_id)
 VALUES
-    ('t2_101', 1, 30, TRUE, 2),
-    ('t2_102', 1, 30, TRUE, 2);
+    ('t2_101', 1, 30, 2),
+    ('t2_102', 1, 30, 2);
 
 -- AUTH
 INSERT INTO ps_auths (id, auth_type, username, password, tenant_id)
@@ -63,9 +63,9 @@ INSERT INTO ps_endpoints (id, transport, aors, context, disallow, allow,
     direct_media, force_rport, rewrite_contact, rtp_symmetric, callerid, tenant_id)
 VALUES
     ('t2_101', 'transport-udp', 't2_101', 'from-kamailio', 'all', 'ulaw',
-     FALSE, TRUE, FALSE, TRUE, '"Globex 101" <101>', 2),
+     FALSE, TRUE, TRUE, TRUE, '"Globex 101" <101>', 2),
     ('t2_102', 'transport-udp', 't2_102', 'from-kamailio', 'all', 'ulaw',
-     FALSE, TRUE, FALSE, TRUE, '"Globex 102" <102>', 2);
+     FALSE, TRUE, TRUE, TRUE, '"Globex 102" <102>', 2);
 
 -- Application-level extension metadata
 INSERT INTO extensions (tenant_id, extension, display_name)
