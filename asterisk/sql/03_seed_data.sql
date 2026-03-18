@@ -39,8 +39,8 @@ VALUES
 -- PJSIP Endpoints (composite ID: {slug}_{ext})
 INSERT INTO ps_endpoints (id, tenant_id, transport, aors, auth, context, disallow, allow, direct_media, force_rport, rewrite_contact, rtp_symmetric, dtmf_mode, callerid)
 VALUES
-    ('acme_101', 'a0000000-0000-0000-0000-000000000001', 'transport-udp', 'acme_101', 'acme_101', 'from-kamailio', 'all', 'ulaw', false, true, true, true, 'rfc4733', '"Acme 101" <101>'),
-    ('acme_102', 'a0000000-0000-0000-0000-000000000001', 'transport-udp', 'acme_102', 'acme_102', 'from-kamailio', 'all', 'ulaw', false, true, true, true, 'rfc4733', '"Acme 102" <102>');
+    ('acme_101', 'a0000000-0000-0000-0000-000000000001', 'transport-udp', 'acme_101', 'acme_101', 'from-kamailio', 'all', 'ulaw', false, true, false, true, 'rfc4733', '"Acme 101" <101>'),
+    ('acme_102', 'a0000000-0000-0000-0000-000000000001', 'transport-udp', 'acme_102', 'acme_102', 'from-kamailio', 'all', 'ulaw', false, true, false, true, 'rfc4733', '"Acme 102" <102>');
 
 -- PJSIP Auth
 INSERT INTO ps_auths (id, tenant_id, auth_type, username, password)
@@ -67,8 +67,8 @@ VALUES
 -- PJSIP Endpoints
 INSERT INTO ps_endpoints (id, tenant_id, transport, aors, auth, context, disallow, allow, direct_media, force_rport, rewrite_contact, rtp_symmetric, dtmf_mode, callerid)
 VALUES
-    ('globex_201', 'b0000000-0000-0000-0000-000000000002', 'transport-udp', 'globex_201', 'globex_201', 'from-kamailio', 'all', 'ulaw', false, true, true, true, 'rfc4733', '"Globex 201" <201>'),
-    ('globex_202', 'b0000000-0000-0000-0000-000000000002', 'transport-udp', 'globex_202', 'globex_202', 'from-kamailio', 'all', 'ulaw', false, true, true, true, 'rfc4733', '"Globex 202" <202>');
+    ('globex_201', 'b0000000-0000-0000-0000-000000000002', 'transport-udp', 'globex_201', 'globex_201', 'from-kamailio', 'all', 'ulaw', false, true, false, true, 'rfc4733', '"Globex 201" <201>'),
+    ('globex_202', 'b0000000-0000-0000-0000-000000000002', 'transport-udp', 'globex_202', 'globex_202', 'from-kamailio', 'all', 'ulaw', false, true, false, true, 'rfc4733', '"Globex 202" <202>');
 
 -- PJSIP Auth
 INSERT INTO ps_auths (id, tenant_id, auth_type, username, password)
