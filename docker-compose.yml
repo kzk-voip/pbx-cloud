@@ -5,6 +5,8 @@ services:
       - "5060:5060/udp"
     networks:
       - sip-net
+    volumes:
+      - ./kamailio/etc/kamailio/kamailio.cfg:/etc/kamailio/kamailio.cfg
     depends_on:
       asterisk:
         condition: service_started
