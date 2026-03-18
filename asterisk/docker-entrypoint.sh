@@ -13,4 +13,9 @@ sed "s/\${POSTGRES_PASSWORD}/$POSTGRES_PASSWORD/g" \
     /etc/asterisk/res_pgsql.conf > /tmp/res_pgsql.conf
 cp /tmp/res_pgsql.conf /etc/asterisk/res_pgsql.conf
 
+# Substitute EXTERNAL_IP in pjsip.conf
+sed "s/\${EXTERNAL_IP}/${EXTERNAL_IP:-127.0.0.1}/g" \
+    /etc/asterisk/pjsip.conf > /tmp/pjsip.conf
+cp /tmp/pjsip.conf /etc/asterisk/pjsip.conf
+
 exec asterisk -f
