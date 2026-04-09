@@ -1,15 +1,18 @@
 #!/bin/sh
 set -e
 
-# Copy mounted config to a writable location
-cp /etc/kamailio/kamailio.cfg /tmp/kamailio.cfg
-
 # Fix Windows CRLF line endings
-sed -i 's/\r$//' /tmp/kamailio.cfg
+for f in /etc/kamailio/*; do
+    if [ -f "$f" ]; then
+        sed 's/\r$//' "$f" > "/tmp/$(basename "$f")"
+        cp "/tmp/$(basename "$f")" "$f"
+    fi
+done
 
-# Substitute environment variables
-sed -i "s|\${ASTERISK_IP}|${ASTERISK_IP:-127.0.0.1}|g" /tmp/kamailio.cfg
-sed -i "s|\${ASTERISK_PORT}|${ASTERISK_PORT:-5070}|g" /tmp/kamailio.cfg
-sed -i "s|\${EXTERNAL_IP}|${EXTERNAL_IP:-127.0.0.1}|g" /tmp/kamailio.cfg
+# Substitute placeholders in kamailio.cfg
+sed -e "s/POSTGRES_PASSWORD_PLACEHOLDER/$POSTGRES_PASSWORD/g" \
+    -e "s/EXTERNAL_IP_PLACEHOLDER/$EXTERNAL_IP/g" \
+    /etc/kamailio/kamailio.cfg > /tmp/kamailio.cfg
+cp /tmp/kamailio.cfg /etc/kamailio/kamailio.cfg
 
-exec kamailio -DD -E -m 64 -M 8 -f /tmp/kamailio.cfg
+exec kamailio -DD -E
