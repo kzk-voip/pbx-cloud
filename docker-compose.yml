@@ -20,6 +20,7 @@ services:
         condition: service_healthy
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - EXTERNAL_IP=${EXTERNAL_IP}
     volumes:
       - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
