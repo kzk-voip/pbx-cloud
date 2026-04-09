@@ -5,11 +5,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      asterisk:
-        condition: service_started
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ASTERISK_IP=127.0.0.1
+      - ASTERISK_PORT=5070
       - EXTERNAL_IP=${EXTERNAL_IP}
+    volumes:
+      - ./kamailio/kamailio.cfg:/etc/kamailio/kamailio.cfg
     restart: unless-stopped
 
   asterisk:
@@ -20,6 +21,7 @@ services:
         condition: service_healthy
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - EXTERNAL_IP=${EXTERNAL_IP}
     volumes:
       - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
