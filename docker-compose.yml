@@ -52,5 +52,40 @@ services:
       retries: 5
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    network_mode: host
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://pbx_user:${POSTGRES_PASSWORD}@127.0.0.1:5432/pbx
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@127.0.0.1:6379/0
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - AMI_HOST=127.0.0.1
+      - AMI_PORT=5038
+      - AMI_USERNAME=${AMI_USERNAME:-admin}
+      - AMI_PASSWORD=${AMI_PASSWORD:-changeme}
+    volumes:
+      - ./api:/app
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  redis_data:
