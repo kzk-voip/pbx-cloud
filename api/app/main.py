@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.redis import init_redis, close_redis
-from app.routers import health, auth
+from app.routers import health, auth, tenants
 
 
 @asynccontextmanager
@@ -43,3 +43,4 @@ app.add_middleware(
 # Register routers
 app.include_router(health.router)
 app.include_router(auth.router)
+app.include_router(tenants.router)
