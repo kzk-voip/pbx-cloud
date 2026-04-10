@@ -6,6 +6,6 @@ redis[hiredis]==5.2.*
 pydantic==2.11.*
 pydantic-settings==2.9.*
 alembic==1.15.*
-passlib[bcrypt]==1.7.*
+bcrypt==4.2.*
 python-jose[cryptography]==3.3.*
 python-multipart==0.0.*
