@@ -5,7 +5,12 @@ Uses the same SQLAlchemy engine as the application.
 """
 
 import asyncio
+import sys
 from logging.config import fileConfig
+from pathlib import Path
+
+# Ensure project root is on Python path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
