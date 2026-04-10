@@ -31,6 +31,7 @@ services:
       - ./asterisk/etc/asterisk/voicemail.conf:/etc/asterisk/voicemail.conf
       - ./asterisk/etc/asterisk/features.conf:/etc/asterisk/features.conf
       - ./asterisk/etc/asterisk/musiconhold.conf:/etc/asterisk/musiconhold.conf
+      - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
     restart: unless-stopped
 
   postgres:
