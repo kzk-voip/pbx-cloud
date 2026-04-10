@@ -2,6 +2,7 @@
 Tenant service — business logic for tenant CRUD operations.
 """
 
+import logging
 import math
 import uuid
 from datetime import datetime, timezone
@@ -12,6 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.tenant import Tenant
 from app.models.extension import Extension
 from app.schemas.tenant import TenantCreate, TenantUpdate, TenantResponse, TenantListResponse
+from app.services import kamailio_service
+
+logger = logging.getLogger(__name__)
 
 
 async def _tenant_to_response(db: AsyncSession, tenant: Tenant) -> TenantResponse:
@@ -56,6 +60,12 @@ async def create_tenant(db: AsyncSession, data: TenantCreate) -> TenantResponse:
     db.add(tenant)
     await db.commit()
     await db.refresh(tenant)
+
+    # Sync to Kamailio htable (domain -> slug mapping)
+    if not kamailio_service.add_tenant_domain(tenant.domain, tenant.slug):
+        logger.warning(f"Tenant {tenant.slug} created in DB but Kamailio sync failed. "
+                       f"Kamailio restart may be needed.")
+
     return await _tenant_to_response(db, tenant)
 
 
@@ -129,4 +139,8 @@ async def delete_tenant(db: AsyncSession, tenant_id: uuid.UUID) -> bool:
     tenant.is_active = False
     tenant.updated_at = datetime.now(timezone.utc)
     await db.commit()
+
+    # Remove from Kamailio htable
+    kamailio_service.remove_tenant_domain(tenant.domain)
+
     return True
