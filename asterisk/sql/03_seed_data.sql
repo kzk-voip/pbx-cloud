@@ -1,5 +1,5 @@
 -- =============================================
--- Seed Data: 2 Tenants with Extensions
+-- Seed Data: 3 Tenants with Extensions
 -- =============================================
 
 -- Tenant: Acme Corp
@@ -21,6 +21,18 @@ VALUES (
     'globex',
     'globex.pbx.local',
     'Globex Inc',
+    10,
+    5,
+    'ulaw,alaw'
+);
+
+-- Tenant: Wayne Enterprises
+INSERT INTO tenants (id, slug, domain, name, max_extensions, max_concurrent_calls, codecs)
+VALUES (
+    'c0000000-0000-0000-0000-000000000003',
+    'wayne',
+    'wayne.pbx.local',
+    'Wayne Enterprises',
     10,
     5,
     'ulaw,alaw'
@@ -81,3 +93,31 @@ INSERT INTO ps_aors (id, tenant_id, max_contacts, support_path, qualify_frequenc
 VALUES
     ('globex_201', 'b0000000-0000-0000-0000-000000000002', 1, true, 30),
     ('globex_202', 'b0000000-0000-0000-0000-000000000002', 1, true, 30);
+
+-- =============================================
+-- Wayne Extensions (301, 302)
+-- =============================================
+
+-- Extension metadata
+INSERT INTO extensions (tenant_id, extension_number, display_name)
+VALUES
+    ('c0000000-0000-0000-0000-000000000003', '301', 'Wayne User 301'),
+    ('c0000000-0000-0000-0000-000000000003', '302', 'Wayne User 302');
+
+-- PJSIP Endpoints
+INSERT INTO ps_endpoints (id, tenant_id, transport, aors, auth, context, disallow, allow, direct_media, force_rport, rewrite_contact, rtp_symmetric, dtmf_mode, callerid)
+VALUES
+    ('wayne_301', 'c0000000-0000-0000-0000-000000000003', 'transport-udp', 'wayne_301', 'wayne_301', 'from-kamailio', 'all', 'ulaw', false, true, false, true, 'rfc4733', '"Wayne 301" <301>'),
+    ('wayne_302', 'c0000000-0000-0000-0000-000000000003', 'transport-udp', 'wayne_302', 'wayne_302', 'from-kamailio', 'all', 'ulaw', false, true, false, true, 'rfc4733', '"Wayne 302" <302>');
+
+-- PJSIP Auth
+INSERT INTO ps_auths (id, tenant_id, auth_type, username, password)
+VALUES
+    ('wayne_301', 'c0000000-0000-0000-0000-000000000003', 'userpass', 'wayne_301', 'wayne301pass'),
+    ('wayne_302', 'c0000000-0000-0000-0000-000000000003', 'userpass', 'wayne_302', 'wayne302pass');
+
+-- PJSIP AOR
+INSERT INTO ps_aors (id, tenant_id, max_contacts, support_path, qualify_frequency)
+VALUES
+    ('wayne_301', 'c0000000-0000-0000-0000-000000000003', 1, true, 30),
+    ('wayne_302', 'c0000000-0000-0000-0000-000000000003', 1, true, 30);

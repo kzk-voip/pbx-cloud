@@ -8,10 +8,12 @@ for f in /etc/asterisk/*.conf; do
     cp "/tmp/$(basename "$f")" "$f"
 done
 
-# Substitute POSTGRES_PASSWORD in res_pgsql.conf
-sed "s/\${POSTGRES_PASSWORD}/$POSTGRES_PASSWORD/g" \
-    /etc/asterisk/res_pgsql.conf > /tmp/res_pgsql.conf
-cp /tmp/res_pgsql.conf /etc/asterisk/res_pgsql.conf
+# Substitute POSTGRES_PASSWORD in res_pgsql.conf and cdr_pgsql.conf
+for pgconf in res_pgsql.conf cdr_pgsql.conf; do
+    sed "s/\${POSTGRES_PASSWORD}/$POSTGRES_PASSWORD/g" \
+        /etc/asterisk/$pgconf > /tmp/$pgconf
+    cp /tmp/$pgconf /etc/asterisk/$pgconf
+done
 
 # Substitute EXTERNAL_IP in pjsip.conf
 sed "s/\${EXTERNAL_IP}/${EXTERNAL_IP:-127.0.0.1}/g" \
