@@ -41,25 +41,45 @@ async def _tenant_to_response(db: AsyncSession, tenant: Tenant) -> TenantRespons
 
 
 async def create_tenant(db: AsyncSession, data: TenantCreate) -> TenantResponse:
-    """Create a new tenant. Raises ValueError if slug or domain already exists."""
-    # Check slug uniqueness
-    existing = await db.execute(
+    """
+    Create a new tenant. If a soft-deleted tenant with the same slug/domain
+    exists, re-activate it with updated data. Raises ValueError only if
+    an active tenant with this slug or domain already exists.
+    """
+    existing_result = await db.execute(
         select(Tenant).where((Tenant.slug == data.slug) | (Tenant.domain == data.domain))
     )
-    if existing.scalar_one_or_none() is not None:
-        raise ValueError("Tenant with this slug or domain already exists")
+    existing = existing_result.scalar_one_or_none()
 
-    tenant = Tenant(
-        slug=data.slug,
-        domain=data.domain,
-        name=data.name,
-        max_extensions=data.max_extensions,
-        max_concurrent_calls=data.max_concurrent_calls,
-        codecs=data.codecs,
-    )
-    db.add(tenant)
-    await db.commit()
-    await db.refresh(tenant)
+    if existing is not None:
+        if existing.is_active:
+            raise ValueError("Tenant with this slug or domain already exists")
+
+        # Re-activate soft-deleted tenant with updated data
+        logger.info(f"Re-activating soft-deleted tenant: {existing.slug}")
+        existing.slug = data.slug
+        existing.domain = data.domain
+        existing.name = data.name
+        existing.max_extensions = data.max_extensions
+        existing.max_concurrent_calls = data.max_concurrent_calls
+        existing.codecs = data.codecs
+        existing.is_active = True
+        existing.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(existing)
+        tenant = existing
+    else:
+        tenant = Tenant(
+            slug=data.slug,
+            domain=data.domain,
+            name=data.name,
+            max_extensions=data.max_extensions,
+            max_concurrent_calls=data.max_concurrent_calls,
+            codecs=data.codecs,
+        )
+        db.add(tenant)
+        await db.commit()
+        await db.refresh(tenant)
 
     # Sync to Kamailio htable (domain -> slug mapping)
     if not await kamailio_service.add_tenant_domain(tenant.domain, tenant.slug):
