@@ -2,14 +2,20 @@
 PBX Cloud — FastAPI Application Entry Point
 """
 
+import logging
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.database import async_session
 from app.redis import init_redis, close_redis
-from app.routers import health, auth, tenants, extensions, trunks
+from app.routers import health, auth, tenants, extensions, trunks, cdr, calls
+from app.services import kamailio_service
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -17,6 +23,15 @@ async def lifespan(app: FastAPI):
     """Manage application lifecycle: startup and shutdown events."""
     # Startup
     await init_redis()
+
+    # Sync all active tenants to Kamailio htable
+    try:
+        async with async_session() as db:
+            synced = await kamailio_service.sync_all_tenants_from_db(db)
+            logger.info(f"Startup: synced {synced} tenants to Kamailio htable")
+    except Exception as e:
+        logger.warning(f"Startup: Kamailio htable sync failed (non-fatal): {e}")
+
     yield
     # Shutdown
     await close_redis()
@@ -46,3 +61,5 @@ app.include_router(auth.router)
 app.include_router(tenants.router)
 app.include_router(extensions.router)
 app.include_router(trunks.router)
+app.include_router(cdr.router)
+app.include_router(calls.router)

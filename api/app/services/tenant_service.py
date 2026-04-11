@@ -62,7 +62,7 @@ async def create_tenant(db: AsyncSession, data: TenantCreate) -> TenantResponse:
     await db.refresh(tenant)
 
     # Sync to Kamailio htable (domain -> slug mapping)
-    if not kamailio_service.add_tenant_domain(tenant.domain, tenant.slug):
+    if not await kamailio_service.add_tenant_domain(tenant.domain, tenant.slug):
         logger.warning(f"Tenant {tenant.slug} created in DB but Kamailio sync failed. "
                        f"Kamailio restart may be needed.")
 
@@ -141,6 +141,6 @@ async def delete_tenant(db: AsyncSession, tenant_id: uuid.UUID) -> bool:
     await db.commit()
 
     # Remove from Kamailio htable
-    kamailio_service.remove_tenant_domain(tenant.domain)
+    await kamailio_service.remove_tenant_domain(tenant.domain)
 
     return True

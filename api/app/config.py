@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     ami_username: str = "admin"
     ami_password: str = "changeme"
 
+    # Kamailio JSONRPC
+    kamailio_jsonrpc_host: str = "127.0.0.1"
+    kamailio_jsonrpc_port: int = 9090
+    kamailio_jsonrpc_timeout: float = 3.0
+
     # App
     app_name: str = "PBX Cloud API"
     debug: bool = False

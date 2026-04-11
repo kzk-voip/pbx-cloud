@@ -1,24 +1,24 @@
 """
-Kamailio service — JSONRPC client for dynamic htable management.
+Kamailio service — async JSONRPC client for dynamic htable management.
 
 Communicates with Kamailio's jsonrpcs module over UDP datagram
 to add/remove tenant domains from the htable without Kamailio restart.
+
+All methods are async to avoid blocking the FastAPI event loop.
 """
 
+import asyncio
 import json
 import logging
-import socket
+
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-KAMAILIO_JSONRPC_HOST = "127.0.0.1"
-KAMAILIO_JSONRPC_PORT = 9090
-TIMEOUT_SECONDS = 3
 
-
-def _send_jsonrpc(method: str, params: list) -> dict | None:
+async def _send_jsonrpc(method: str, params: list) -> dict | None:
     """
-    Send a JSONRPC request to Kamailio via UDP datagram.
+    Send a JSONRPC request to Kamailio via async UDP datagram.
     Returns the parsed response or None on failure.
     """
     payload = json.dumps({
@@ -26,31 +26,62 @@ def _send_jsonrpc(method: str, params: list) -> dict | None:
         "method": method,
         "params": params,
         "id": 1,
-    })
+    }).encode("utf-8")
 
+    host = settings.kamailio_jsonrpc_host
+    port = settings.kamailio_jsonrpc_port
+    timeout = settings.kamailio_jsonrpc_timeout
+
+    loop = asyncio.get_running_loop()
+    future = loop.create_future()
+
+    class JSONRPCProtocol(asyncio.DatagramProtocol):
+        def __init__(self):
+            self.transport = None
+
+        def connection_made(self, transport):
+            self.transport = transport
+            self.transport.sendto(payload, (host, port))
+
+        def datagram_received(self, data, addr):
+            if not future.done():
+                future.set_result(data)
+
+        def error_received(self, exc):
+            if not future.done():
+                future.set_exception(exc)
+
+        def connection_lost(self, exc):
+            if not future.done():
+                future.set_exception(exc or ConnectionError("Connection lost"))
+
+    transport = None
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.settimeout(TIMEOUT_SECONDS)
-        sock.sendto(payload.encode("utf-8"), (KAMAILIO_JSONRPC_HOST, KAMAILIO_JSONRPC_PORT))
-        data, _ = sock.recvfrom(4096)
-        sock.close()
+        transport, protocol = await loop.create_datagram_endpoint(
+            JSONRPCProtocol,
+            remote_addr=(host, port),
+        )
+        data = await asyncio.wait_for(future, timeout=timeout)
         response = json.loads(data.decode("utf-8"))
         logger.info(f"Kamailio JSONRPC {method}: {response}")
         return response
-    except socket.timeout:
+    except asyncio.TimeoutError:
         logger.error(f"Kamailio JSONRPC timeout for {method}")
         return None
     except Exception as e:
         logger.error(f"Kamailio JSONRPC error for {method}: {e}")
         return None
+    finally:
+        if transport is not None:
+            transport.close()
 
 
-def add_tenant_domain(domain: str, slug: str) -> bool:
+async def add_tenant_domain(domain: str, slug: str) -> bool:
     """
     Add a tenant domain to Kamailio's htable.
     Equivalent to: kamcmd htable.sets tenants <domain> s:<slug>
     """
-    response = _send_jsonrpc("htable.sets", ["tenants", domain, slug])
+    response = await _send_jsonrpc("htable.sets", ["tenants", domain, slug])
     if response and "result" in response:
         logger.info(f"Added tenant domain to Kamailio: {domain} -> {slug}")
         return True
@@ -58,14 +89,50 @@ def add_tenant_domain(domain: str, slug: str) -> bool:
     return False
 
 
-def remove_tenant_domain(domain: str) -> bool:
+async def remove_tenant_domain(domain: str) -> bool:
     """
     Remove a tenant domain from Kamailio's htable.
     Equivalent to: kamcmd htable.delete tenants <domain>
     """
-    response = _send_jsonrpc("htable.delete", ["tenants", domain])
+    response = await _send_jsonrpc("htable.delete", ["tenants", domain])
     if response and "result" in response:
         logger.info(f"Removed tenant domain from Kamailio: {domain}")
         return True
     logger.warning(f"Failed to remove tenant domain from Kamailio: {domain}")
     return False
+
+
+async def dump_htable() -> dict | None:
+    """
+    Dump all entries from the tenants htable for diagnostics.
+    Returns the raw JSONRPC response or None on failure.
+    """
+    return await _send_jsonrpc("htable.dump", ["tenants"])
+
+
+async def sync_all_tenants_from_db(db_session) -> int:
+    """
+    Load all active tenants from PostgreSQL and sync them to Kamailio htable.
+    Called on API startup to ensure Kamailio has all tenant domains.
+    Returns the number of successfully synced tenants.
+    """
+    from sqlalchemy import select
+    from app.models.tenant import Tenant
+
+    result = await db_session.execute(
+        select(Tenant).where(Tenant.is_active == True)
+    )
+    tenants = result.scalars().all()
+
+    synced = 0
+    for tenant in tenants:
+        success = await add_tenant_domain(tenant.domain, tenant.slug)
+        if success:
+            synced += 1
+        else:
+            logger.warning(
+                f"Failed to sync tenant {tenant.slug} ({tenant.domain}) to Kamailio"
+            )
+
+    logger.info(f"Kamailio htable sync complete: {synced}/{len(tenants)} tenants synced")
+    return synced

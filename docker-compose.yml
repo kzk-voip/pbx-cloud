@@ -32,6 +32,7 @@ services:
       - ./asterisk/etc/asterisk/features.conf:/etc/asterisk/features.conf
       - ./asterisk/etc/asterisk/musiconhold.conf:/etc/asterisk/musiconhold.conf
       - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
+      - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
     restart: unless-stopped
 
   postgres:
@@ -84,6 +85,15 @@ services:
       - AMI_PASSWORD=${AMI_PASSWORD:-changeme}
     volumes:
       - ./api:/app
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    network_mode: host
+    depends_on:
+      - api
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: unless-stopped
 
 volumes:
