@@ -90,8 +90,10 @@ async def create_tenant(db: AsyncSession, data: TenantCreate) -> TenantResponse:
 
 
 async def get_tenant(db: AsyncSession, tenant_id: uuid.UUID) -> TenantResponse | None:
-    """Get a single tenant by ID."""
-    result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
+    """Get a single active tenant by ID."""
+    result = await db.execute(
+        select(Tenant).where(Tenant.id == tenant_id, Tenant.is_active == True)
+    )
     tenant = result.scalar_one_or_none()
     if tenant is None:
         return None
@@ -101,15 +103,18 @@ async def get_tenant(db: AsyncSession, tenant_id: uuid.UUID) -> TenantResponse |
 async def list_tenants(
     db: AsyncSession, page: int = 1, per_page: int = 20
 ) -> TenantListResponse:
-    """List all tenants with pagination."""
-    # Total count
-    count_result = await db.execute(select(func.count()).select_from(Tenant))
+    """List all active tenants with pagination."""
+    # Total count (active only)
+    count_result = await db.execute(
+        select(func.count()).select_from(Tenant).where(Tenant.is_active == True)
+    )
     total = count_result.scalar() or 0
 
-    # Paginated query
+    # Paginated query (active only)
     offset = (page - 1) * per_page
     result = await db.execute(
         select(Tenant)
+        .where(Tenant.is_active == True)
         .order_by(Tenant.created_at.desc())
         .offset(offset)
         .limit(per_page)
