@@ -15,6 +15,8 @@ from app.redis import init_redis, close_redis
 from app.routers import health, auth, tenants, extensions, trunks, cdr, calls
 from app.services import kamailio_service
 
+# Configure logging for all app.* loggers
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s [%(name)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 
