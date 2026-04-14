@@ -1,8 +1,13 @@
 """
 Kamailio service — async JSONRPC client for dynamic htable management.
 
-Communicates with Kamailio's jsonrpcs module over UDP datagram
+Communicates with Kamailio's jsonrpcs module over UDP datagram (transport=4)
 to add/remove tenant domains from the htable without Kamailio restart.
+
+Architecture:
+  - htable loads from PostgreSQL on startup (via db_url)
+  - JSONRPC adds/removes entries dynamically (for immediate effect)
+  - sqlops fallback in TENANT_LOOKUP queries DB on cache miss
 
 All methods are async to avoid blocking the FastAPI event loop.
 """
@@ -79,7 +84,7 @@ async def _send_jsonrpc(method: str, params: list) -> dict | None:
 async def add_tenant_domain(domain: str, slug: str) -> bool:
     """
     Add a tenant domain to Kamailio's htable.
-    Equivalent to: kamcmd htable.sets tenants <domain> s:<slug>
+    Uses htable.sets (set string value).
     """
     response = await _send_jsonrpc("htable.sets", ["tenants", domain, slug])
     if response and "result" in response:
@@ -92,7 +97,6 @@ async def add_tenant_domain(domain: str, slug: str) -> bool:
 async def remove_tenant_domain(domain: str) -> bool:
     """
     Remove a tenant domain from Kamailio's htable.
-    Equivalent to: kamcmd htable.delete tenants <domain>
     """
     response = await _send_jsonrpc("htable.delete", ["tenants", domain])
     if response and "result" in response:
@@ -105,7 +109,6 @@ async def remove_tenant_domain(domain: str) -> bool:
 async def dump_htable() -> dict | None:
     """
     Dump all entries from the tenants htable for diagnostics.
-    Returns the raw JSONRPC response or None on failure.
     """
     return await _send_jsonrpc("htable.dump", ["tenants"])
 
@@ -114,7 +117,10 @@ async def sync_all_tenants_from_db(db_session) -> int:
     """
     Load all active tenants from PostgreSQL and sync them to Kamailio htable.
     Called on API startup to ensure Kamailio has all tenant domains.
-    Returns the number of successfully synced tenants.
+    
+    Note: with htable db_url configured, Kamailio already loads from DB on startup.
+    This function provides an additional sync for cases where the API starts
+    after Kamailio and new tenants were added while Kamailio was already running.
     """
     from sqlalchemy import select
     from app.models.tenant import Tenant
