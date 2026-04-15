@@ -1,8 +1,7 @@
 FROM ghcr.io/kamailio/kamailio-ci:5.7
 
-# Install openssl for TLS certificate generation
-RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
-    rm -rf /var/lib/apt/lists/*
+# Install openssl for TLS certificate generation (Alpine-based image)
+RUN apk add --no-cache openssl
 
 # Generate self-signed TLS certificate for SIP over TLS (port 5061)
 RUN mkdir -p /etc/kamailio/tls && \
