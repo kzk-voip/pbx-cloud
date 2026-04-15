@@ -120,7 +120,7 @@ services:
       - nginx_logs:/var/log/nginx:ro
       # Map docker container logs for kamailio if needed, or use a dummy file for now
       # to prevent crash:
-      - ./fail2ban/dummy.log:/var/log/syslog:ro
+      - ./fail2ban/dummy.txt:/var/log/syslog:ro
     restart: unless-stopped
 
 volumes:
