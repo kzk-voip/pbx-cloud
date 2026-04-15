@@ -11,6 +11,7 @@ services:
       - EXTERNAL_IP=${EXTERNAL_IP}
     volumes:
       - ./kamailio/kamailio.cfg:/etc/kamailio/kamailio.cfg
+      - ./kamailio/tls.cfg:/etc/kamailio/tls.cfg
     restart: unless-stopped
 
   asterisk:
@@ -96,6 +97,28 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: unless-stopped
 
+  sipp:
+    image: ctaloi/sipp:latest
+    network_mode: host
+    profiles:
+      - testing
+    volumes:
+      - ./sipp:/sipp
+    entrypoint: ["sleep", "infinity"]
+
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./fail2ban/jail.local:/data/jail.d/jail.local:ro
+      - ./fail2ban/filter.d:/data/filter.d:ro
+      - fail2ban_data:/data/db
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
+  fail2ban_data:

@@ -27,6 +27,7 @@ class Tenant(Base):
     max_concurrent_calls: Mapped[int] = mapped_column(Integer, nullable=False, server_default="5")
     codecs: Mapped[str] = mapped_column(String(200), nullable=False, server_default="ulaw,alaw")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    allow_international: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
 

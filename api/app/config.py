@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # App
     app_name: str = "PBX Cloud API"
     debug: bool = False
+    allowed_origins: str = "http://localhost:3000,http://localhost:8080"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

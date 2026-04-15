@@ -142,3 +142,30 @@ async def sync_all_tenants_from_db(db_session) -> int:
 
     logger.info(f"Kamailio htable sync complete: {synced}/{len(tenants)} tenants synced")
     return synced
+
+
+# ---- IP Blacklist Management ----
+
+async def dump_blacklist() -> dict | None:
+    """Dump all entries from the ipblacklist htable."""
+    return await _send_jsonrpc("htable.dump", ["ipblacklist"])
+
+
+async def blacklist_ip(ip: str) -> bool:
+    """Add an IP to the Kamailio blacklist (auto-expires per htable config)."""
+    response = await _send_jsonrpc("htable.seti", ["ipblacklist", ip, 1])
+    if response and "result" in response:
+        logger.info(f"Blacklisted IP in Kamailio: {ip}")
+        return True
+    logger.warning(f"Failed to blacklist IP in Kamailio: {ip}")
+    return False
+
+
+async def unblacklist_ip(ip: str) -> bool:
+    """Remove an IP from the Kamailio blacklist."""
+    response = await _send_jsonrpc("htable.delete", ["ipblacklist", ip])
+    if response and "result" in response:
+        logger.info(f"Removed IP from Kamailio blacklist: {ip}")
+        return True
+    logger.warning(f"Failed to remove IP from Kamailio blacklist: {ip}")
+    return False

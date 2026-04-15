@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import async_session
 from app.redis import init_redis, close_redis
-from app.routers import health, auth, tenants, extensions, trunks, cdr, calls
+from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist
 from app.services import kamailio_service
 
 # Configure logging for all app.* loggers
@@ -48,10 +48,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS (permissive for development; tighten in Phase 4)
+# CORS (configurable via ALLOWED_ORIGINS env var)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.allowed_origins.split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,3 +65,5 @@ app.include_router(extensions.router)
 app.include_router(trunks.router)
 app.include_router(cdr.router)
 app.include_router(calls.router)
+app.include_router(admin.router)
+app.include_router(blacklist.router)

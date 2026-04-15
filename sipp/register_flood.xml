@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  SIPp REGISTER flood test scenario
+  Usage: docker compose run --rm sipp sipp -sf /sipp/register_flood.xml
+         -d 100 -l 100 -r 50 127.0.0.1:5060
+
+  Parameters:
+    -d 100    : 100ms pause between registrations
+    -l 100    : max 100 concurrent calls
+    -r 50     : 50 registrations per second
+    -m 1000   : stop after 1000 messages
+
+  This scenario sends unauthenticated REGISTERs to test
+  Kamailio's pike rate limiting and IP blacklisting.
+-->
+<scenario name="REGISTER Flood Test">
+  <send retrans="500">
+    <![CDATA[
+      REGISTER sip:test.pbx.local SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: <sip:flood_[call_number]@test.pbx.local>;tag=[pid]SIPpTag[call_number]
+      To: <sip:flood_[call_number]@test.pbx.local>
+      Call-ID: [call_id]
+      CSeq: 1 REGISTER
+      Contact: sip:flood_[call_number]@[local_ip]:[local_port]
+      Max-Forwards: 70
+      Expires: 3600
+      Content-Length: 0
+    ]]>
+  </send>
+
+  <recv response=".*" optional="true" timeout="2000">
+  </recv>
+</scenario>
