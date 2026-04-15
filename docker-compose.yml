@@ -95,6 +95,7 @@ services:
       - api
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
     restart: unless-stopped
 
   sipp:
@@ -116,9 +117,14 @@ services:
       - ./fail2ban/jail.local:/data/jail.d/jail.local:ro
       - ./fail2ban/filter.d:/data/filter.d:ro
       - fail2ban_data:/data/db
+      - nginx_logs:/var/log/nginx:ro
+      # Map docker container logs for kamailio if needed, or use a dummy file for now
+      # to prevent crash:
+      - ./fail2ban/dummy.log:/var/log/syslog:ro
     restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
   fail2ban_data:
+  nginx_logs:
