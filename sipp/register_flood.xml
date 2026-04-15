@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
   SIPp REGISTER flood test scenario
-  Usage: docker compose run --rm sipp sipp -sf /sipp/register_flood.xml
-         -d 100 -l 100 -r 50 127.0.0.1:5060
-
-  Parameters:
-    -d 100    : 100ms pause between registrations
-    -l 100    : max 100 concurrent calls
-    -r 50     : 50 registrations per second
-    -m 1000   : stop after 1000 messages
+  Usage: docker compose exec sipp sipp -sf /sipp/register_flood.xml
+         -d 50 -r 100 -m 500 -i 127.0.0.1 127.0.0.1:5060
 
   This scenario sends unauthenticated REGISTERs to test
   Kamailio's pike rate limiting and IP blacklisting.
@@ -29,6 +23,10 @@
     ]]>
   </send>
 
-  <recv response=".*" optional="true" timeout="2000">
+  <recv response="100" optional="true" timeout="500">
   </recv>
+
+  <recv response="403" optional="true" timeout="2000">
+  </recv>
+
 </scenario>
