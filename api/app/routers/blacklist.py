@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
+from app.dependencies.database import get_db
 from app.dependencies.auth import require_role
 from app.models.user import User
 from app.models.blacklist import NumberBlacklist
