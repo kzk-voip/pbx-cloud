@@ -1,16 +1,17 @@
-FROM ghcr.io/kamailio/kamailio-ci:5.7
-
-# Install openssl for TLS certificate generation (Alpine-based image)
-RUN apk add --no-cache openssl
-
-# Generate self-signed TLS certificate for SIP over TLS (port 5061)
-RUN mkdir -p /etc/kamailio/tls && \
+FROM alpine:3.20 AS cert-gen
+RUN apk add --no-cache openssl && \
+    mkdir -p /certs && \
     openssl req -x509 -newkey rsa:2048 -nodes \
-      -keyout /etc/kamailio/tls/kamailio-key.pem \
-      -out /etc/kamailio/tls/kamailio-cert.pem \
+      -keyout /certs/kamailio-key.pem \
+      -out /certs/kamailio-cert.pem \
       -days 3650 \
       -subj "/CN=pbx-cloud/O=PBX Cloud/C=UA" && \
-    chmod 600 /etc/kamailio/tls/kamailio-key.pem
+    chmod 600 /certs/kamailio-key.pem
+
+FROM ghcr.io/kamailio/kamailio-ci:5.7
+
+# Copy TLS certificate from builder stage
+COPY --from=cert-gen /certs/ /etc/kamailio/tls/
 
 COPY --chmod=755 docker-entrypoint.sh /docker-entrypoint.sh
 
