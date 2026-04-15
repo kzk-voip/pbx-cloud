@@ -34,6 +34,7 @@ async def _tenant_to_response(db: AsyncSession, tenant: Tenant) -> TenantRespons
         max_concurrent_calls=tenant.max_concurrent_calls,
         codecs=tenant.codecs,
         is_active=tenant.is_active,
+        allow_international=tenant.allow_international,
         created_at=tenant.created_at,
         updated_at=tenant.updated_at,
         extension_count=ext_count,
