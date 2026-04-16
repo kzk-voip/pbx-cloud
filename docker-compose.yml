@@ -146,7 +146,6 @@ services:
       - testing
     volumes:
       - ./sipp:/sipp
-    entrypoint: ["sleep", "infinity"]
 
   fail2ban:
     image: crazymax/fail2ban:latest
