@@ -23,10 +23,10 @@
     ]]>
   </send>
 
-  <recv response="100" optional="true" timeout="500">
+  <recv response="100" optional="true" >
   </recv>
 
-  <recv response="403" optional="true" timeout="2000">
+  <recv response="401" optional="true" timeout="2000">
   </recv>
 
 </scenario>
