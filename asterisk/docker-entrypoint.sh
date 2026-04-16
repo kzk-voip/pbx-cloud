@@ -21,4 +21,9 @@ sed "s/\${EXTERNAL_IP}/${EXTERNAL_IP:-127.0.0.1}/g" \
 sed -i "s/\${ASTERISK_SIP_PORT}/${ASTERISK_SIP_PORT:-5070}/g" /tmp/pjsip.conf
 cp /tmp/pjsip.conf /etc/asterisk/pjsip.conf
 
+# Substitute AMI_PORT in manager.conf (each node needs a unique AMI port)
+sed "s/\${AMI_PORT}/${AMI_PORT:-5038}/g" \
+    /etc/asterisk/manager.conf > /tmp/manager.conf
+cp /tmp/manager.conf /etc/asterisk/manager.conf
+
 exec asterisk -f

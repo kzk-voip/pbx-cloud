@@ -19,12 +19,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      pgbouncer:
-        condition: service_started
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - EXTERNAL_IP=${EXTERNAL_IP}
       - ASTERISK_SIP_PORT=5070
+      - AMI_PORT=5038
     volumes:
       - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
@@ -45,12 +44,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      pgbouncer:
-        condition: service_started
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - EXTERNAL_IP=${EXTERNAL_IP}
       - ASTERISK_SIP_PORT=5072
+      - AMI_PORT=5039
     volumes:
       - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
@@ -118,10 +116,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      pgbouncer:
-        condition: service_started
     environment:
-      - DATABASE_URL=postgresql+asyncpg://pbx_user:${POSTGRES_PASSWORD}@127.0.0.1:6432/pbx
+      - DATABASE_URL=postgresql+asyncpg://pbx_user:${POSTGRES_PASSWORD}@127.0.0.1:5432/pbx
       - REDIS_URL=redis://:${REDIS_PASSWORD}@127.0.0.1:6379/0
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
