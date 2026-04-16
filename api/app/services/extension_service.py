@@ -4,6 +4,8 @@ Extension service — business logic with ARA auto-provisioning.
 When an extension is created, the service automatically provisions
 the corresponding ps_endpoints, ps_auths, and ps_aors records
 so the SIP client can register immediately without Asterisk restart.
+
+Phase 5: Redis cache invalidation on create/update/delete.
 """
 
 import secrets
@@ -15,6 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.tenant import Tenant
 from app.models.extension import Extension
 from app.models.ara import PjsipEndpoint, PjsipAuth, PjsipAor
+from app.redis import redis_client
+from app.services.ara_cache_service import invalidate_endpoint
 from app.schemas.extension import (
     ExtensionCreate,
     ExtensionUpdate,
@@ -143,6 +147,10 @@ async def create_extension(
     await db.commit()
     await db.refresh(extension)
 
+    # Invalidate ARA cache for this endpoint
+    if redis_client:
+        await invalidate_endpoint(redis_client, sip_id)
+
     return ExtensionCredentials(
         id=extension.id,
         extension_number=data.extension_number,
@@ -222,6 +230,12 @@ async def update_extension(
 
     await db.commit()
     await db.refresh(ext)
+
+    # Invalidate ARA cache for updated endpoint
+    sip_id_for_cache = _make_sip_id(tenant.slug, ext.extension_number)
+    if redis_client:
+        await invalidate_endpoint(redis_client, sip_id_for_cache)
+
     return _ext_to_response(ext, tenant.slug)
 
 
@@ -252,6 +266,11 @@ async def delete_extension(
     await db.execute(delete(Extension).where(Extension.id == ext_id))
 
     await db.commit()
+
+    # Invalidate ARA cache for deleted endpoint
+    if redis_client:
+        await invalidate_endpoint(redis_client, sip_id)
+
     return True
 
 
@@ -282,6 +301,10 @@ async def reset_password(
     if auth:
         auth.password = new_password
         await db.commit()
+
+    # Invalidate ARA cache for password-reset endpoint
+    if redis_client:
+        await invalidate_endpoint(redis_client, sip_id)
 
     return ExtensionCredentials(
         id=ext.id,

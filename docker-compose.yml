@@ -6,23 +6,25 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - ASTERISK_IP=127.0.0.1
-      - ASTERISK_PORT=5070
       - EXTERNAL_IP=${EXTERNAL_IP}
     volumes:
       - ./kamailio/kamailio.cfg:/etc/kamailio/kamailio.cfg
       - ./kamailio/tls.cfg:/etc/kamailio/tls.cfg
+      - ./kamailio/dispatcher.list:/etc/kamailio/dispatcher.list
     restart: unless-stopped
 
-  asterisk:
+  asterisk-1:
     build: ./asterisk
     network_mode: host
     depends_on:
       postgres:
         condition: service_healthy
+      pgbouncer:
+        condition: service_started
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - EXTERNAL_IP=${EXTERNAL_IP}
+      - ASTERISK_SIP_PORT=5070
     volumes:
       - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
@@ -34,6 +36,33 @@ services:
       - ./asterisk/etc/asterisk/musiconhold.conf:/etc/asterisk/musiconhold.conf
       - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
       - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
+      - ./asterisk/etc/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf
+    restart: unless-stopped
+
+  asterisk-2:
+    build: ./asterisk
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_started
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - EXTERNAL_IP=${EXTERNAL_IP}
+      - ASTERISK_SIP_PORT=5072
+    volumes:
+      - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
+      - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
+      - ./asterisk/etc/asterisk/extconfig.conf:/etc/asterisk/extconfig.conf
+      - ./asterisk/etc/asterisk/res_pgsql.conf:/etc/asterisk/res_pgsql.conf
+      - ./asterisk/etc/asterisk/sorcery.conf:/etc/asterisk/sorcery.conf
+      - ./asterisk/etc/asterisk/voicemail.conf:/etc/asterisk/voicemail.conf
+      - ./asterisk/etc/asterisk/features.conf:/etc/asterisk/features.conf
+      - ./asterisk/etc/asterisk/musiconhold.conf:/etc/asterisk/musiconhold.conf
+      - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
+      - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
+      - ./asterisk/etc/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf
     restart: unless-stopped
 
   postgres:
@@ -52,6 +81,24 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - PGBOUNCER_DATABASE=pbx
+      - POSTGRESQL_HOST=127.0.0.1
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_USERNAME=pbx_user
+      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
+      - PGBOUNCER_PORT=6432
+      - PGBOUNCER_POOL_MODE=transaction
+      - PGBOUNCER_MAX_CLIENT_CONN=200
+      - PGBOUNCER_DEFAULT_POOL_SIZE=25
     restart: unless-stopped
 
   redis:
@@ -75,8 +122,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      pgbouncer:
+        condition: service_started
     environment:
-      - DATABASE_URL=postgresql+asyncpg://pbx_user:${POSTGRES_PASSWORD}@127.0.0.1:5432/pbx
+      - DATABASE_URL=postgresql+asyncpg://pbx_user:${POSTGRES_PASSWORD}@127.0.0.1:6432/pbx
       - REDIS_URL=redis://:${REDIS_PASSWORD}@127.0.0.1:6379/0
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
@@ -118,8 +167,6 @@ services:
       - ./fail2ban/filter.d:/data/filter.d:ro
       - fail2ban_data:/data/db
       - nginx_logs:/var/log/nginx:ro
-      # Map docker container logs for kamailio if needed, or use a dummy file for now
-      # to prevent crash:
       - ./fail2ban/dummy.txt:/var/log/syslog:ro
     restart: unless-stopped
 
