@@ -111,6 +111,41 @@
       ],
       "title": "API Requests per Second (RPS)",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "asterisk_channels",
+          "legendFormat": "{{job}} Channels",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Asterisk Active Channels",
+      "type": "timeseries"
     }
   ],
   "schemaVersion": 38,
