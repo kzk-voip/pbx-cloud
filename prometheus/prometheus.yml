@@ -20,10 +20,6 @@ scrape_configs:
     static_configs:
       - targets: ['127.0.0.1:8000']
 
-  - job_name: 'kamailio'
-    static_configs:
-      - targets: ['127.0.0.1:9494']
-
   - job_name: 'redis'
     static_configs:
       - targets: ['127.0.0.1:9121']
