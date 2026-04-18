@@ -143,5 +143,6 @@
   "title": "Infrastructure Overview (DB/Redis)",
   "uid": "infra-overview-001",
   "version": 1,
+  "refresh": "5s",
   "weekStart": ""
 }

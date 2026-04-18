@@ -163,5 +163,6 @@
   "title": "PBX & API Overview",
   "uid": "pbx-overview-001",
   "version": 2,
+  "refresh": "5s",
   "weekStart": ""
 }
