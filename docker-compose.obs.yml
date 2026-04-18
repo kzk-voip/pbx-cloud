@@ -63,19 +63,19 @@ services:
     restart: unless-stopped
 
   postgres-exporter:
-    image: wrouesnel/postgres_exporter
+    image: prometheuscommunity/postgres-exporter
     network_mode: host
     environment:
       - DATA_SOURCE_NAME=postgresql://pbx_user:${POSTGRES_PASSWORD}@127.0.0.1:5432/pbx?sslmode=disable
     restart: unless-stopped
 
-  # Kamailio exporter (uses the jsonrpc module to get stats)
-  kamailio-exporter:
-    image: ghcr.io/ngvoice/kamailio_exporter:latest
-    network_mode: host
-    command: ["-kamailio.scrape-uri", "http://127.0.0.1:9090"]
-    # Wait, we use UDP 9090 for jsonrpc, kamailio_exporter usually expects HTTP. We might need to enable HTTP jsonrpc in Kamailio or use another exporter! Let me use standard configs for now.
-    restart: unless-stopped
+  # Kamailio exporter
+  # kamailio-exporter:
+  #   image: florentchauveau/kamailio_exporter:latest # Trying an alternative or disable if unavailable
+  #   network_mode: host
+  #   command: ["-kamailio.scrape-uri", "http://127.0.0.1:9090"]
+  #   restart: unless-stopped
+
 
 volumes:
   prometheus_data:
