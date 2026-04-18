@@ -67,3 +67,6 @@ app.include_router(cdr.router)
 app.include_router(calls.router)
 app.include_router(admin.router)
 app.include_router(blacklist.router)
+
+from prometheus_fastapi_instrumentator import Instrumentator
+Instrumentator().instrument(app).expose(app)

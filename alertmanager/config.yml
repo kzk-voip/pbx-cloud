@@ -1,0 +1,12 @@
+route:
+  group_by: ['alertname']
+  group_wait: 5s
+  group_interval: 1m
+  repeat_interval: 1h
+  receiver: 'dummy'
+
+receivers:
+  - name: 'dummy'
+    # By default we suppress emails/webhooks, configure later if Telegram is needed
+    # webhook_configs:
+    #  - url: 'http://127.0.0.1:8000/alerts'

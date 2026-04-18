@@ -9,3 +9,4 @@ alembic==1.15.*
 bcrypt==4.2.*
 python-jose[cryptography]==3.3.*
 python-multipart==0.0.*
+prometheus-fastapi-instrumentator==7.0.*
