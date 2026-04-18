@@ -1,0 +1,9 @@
+# Kamailio Dispatcher List — Asterisk Node Pool
+# Format: setid(int) destination(sip_uri) flags(int) priority(int) attrs(str)
+#
+# Set 1 = Asterisk media nodes
+# Algorithm 10 (hash-by-Call-ID) used in route[TO_ASTERISK]
+# Health check: OPTIONS ping every 5s (configured in kamailio.cfg)
+#
+1 sip:127.0.0.1:5070 0 0 node=ast1
+1 sip:127.0.0.1:5072 0 0 node=ast2

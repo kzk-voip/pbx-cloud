@@ -1,8 +1,7 @@
 # Environment
 .env
 
-specs.md
-roadmap.md
+*.md
 
 # Logs
 *.log

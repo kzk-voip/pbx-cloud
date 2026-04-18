@@ -1,0 +1,19 @@
+# fail2ban jail configuration for PBX Cloud
+
+[kamailio]
+enabled = true
+filter = kamailio
+logpath = /var/log/syslog
+maxretry = 5
+findtime = 300
+bantime = 3600
+action = iptables-allports[name=kamailio, protocol=all]
+
+[nginx-auth]
+enabled = true
+filter = nginx-auth
+logpath = /var/log/nginx/access.log
+maxretry = 10
+findtime = 300
+bantime = 1800
+action = iptables-allports[name=nginx-auth, protocol=all]

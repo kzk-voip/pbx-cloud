@@ -6,14 +6,14 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - ASTERISK_IP=127.0.0.1
-      - ASTERISK_PORT=5070
       - EXTERNAL_IP=${EXTERNAL_IP}
     volumes:
       - ./kamailio/kamailio.cfg:/etc/kamailio/kamailio.cfg
+      - ./kamailio/tls.cfg:/etc/kamailio/tls.cfg
+      - ./kamailio/dispatcher.list:/etc/kamailio/dispatcher.list
     restart: unless-stopped
 
-  asterisk:
+  asterisk-1:
     build: ./asterisk
     network_mode: host
     depends_on:
@@ -22,6 +22,8 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - EXTERNAL_IP=${EXTERNAL_IP}
+      - ASTERISK_SIP_PORT=5070
+      - AMI_PORT=5038
     volumes:
       - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
@@ -32,6 +34,33 @@ services:
       - ./asterisk/etc/asterisk/features.conf:/etc/asterisk/features.conf
       - ./asterisk/etc/asterisk/musiconhold.conf:/etc/asterisk/musiconhold.conf
       - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
+      - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
+      - ./asterisk/etc/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf
+    restart: unless-stopped
+
+  asterisk-2:
+    build: ./asterisk
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - EXTERNAL_IP=${EXTERNAL_IP}
+      - ASTERISK_SIP_PORT=5072
+      - AMI_PORT=5039
+    volumes:
+      - ./asterisk/etc/asterisk/pjsip.conf:/etc/asterisk/pjsip.conf
+      - ./asterisk/etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf
+      - ./asterisk/etc/asterisk/extconfig.conf:/etc/asterisk/extconfig.conf
+      - ./asterisk/etc/asterisk/res_pgsql.conf:/etc/asterisk/res_pgsql.conf
+      - ./asterisk/etc/asterisk/sorcery.conf:/etc/asterisk/sorcery.conf
+      - ./asterisk/etc/asterisk/voicemail.conf:/etc/asterisk/voicemail.conf
+      - ./asterisk/etc/asterisk/features.conf:/etc/asterisk/features.conf
+      - ./asterisk/etc/asterisk/musiconhold.conf:/etc/asterisk/musiconhold.conf
+      - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
+      - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
+      - ./asterisk/etc/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf
     restart: unless-stopped
 
   postgres:
@@ -52,5 +81,88 @@ services:
       retries: 5
     restart: unless-stopped
 
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://pbx_user:${POSTGRES_PASSWORD}@127.0.0.1:5432/pbx
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=200
+      - DEFAULT_POOL_SIZE=25
+      - LISTEN_PORT=6432
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    network_mode: host
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://pbx_user:${POSTGRES_PASSWORD}@127.0.0.1:5432/pbx
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@127.0.0.1:6379/0
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - AMI_HOST=127.0.0.1
+      - AMI_PORT=5038
+      - AMI_USERNAME=${AMI_USERNAME:-admin}
+      - AMI_PASSWORD=${AMI_PASSWORD:-changeme}
+    volumes:
+      - ./api:/app
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    network_mode: host
+    depends_on:
+      - api
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    restart: unless-stopped
+
+  sipp:
+    image: ctaloi/sipp:latest
+    network_mode: host
+    profiles:
+      - testing
+    volumes:
+      - ./sipp:/sipp
+
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./fail2ban/jail.local:/data/jail.d/jail.local:ro
+      - ./fail2ban/filter.d:/data/filter.d:ro
+      - fail2ban_data:/data/db
+      - nginx_logs:/var/log/nginx:ro
+      - ./fail2ban/dummy.txt:/var/log/syslog:ro
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  redis_data:
+  fail2ban_data:
+  nginx_logs:
