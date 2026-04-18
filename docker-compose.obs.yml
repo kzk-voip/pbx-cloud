@@ -76,29 +76,6 @@ services:
   #   restart: unless-stopped
 
 
-  # Asterisk exporters for Node 1 and Node 2
-  asterisk-exporter-1:
-    image: nevsnode/asterisk_exporter:latest
-    network_mode: host
-    environment:
-      - ASTERISK_AMI_HOST=127.0.0.1
-      - ASTERISK_AMI_PORT=5038
-      - ASTERISK_AMI_USERNAME=pbx_api
-      - ASTERISK_AMI_PASSWORD=amipass123
-      - HTTP_PORT=9500
-    restart: unless-stopped
-
-  asterisk-exporter-2:
-    image: nevsnode/asterisk_exporter:latest
-    network_mode: host
-    environment:
-      - ASTERISK_AMI_HOST=127.0.0.1
-      - ASTERISK_AMI_PORT=5039
-      - ASTERISK_AMI_USERNAME=pbx_api
-      - ASTERISK_AMI_PASSWORD=amipass123
-      - HTTP_PORT=9501
-    restart: unless-stopped
-
 volumes:
   prometheus_data:
   grafana_data:

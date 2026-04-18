@@ -139,7 +139,7 @@
           },
           "editorMode": "code",
           "expr": "asterisk_channels",
-          "legendFormat": "{{job}} Channels",
+          "legendFormat": "{{node}} Channels",
           "range": true,
           "refId": "A"
         }

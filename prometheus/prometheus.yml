@@ -28,12 +28,4 @@ scrape_configs:
     static_configs:
       - targets: ['127.0.0.1:9187']
 
-  - job_name: 'asterisk-1'
-    static_configs:
-      - targets: ['127.0.0.1:9500']
-
-  - job_name: 'asterisk-2'
-    static_configs:
-      - targets: ['127.0.0.1:9501']
-
   # Currently asterisk-exporter is omitted until we deploy it (runs on 9500), configure later.
