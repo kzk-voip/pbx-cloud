@@ -25,12 +25,11 @@ from app.database import Base
 from app.dependencies.database import get_db
 
 # ---------------------------------------------------------------------------
-# Test database engine
+# Test database engine — reuse the app's own DB credentials
 # ---------------------------------------------------------------------------
-DATABASE_TEST_URL = os.getenv(
-    "DATABASE_TEST_URL",
-    "postgresql+asyncpg://pbx_user:pbx_pass@localhost:5432/pbx",
-)
+from app.config import settings
+
+DATABASE_TEST_URL = os.getenv("DATABASE_TEST_URL", settings.database_url)
 
 test_engine = create_async_engine(
     DATABASE_TEST_URL,
