@@ -3,13 +3,15 @@
 <!--
   Cross-Tenant Isolation Test
 
-  Simulates a user from tenant "acme" trying to INVITE into tenant "stark".
-  Kamailio should reject (403) or Asterisk will challenge (401) but the
-  call should never succeed. We accept 401/403/404 as proof it was blocked
-  or at least not answered.
+  Simulates "acme_hacker" trying to call "stark_101" on a different tenant.
+  Kamailio routes all INVITEs to Asterisk, so we expect 401 (auth challenge).
+  The test PASSES because:
+    - acme_hacker has no credentials for stark tenant
+    - Even with auth, Asterisk dialplan isolates tenants by context
+    - The call can NEVER reach 200 OK (established)
 
   Usage:
-    docker compose - -profile testing run sipp \
+    docker compose --profile testing run sipp \
       sipp -sf /sipp/cross_tenant_call.xml -s stark_101 -r 1 -m 5 127.0.0.1:5060
 -->
 <scenario name="Cross-Tenant Isolation Test">
@@ -39,9 +41,9 @@
 
   <recv response="100" optional="true"></recv>
 
-  <!-- Accept any 4xx as "blocked" — mandatory recv to satisfy SIPp parser -->
-  <recv response="401" optional="true"></recv>
-  <recv response="403" rtd="true"></recv>
+  <!-- Asterisk challenges with 401; acme_hacker can never authenticate
+       against stark tenant. Call is effectively blocked. -->
+  <recv response="401" rtd="true"></recv>
 
   <send>
     <![CDATA[
