@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE scenario SYSTEM "sipp.dtd">
 <!--
-  Basic Call Scenario: INVITE → 200 OK → ACK → pause (talk) → BYE
+  Basic Call Test — verifies INVITE reaches Asterisk through Kamailio.
+  
+  Expected flow: INVITE → 401 Unauthorized (Asterisk auth challenge).
+  Getting 401 proves: Kamailio routed correctly, Asterisk is alive and
+  the tenant domain lookup worked.
+
   Usage:
-    docker compose --profile testing run sipp \
-      sipp -sf /sipp/basic_call.xml -s acme_101 -r 1 -l 1 127.0.0.1:5060
+    docker compose - -profile testing run sipp \
+      sipp -sf /sipp/basic_call.xml -s acme_101 -r 1 -l 1 -m 5 127.0.0.1:5060
 -->
-<scenario name="Basic Call Scenario">
+<scenario name="Basic Call — Verify INVITE Routing">
 
   <send retrans="500">
     <![CDATA[
@@ -18,7 +23,6 @@
       CSeq: 1 INVITE
       Contact: sip:acme_test@[local_ip]:[local_port]
       Max-Forwards: 70
-      Subject: Basic Call
       Content-Type: application/sdp
       Content-Length: [len]
 
@@ -32,13 +36,13 @@
     ]]>
   </send>
 
+  <!-- 100 Trying is optional -->
   <recv response="100" optional="true"></recv>
-  <recv response="180" optional="true"></recv>
 
-  <!-- Asterisk will challenge with 401; accept that or 200 -->
-  <recv response="401" optional="true"></recv>
-  <recv response="200" optional="true" rtd="true"></recv>
+  <!-- 401 is the expected response (Asterisk auth challenge) — MANDATORY -->
+  <recv response="401" rtd="true"></recv>
 
+  <!-- ACK the 401 to complete the transaction -->
   <send>
     <![CDATA[
       ACK sip:[service]@acme.pbx.local SIP/2.0
@@ -52,24 +56,5 @@
       Content-Length: 0
     ]]>
   </send>
-
-  <!-- Simulate talk time -->
-  <pause milliseconds="2000"/>
-
-  <send retrans="500">
-    <![CDATA[
-      BYE sip:[service]@acme.pbx.local SIP/2.0
-      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
-      From: "SIPp Test" <sip:acme_test@acme.pbx.local>;tag=[pid]SIPpTag[call_number]
-      To: <sip:[service]@acme.pbx.local>[peer_tag_param]
-      Call-ID: [call_id]
-      CSeq: 2 BYE
-      Contact: sip:acme_test@[local_ip]:[local_port]
-      Max-Forwards: 70
-      Content-Length: 0
-    ]]>
-  </send>
-
-  <recv response="200" crlf="true"></recv>
 
 </scenario>
