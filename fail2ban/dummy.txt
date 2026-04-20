@@ -1,0 +1,1 @@
+# Dummy syslog file for fail2ban to watch until docker json-file backend is configured

@@ -1,6 +1,42 @@
+-- =============================================
+-- PBX Cloud: Multi-Tenant ARA Schema
+-- =============================================
+
+-- TENANTS: Core tenant configuration
+CREATE TABLE tenants (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug VARCHAR(40) NOT NULL UNIQUE,
+    domain VARCHAR(80) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    max_extensions INT NOT NULL DEFAULT 10,
+    max_concurrent_calls INT NOT NULL DEFAULT 5,
+    codecs VARCHAR(200) NOT NULL DEFAULT 'ulaw,alaw',
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_tenants_domain ON tenants(domain);
+CREATE INDEX idx_tenants_slug ON tenants(slug);
+
+-- EXTENSIONS: Tenant-scoped extension metadata
+CREATE TABLE extensions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    extension_number VARCHAR(10) NOT NULL,
+    display_name VARCHAR(100),
+    email VARCHAR(255),
+    enabled BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE(tenant_id, extension_number)
+);
+
+CREATE INDEX idx_extensions_tenant_id ON extensions(tenant_id);
+
 -- AOR (Address of Record): Defines where endpoints register and how contacts are managed.
 CREATE TABLE ps_aors (
     id VARCHAR(40) PRIMARY KEY,
+    tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE,
     contact VARCHAR(255),
     default_expiration INT,
     mailboxes VARCHAR(80),
@@ -16,9 +52,12 @@ CREATE TABLE ps_aors (
     voicemail_extension VARCHAR(40)
 );
 
+CREATE INDEX idx_ps_aors_tenant_id ON ps_aors(tenant_id);
+
 -- AUTH: Stores credentials used for registration and SIP challenges.
 CREATE TABLE ps_auths (
     id VARCHAR(40) PRIMARY KEY,
+    tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE,
     auth_type VARCHAR(20),
     nonce_lifetime INT,
     md5_cred VARCHAR(40),
@@ -27,9 +66,12 @@ CREATE TABLE ps_auths (
     username VARCHAR(40)
 );
 
+CREATE INDEX idx_ps_auths_tenant_id ON ps_auths(tenant_id);
+
 -- ENDPOINTS: The main configuration for SIP accounts/peers.
 CREATE TABLE ps_endpoints (
     id VARCHAR(40) PRIMARY KEY,
+    tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE,
     transport VARCHAR(40),
     aors VARCHAR(200),
     auth VARCHAR(40),
@@ -113,6 +155,8 @@ CREATE TABLE ps_endpoints (
     force_avp_on_hold BOOLEAN,
     rpid_immediate BOOLEAN
 );
+
+CREATE INDEX idx_ps_endpoints_tenant_id ON ps_endpoints(tenant_id);
 
 -- CONTACTS: Active registrations (automatically populated and maintained by Asterisk)
 CREATE TABLE ps_contacts (
