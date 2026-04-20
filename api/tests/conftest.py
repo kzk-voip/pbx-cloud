@@ -1,18 +1,17 @@
 """
 Phase 7: Test fixtures — isolated DB schema, async client, auth helpers.
 
-Key design decisions:
-- Uses a separate PostgreSQL schema 'pbx_test' within the same database
-  to achieve full table isolation without needing a separate container.
-- Each test function gets its own DB session that is rolled back after the test,
-  so tests never leak state to each other.
-- The FastAPI dependency override for get_db is scoped per-test to avoid conflicts
-  with other dependency overrides (e.g. auth mocks).
+Architecture:
+- 'setup_test_db' (session-scoped) creates/drops the pbx_test schema once.
+- 'db_session' gives each test its OWN session for seeding/asserting data.
+- 'client' gives each test an HTTPX client; FastAPI route handlers get their
+  OWN SEPARATE sessions via the get_db override. This avoids the asyncpg
+  "another operation is in progress" error that occurs when a single
+  connection is used concurrently by the test AND the route handler.
 """
 
 import os
 
-import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event, text
@@ -26,25 +25,30 @@ from app.database import Base
 from app.dependencies.database import get_db
 
 # ---------------------------------------------------------------------------
-# Test database engine (uses the same Postgres instance, different schema)
+# Test database engine
 # ---------------------------------------------------------------------------
 DATABASE_TEST_URL = os.getenv(
     "DATABASE_TEST_URL",
     "postgresql+asyncpg://pbx_user:pbx_pass@localhost:5432/pbx",
 )
 
-test_engine = create_async_engine(DATABASE_TEST_URL, echo=False)
+test_engine = create_async_engine(
+    DATABASE_TEST_URL,
+    echo=False,
+    pool_size=5,
+    max_overflow=10,
+)
+
 TestingSessionLocal = async_sessionmaker(
     test_engine, class_=AsyncSession, expire_on_commit=False
 )
 
 
 # ---------------------------------------------------------------------------
-# Ensure every new connection uses the pbx_test search_path automatically
+# Force search_path on every raw connection from the pool
 # ---------------------------------------------------------------------------
 @event.listens_for(test_engine.sync_engine, "connect")
 def _set_search_path(dbapi_conn, connection_record):
-    """Set search_path on raw DBAPI connection so every session inherits it."""
     cursor = dbapi_conn.cursor()
     cursor.execute("SET search_path TO pbx_test, public;")
     cursor.close()
@@ -52,53 +56,53 @@ def _set_search_path(dbapi_conn, connection_record):
 
 
 # ---------------------------------------------------------------------------
-# Session-scoped: create / drop the pbx_test schema once per test run
+# Session-scoped: create / drop schema once per test run
 # ---------------------------------------------------------------------------
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_test_db():
-    """Create 'pbx_test' schema and all ORM tables before the test session."""
     async with test_engine.begin() as conn:
         await conn.execute(text("DROP SCHEMA IF EXISTS pbx_test CASCADE;"))
         await conn.execute(text("CREATE SCHEMA pbx_test;"))
         await conn.execute(text("SET search_path TO pbx_test, public;"))
         await conn.run_sync(Base.metadata.create_all)
-
     yield
-
     async with test_engine.begin() as conn:
         await conn.execute(text("DROP SCHEMA IF EXISTS pbx_test CASCADE;"))
     await test_engine.dispose()
 
 
 # ---------------------------------------------------------------------------
-# Per-test: provide a session with automatic rollback
+# Per-test: independent session for seeding data / assertions
 # ---------------------------------------------------------------------------
 @pytest_asyncio.fixture()
 async def db_session() -> AsyncSession:
-    """Yield an async session scoped to a single test; rolls back on teardown."""
+    """
+    Yield a standalone session for the TEST ITSELF to insert seed data
+    and make assertions. This is NOT the same session that route handlers use.
+    """
     async with TestingSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.rollback()
-            await session.close()
+        yield session
+        # No rollback — we rely on unique test data + schema drop at end
 
 
 # ---------------------------------------------------------------------------
-# Per-test: HTTPX async client with the test DB wired in
+# Per-test: HTTPX async client (route handlers get their own sessions)
 # ---------------------------------------------------------------------------
 @pytest_asyncio.fixture()
-async def client(db_session: AsyncSession):
+async def client():
     """
-    Provide an async HTTPX client whose requests hit the FastAPI app directly.
-    The get_db dependency is overridden to use the test session.
+    HTTPX client backed by ASGITransport.
+    Route handlers receive a SEPARATE session from TestingSessionLocal,
+    so there is zero connection sharing with the test's db_session.
     """
-    # Import app lazily so module-level side effects (redis, AMI) don't fire
-    # until we actually need the app instance.
     from app.main import app
 
     async def _override_get_db():
-        yield db_session
+        async with TestingSessionLocal() as session:
+            try:
+                yield session
+            finally:
+                await session.close()
 
     app.dependency_overrides[get_db] = _override_get_db
 
@@ -106,5 +110,4 @@ async def client(db_session: AsyncSession):
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
-    # Only remove our own override — don't nuke overrides set by individual tests
     app.dependency_overrides.pop(get_db, None)
