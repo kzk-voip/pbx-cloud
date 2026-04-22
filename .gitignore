@@ -1,7 +1,9 @@
 # Environment
 .env
 
+# Workflow
 *.md
+reference/
 
 # Logs
 *.log
