@@ -84,3 +84,36 @@ async def remove_from_blacklist(
             detail="Failed to remove IP from Kamailio blacklist",
         )
     return {"status": "ok", "ip": ip, "message": "Removed from blacklist"}
+
+
+@router.get("/system-status")
+async def system_status(
+    user: User = Depends(require_role("super_admin")),
+):
+    """
+    Get real-time system status: active calls from both Asterisk nodes,
+    and overall system health indicator.
+    """
+    from app.services.ami_service import AMIClient
+
+    total_channels = 0
+    nodes = []
+
+    for label, port in [("asterisk-1", 5038), ("asterisk-2", 5039)]:
+        try:
+            ami = AMIClient()
+            ami.host = "127.0.0.1"
+            ami.port = port
+            channels = await ami.get_active_channels()
+            count = len(channels)
+            total_channels += count
+            nodes.append({"node": label, "channels": count, "status": "ok"})
+        except Exception:
+            nodes.append({"node": label, "channels": 0, "status": "error"})
+
+    return {
+        "status": "ok",
+        "active_calls": total_channels,
+        "nodes": nodes,
+    }
+

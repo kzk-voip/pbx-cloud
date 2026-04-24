@@ -76,3 +76,29 @@
   padding: var(--space-8);
   color: var(--text-muted);
 }
+
+.chartCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chartPlaceholder {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  background: var(--color-primary-muted);
+  padding: 4px var(--space-1);
+  border-radius: var(--radius-full);
+}
+

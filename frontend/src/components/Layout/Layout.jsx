@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
+import SoftphoneWidget from '../SoftphoneWidget/SoftphoneWidget'
+import useWebSocket from '../../hooks/useWebSocket'
 import styles from './Layout.module.css'
 
 const pageTitles = {
@@ -17,6 +19,9 @@ const pageTitles = {
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
+
+  // WebSocket real-time connection
+  useWebSocket({ enabled: true })
 
   // Resolve page title from pathname
   const title = Object.entries(pageTitles).find(([path]) =>
@@ -39,6 +44,8 @@ export default function Layout() {
           <Outlet />
         </section>
       </main>
+      <SoftphoneWidget />
     </section>
   )
 }
+

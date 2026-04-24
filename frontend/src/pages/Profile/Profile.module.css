@@ -70,3 +70,20 @@
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
 }
+
+.passwordHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.passwordForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+

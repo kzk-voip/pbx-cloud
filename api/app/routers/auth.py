@@ -14,12 +14,14 @@ from app.schemas.auth import (
     RefreshRequest,
     TokenResponse,
     UserResponse,
+    ChangePasswordRequest,
 )
 from app.services.auth_service import (
     create_access_token,
     create_refresh_token,
     decode_token,
     verify_password,
+    hash_password,
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -109,3 +111,26 @@ async def me(current_user: User = Depends(get_current_user)):
     Get the currently authenticated user's information.
     """
     return current_user
+
+
+@router.put("/change-password")
+async def change_password(
+    request: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Change the current user's password.
+    Requires the current password for verification.
+    """
+    if not verify_password(request.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+
+    current_user.password_hash = hash_password(request.new_password)
+    await db.commit()
+
+    return {"status": "ok", "message": "Password changed successfully"}
+
