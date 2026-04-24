@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import useAuthStore from '../../store/authStore'
@@ -7,7 +8,8 @@ import s from '../shared.module.css'
 import styles from './Profile.module.css'
 
 export default function Profile() {
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
   const [form, setForm] = useState({ current_password: '', new_password: '', confirm: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -27,8 +29,12 @@ export default function Profile() {
         current_password: form.current_password,
         new_password: form.new_password,
       })
-      toast.success('Password changed successfully')
-      setForm({ current_password: '', new_password: '', confirm: '' })
+      toast.success('Password changed! Please log in again.')
+      // Force re-login for security
+      setTimeout(() => {
+        logout()
+        navigate('/login')
+      }, 1500)
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to change password')
     } finally {

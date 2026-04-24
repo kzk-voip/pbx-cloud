@@ -17,7 +17,7 @@ export default function Dashboard() {
     queryFn: () => client.get('/tenants').then((r) => r.data),
   })
 
-  const { data: systemStatus } = useQuery({
+  const { data: systemStatus, dataUpdatedAt } = useQuery({
     queryKey: ['system-status'],
     queryFn: () => client.get('/admin/system-status').then((r) => r.data),
     refetchInterval: 5000,
@@ -33,7 +33,7 @@ export default function Dashboard() {
         return next.length > MAX_CHART_POINTS ? next.slice(-MAX_CHART_POINTS) : next
       })
     }
-  }, [systemStatus])
+  }, [dataUpdatedAt])
 
   const totalTenants = tenants?.items?.length ?? tenants?.total ?? 0
   const activeTenants = tenants?.items?.filter?.((t) => t.is_active)?.length ?? 0
