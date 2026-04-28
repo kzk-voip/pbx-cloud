@@ -28,15 +28,23 @@ export default function useSoftphone({
   const timerRef = useRef(null)
   const audioRef = useRef(null)
 
-  // Create audio element for remote stream
+  // Create audio element for remote stream — must be in DOM for Chrome to allow playback
   useEffect(() => {
     if (!audioRef.current) {
-      const el = new Audio()
+      const el = document.createElement('audio')
+      el.id = 'softphone-remote-audio'
       el.autoplay = true
+      el.playsInline = true
+      el.style.display = 'none'
+      document.body.appendChild(el)
       audioRef.current = el
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+      if (audioRef.current && audioRef.current.parentNode) {
+        audioRef.current.parentNode.removeChild(audioRef.current)
+        audioRef.current = null
+      }
     }
   }, [])
 
@@ -127,11 +135,13 @@ export default function useSoftphone({
 
           // Attach remote audio
           session.on('peerconnection', (pc) => {
-            pc.peerconnection.ontrack = (event) => {
+            pc.peerconnection.addEventListener('track', (event) => {
+              console.log('[Softphone] Incoming: remote track received', event.track.kind)
               if (audioRef.current && event.streams[0]) {
                 audioRef.current.srcObject = event.streams[0]
+                audioRef.current.play().catch(e => console.warn('[Softphone] audio play blocked:', e))
               }
-            }
+            })
           })
         }
       })
@@ -214,11 +224,13 @@ export default function useSoftphone({
 
     // Attach remote audio stream
     session.on('peerconnection', (pcEvent) => {
-      pcEvent.peerconnection.ontrack = (event) => {
+      pcEvent.peerconnection.addEventListener('track', (event) => {
+        console.log('[Softphone] Outgoing: remote track received', event.track.kind)
         if (audioRef.current && event.streams[0]) {
           audioRef.current.srcObject = event.streams[0]
+          audioRef.current.play().catch(e => console.warn('[Softphone] audio play blocked:', e))
         }
-      }
+      })
     })
   }, [state, startTimer, stopTimer])
 
