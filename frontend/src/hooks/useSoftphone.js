@@ -203,6 +203,35 @@ export default function useSoftphone({
       console.log('[Softphone] Session accepted')
       setState('in_call')
       startTimer()
+      // Try to attach remote audio from session.connection
+      try {
+        const pc = session.connection
+        if (pc) {
+          console.log('[Softphone] PC state:', pc.connectionState, 'receivers:', pc.getReceivers().length)
+          const remoteStream = new MediaStream()
+          pc.getReceivers().forEach(receiver => {
+            if (receiver.track) {
+              console.log('[Softphone] Adding receiver track:', receiver.track.kind, receiver.track.readyState)
+              remoteStream.addTrack(receiver.track)
+            }
+          })
+          if (remoteStream.getTracks().length > 0 && audioRef.current) {
+            audioRef.current.srcObject = remoteStream
+            audioRef.current.play().catch(e => console.warn('[Softphone] audio play blocked:', e))
+            console.log('[Softphone] Remote audio attached via receivers')
+          }
+          // Also listen for future tracks
+          pc.addEventListener('track', (event) => {
+            console.log('[Softphone] Late track event:', event.track.kind)
+            if (audioRef.current && event.streams[0]) {
+              audioRef.current.srcObject = event.streams[0]
+              audioRef.current.play().catch(e => console.warn('[Softphone] audio play blocked:', e))
+            }
+          })
+        }
+      } catch (err) {
+        console.error('[Softphone] Error attaching remote audio:', err)
+      }
     })
 
     session.on('ended', () => {
@@ -222,8 +251,9 @@ export default function useSoftphone({
       setError(e.cause || 'Call failed')
     })
 
-    // Attach remote audio stream
+    // Also try early track attachment via peerconnection event
     session.on('peerconnection', (pcEvent) => {
+      console.log('[Softphone] peerconnection event fired')
       pcEvent.peerconnection.addEventListener('track', (event) => {
         console.log('[Softphone] Outgoing: remote track received', event.track.kind)
         if (audioRef.current && event.streams[0]) {
