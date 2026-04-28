@@ -153,7 +153,12 @@ export default function useSoftphone({
   }, [])
 
   const call = useCallback((target) => {
-    if (!uaRef.current || state !== 'registered') return
+    if (!uaRef.current || state !== 'registered') {
+      console.warn('[Softphone] call() skipped — UA:', !!uaRef.current, 'state:', state)
+      return
+    }
+
+    console.log('[Softphone] Calling:', target)
 
     const options = {
       mediaConstraints: { audio: true, video: false },
@@ -162,7 +167,15 @@ export default function useSoftphone({
       },
     }
 
-    const session = uaRef.current.call(target, options)
+    let session
+    try {
+      session = uaRef.current.call(target, options)
+    } catch (err) {
+      console.error('[Softphone] call() threw:', err)
+      setError(err.message || 'Call failed')
+      return
+    }
+
     sessionRef.current = session
     setCallInfo({
       direction: 'outgoing',
@@ -171,15 +184,18 @@ export default function useSoftphone({
     setState('calling')
 
     session.on('connecting', () => {
+      console.log('[Softphone] Session connecting...')
       setState('calling')
     })
 
     session.on('accepted', () => {
+      console.log('[Softphone] Session accepted')
       setState('in_call')
       startTimer()
     })
 
     session.on('ended', () => {
+      console.log('[Softphone] Session ended')
       sessionRef.current = null
       setCallInfo(null)
       stopTimer()
@@ -187,6 +203,7 @@ export default function useSoftphone({
     })
 
     session.on('failed', (e) => {
+      console.error('[Softphone] Session FAILED:', e.cause, e.message, e)
       sessionRef.current = null
       setCallInfo(null)
       stopTimer()
