@@ -138,7 +138,7 @@ async def create_extension(
         allow=tenant.codecs.split(",")[0] if tenant.codecs else "ulaw",
         direct_media=False,
         force_rport=True,
-        rewrite_contact=False,
+        rewrite_contact=True,
         rtp_symmetric=True,
         dtmf_mode="rfc4733",
         callerid=callerid,

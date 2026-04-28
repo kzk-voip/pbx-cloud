@@ -53,7 +53,9 @@ export default function SoftphoneWidget() {
 
   const handleDial = () => {
     if (dialInput.trim() && state === 'registered') {
-      call(`sip:${dialInput}@${new URL(sipConfig.wsUri || 'wss://localhost').hostname}`)
+      // Extract domain from SIP URI (e.g. "sip:stark_402@stark.pbx.local" → "stark.pbx.local")
+      const sipDomain = sipConfig.sipUri.replace(/^sip:/i, '').split('@')[1] || 'localhost'
+      call(`sip:${dialInput}@${sipDomain}`)
     }
   }
 
