@@ -207,7 +207,15 @@ export default function useSoftphone({
       try {
         const pc = session.connection
         if (pc) {
-          console.log('[Softphone] PC state:', pc.connectionState, 'receivers:', pc.getReceivers().length)
+          // Expose for console debugging
+          window.__opc = pc
+          console.log('[Softphone] PC state:', pc.connectionState, 'ICE:', pc.iceConnectionState, 'receivers:', pc.getReceivers().length)
+          pc.addEventListener('iceconnectionstatechange', () => {
+            console.log('[Softphone] ICE state changed:', pc.iceConnectionState)
+          })
+          pc.addEventListener('connectionstatechange', () => {
+            console.log('[Softphone] Connection state changed:', pc.connectionState)
+          })
           const remoteStream = new MediaStream()
           pc.getReceivers().forEach(receiver => {
             if (receiver.track) {
