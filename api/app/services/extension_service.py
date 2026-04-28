@@ -109,6 +109,7 @@ async def create_extension(
         id=sip_id,
         tenant_id=tenant_id,
         max_contacts=1,
+        remove_existing=True,
         support_path=True,
         qualify_frequency=30,
     )
