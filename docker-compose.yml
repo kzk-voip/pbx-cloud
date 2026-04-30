@@ -5,6 +5,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rtpengine:
+        condition: service_started
     environment:
       - EXTERNAL_IP=${EXTERNAL_IP}
     volumes:
@@ -138,6 +140,22 @@ services:
       - api
     volumes:
       - nginx_logs:/var/log/nginx
+    restart: unless-stopped
+
+  rtpengine:
+    image: drachtio/rtpengine:latest
+    network_mode: host
+    environment:
+      - EXTERNAL_IP=${EXTERNAL_IP}
+    command: >
+      rtpengine
+      --interface=${EXTERNAL_IP}
+      --listen-ng=127.0.0.1:22222
+      --port-min=30000
+      --port-max=40000
+      --log-level=6
+      --foreground=true
+      --no-fallback
     restart: unless-stopped
 
   sipp:

@@ -48,6 +48,34 @@ export default function useSoftphone({
     }
   }, [])
 
+  /** Attach remote audio stream from an RTCPeerConnection */
+  const attachRemoteAudio = useCallback((pc) => {
+    if (!pc) return
+
+    const handleTrack = (event) => {
+      if (audioRef.current && event.streams[0]) {
+        audioRef.current.srcObject = event.streams[0]
+        audioRef.current.play().catch(() => {})
+      }
+    }
+
+    // Listen for track events
+    pc.addEventListener('track', handleTrack)
+
+    // Also check if receivers already have tracks (late attachment)
+    const receivers = pc.getReceivers()
+    if (receivers.length > 0) {
+      const stream = new MediaStream()
+      receivers.forEach(r => {
+        if (r.track) stream.addTrack(r.track)
+      })
+      if (stream.getTracks().length > 0 && audioRef.current) {
+        audioRef.current.srcObject = stream
+        audioRef.current.play().catch(() => {})
+      }
+    }
+  }, [])
+
   const startTimer = useCallback(() => {
     setCallDuration(0)
     timerRef.current = setInterval(() => {
@@ -131,15 +159,15 @@ export default function useSoftphone({
           session.on('accepted', () => {
             setState('in_call')
             startTimer()
+            attachRemoteAudio(session.connection)
           })
 
-          // Attach remote audio
+          // Also try early attachment via peerconnection event
           session.on('peerconnection', (pc) => {
             pc.peerconnection.addEventListener('track', (event) => {
-              console.log('[Softphone] Incoming: remote track received', event.track.kind)
               if (audioRef.current && event.streams[0]) {
                 audioRef.current.srcObject = event.streams[0]
-                audioRef.current.play().catch(e => console.warn('[Softphone] audio play blocked:', e))
+                audioRef.current.play().catch(() => {})
               }
             })
           })
@@ -152,7 +180,7 @@ export default function useSoftphone({
       setState('error')
       setError(err.message || 'Failed to initialize')
     }
-  }, [wsUri, sipUri, password, startTimer, stopTimer])
+  }, [wsUri, sipUri, password, startTimer, stopTimer, attachRemoteAudio])
 
   const unregister = useCallback(() => {
     if (uaRef.current) {
@@ -168,14 +196,11 @@ export default function useSoftphone({
       return
     }
 
-    console.log('[Softphone] Calling:', target)
-
     const options = {
       mediaConstraints: { audio: true, video: false },
       pcConfig: {
-        iceServers: [],
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
       },
-      sessionTimersExpires: 120,
     }
 
     let session
@@ -195,55 +220,16 @@ export default function useSoftphone({
     setState('calling')
 
     session.on('connecting', () => {
-      console.log('[Softphone] Session connecting...')
       setState('calling')
     })
 
     session.on('accepted', () => {
-      console.log('[Softphone] Session accepted')
       setState('in_call')
       startTimer()
-      // Try to attach remote audio from session.connection
-      try {
-        const pc = session.connection
-        if (pc) {
-          // Expose for console debugging
-          window.__opc = pc
-          console.log('[Softphone] PC state:', pc.connectionState, 'ICE:', pc.iceConnectionState, 'receivers:', pc.getReceivers().length)
-          pc.addEventListener('iceconnectionstatechange', () => {
-            console.log('[Softphone] ICE state changed:', pc.iceConnectionState)
-          })
-          pc.addEventListener('connectionstatechange', () => {
-            console.log('[Softphone] Connection state changed:', pc.connectionState)
-          })
-          const remoteStream = new MediaStream()
-          pc.getReceivers().forEach(receiver => {
-            if (receiver.track) {
-              console.log('[Softphone] Adding receiver track:', receiver.track.kind, receiver.track.readyState)
-              remoteStream.addTrack(receiver.track)
-            }
-          })
-          if (remoteStream.getTracks().length > 0 && audioRef.current) {
-            audioRef.current.srcObject = remoteStream
-            audioRef.current.play().catch(e => console.warn('[Softphone] audio play blocked:', e))
-            console.log('[Softphone] Remote audio attached via receivers')
-          }
-          // Also listen for future tracks
-          pc.addEventListener('track', (event) => {
-            console.log('[Softphone] Late track event:', event.track.kind)
-            if (audioRef.current && event.streams[0]) {
-              audioRef.current.srcObject = event.streams[0]
-              audioRef.current.play().catch(e => console.warn('[Softphone] audio play blocked:', e))
-            }
-          })
-        }
-      } catch (err) {
-        console.error('[Softphone] Error attaching remote audio:', err)
-      }
+      attachRemoteAudio(session.connection)
     })
 
     session.on('ended', () => {
-      console.log('[Softphone] Session ended')
       sessionRef.current = null
       setCallInfo(null)
       stopTimer()
@@ -251,7 +237,7 @@ export default function useSoftphone({
     })
 
     session.on('failed', (e) => {
-      console.error('[Softphone] Session FAILED:', e.cause, e.message, e)
+      console.error('[Softphone] Session FAILED:', e.cause)
       sessionRef.current = null
       setCallInfo(null)
       stopTimer()
@@ -259,18 +245,16 @@ export default function useSoftphone({
       setError(e.cause || 'Call failed')
     })
 
-    // Also try early track attachment via peerconnection event
+    // Early track attachment via peerconnection event
     session.on('peerconnection', (pcEvent) => {
-      console.log('[Softphone] peerconnection event fired')
       pcEvent.peerconnection.addEventListener('track', (event) => {
-        console.log('[Softphone] Outgoing: remote track received', event.track.kind)
         if (audioRef.current && event.streams[0]) {
           audioRef.current.srcObject = event.streams[0]
-          audioRef.current.play().catch(e => console.warn('[Softphone] audio play blocked:', e))
+          audioRef.current.play().catch(() => {})
         }
       })
     })
-  }, [state, startTimer, stopTimer])
+  }, [state, startTimer, stopTimer, attachRemoteAudio])
 
   const hangup = useCallback(() => {
     if (sessionRef.current) {
