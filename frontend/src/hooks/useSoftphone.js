@@ -199,7 +199,7 @@ export default function useSoftphone({
     const options = {
       mediaConstraints: { audio: true, video: false },
       pcConfig: {
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+        iceServers: [],
       },
     }
 
