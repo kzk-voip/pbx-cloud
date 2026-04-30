@@ -151,6 +151,7 @@ services:
       rtpengine
       --interface=${EXTERNAL_IP}
       --listen-ng=127.0.0.1:22222
+      --listen-http=127.0.0.1:18080
       --port-min=30000
       --port-max=40000
       --log-level=6
