@@ -48,14 +48,39 @@ export default function useSoftphone({
     }
   }, [])
 
+  /**
+   * Unlock Chrome's autoplay restriction by playing a short silent buffer.
+   * Must be called from a user gesture context (click handler).
+   */
+  const ensureAudioUnlocked = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)()
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+      // Play a tiny silent buffer to unlock the audio output
+      const buf = ctx.createBuffer(1, 1, 22050)
+      const src = ctx.createBufferSource()
+      src.buffer = buf
+      src.connect(ctx.destination)
+      src.start(0)
+      console.log('[Softphone] Audio context unlocked, state:', ctx.state)
+    } catch (e) {
+      console.warn('[Softphone] Failed to unlock audio context:', e)
+    }
+  }, [])
+
   /** Attach remote audio stream from an RTCPeerConnection */
   const attachRemoteAudio = useCallback((pc) => {
     if (!pc) return
 
     const handleTrack = (event) => {
+      console.log('[Softphone] Remote track received:', event.track.kind, 'streams:', event.streams.length)
       if (audioRef.current && event.streams[0]) {
         audioRef.current.srcObject = event.streams[0]
-        audioRef.current.play().catch(() => {})
+        audioRef.current.play().catch((err) => {
+          console.error('[Softphone] Audio play() blocked:', err.name, err.message)
+        })
       }
     }
 
@@ -191,6 +216,9 @@ export default function useSoftphone({
   }, [])
 
   const call = useCallback((target) => {
+    // Unlock audio playback during user gesture
+    ensureAudioUnlocked()
+
     if (!uaRef.current || state !== 'registered') {
       console.warn('[Softphone] call() skipped — UA:', !!uaRef.current, 'state:', state)
       return
@@ -254,7 +282,7 @@ export default function useSoftphone({
         }
       })
     })
-  }, [state, startTimer, stopTimer, attachRemoteAudio])
+  }, [state, startTimer, stopTimer, attachRemoteAudio, ensureAudioUnlocked])
 
   const hangup = useCallback(() => {
     if (sessionRef.current) {
@@ -263,12 +291,15 @@ export default function useSoftphone({
   }, [])
 
   const answer = useCallback(() => {
+    // Unlock audio playback during user gesture
+    ensureAudioUnlocked()
+
     if (sessionRef.current && state === 'calling' && callInfo?.direction === 'incoming') {
       sessionRef.current.answer({
         mediaConstraints: { audio: true, video: false },
       })
     }
-  }, [state, callInfo])
+  }, [state, callInfo, ensureAudioUnlocked])
 
   const hold = useCallback(() => {
     if (sessionRef.current && state === 'in_call') {
