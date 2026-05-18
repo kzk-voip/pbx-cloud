@@ -38,7 +38,7 @@ def _generate_password() -> str:
     return secrets.token_urlsafe(16)
 
 
-def _ext_to_response(ext: Extension, tenant_slug: str) -> ExtensionResponse:
+def _ext_to_response(ext: Extension, tenant_slug: str, sip_password: str | None = None) -> ExtensionResponse:
     """Convert Extension ORM to response with sip_username."""
     return ExtensionResponse(
         id=ext.id,
@@ -49,6 +49,7 @@ def _ext_to_response(ext: Extension, tenant_slug: str) -> ExtensionResponse:
         enabled=ext.enabled,
         created_at=ext.created_at,
         sip_username=_make_sip_id(tenant_slug, ext.extension_number),
+        sip_password=sip_password,
     )
 
 
@@ -165,7 +166,7 @@ async def create_extension(
 async def list_extensions(
     db: AsyncSession, tenant_id: uuid.UUID
 ) -> ExtensionListResponse:
-    """List all extensions for a tenant."""
+    """List all extensions for a tenant with SIP passwords."""
     tenant = await _get_tenant_or_raise(db, tenant_id)
 
     result = await db.execute(
@@ -175,7 +176,23 @@ async def list_extensions(
     )
     extensions = result.scalars().all()
 
-    items = [_ext_to_response(ext, tenant.slug) for ext in extensions]
+    # Batch-fetch passwords from ps_auths
+    sip_ids = [_make_sip_id(tenant.slug, ext.extension_number) for ext in extensions]
+    auth_result = await db.execute(
+        select(PjsipAuth).where(PjsipAuth.id.in_(sip_ids))
+    ) if sip_ids else None
+    password_map = {}
+    if auth_result:
+        for auth in auth_result.scalars().all():
+            password_map[auth.id] = auth.password
+
+    items = [
+        _ext_to_response(
+            ext, tenant.slug,
+            sip_password=password_map.get(_make_sip_id(tenant.slug, ext.extension_number))
+        )
+        for ext in extensions
+    ]
 
     return ExtensionListResponse(items=items, total=len(items))
 
@@ -183,7 +200,7 @@ async def list_extensions(
 async def get_extension(
     db: AsyncSession, tenant_id: uuid.UUID, ext_id: uuid.UUID
 ) -> ExtensionResponse | None:
-    """Get a single extension by ID."""
+    """Get a single extension by ID with SIP password."""
     tenant = await _get_tenant_or_raise(db, tenant_id)
 
     result = await db.execute(
@@ -196,7 +213,13 @@ async def get_extension(
     if ext is None:
         return None
 
-    return _ext_to_response(ext, tenant.slug)
+    sip_id = _make_sip_id(tenant.slug, ext.extension_number)
+    auth_result = await db.execute(
+        select(PjsipAuth).where(PjsipAuth.id == sip_id)
+    )
+    auth = auth_result.scalar_one_or_none()
+
+    return _ext_to_response(ext, tenant.slug, sip_password=auth.password if auth else None)
 
 
 async def update_extension(

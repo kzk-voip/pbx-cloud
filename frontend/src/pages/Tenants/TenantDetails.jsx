@@ -30,6 +30,8 @@ export default function TenantDetails() {
   const [extEditDialogOpen, setExtEditDialogOpen] = useState(false)
   const [extEditForm, setExtEditForm] = useState(EMPTY_EXT_EDIT_FORM)
   const [editingExtId, setEditingExtId] = useState(null)
+  const [showExtPassword, setShowExtPassword] = useState(false)
+  const [originalExtPassword, setOriginalExtPassword] = useState('')
 
   // --- Trunk state ---
   const [trunkDialogOpen, setTrunkDialogOpen] = useState(false)
@@ -145,19 +147,24 @@ export default function TenantDetails() {
   const handleUpdateExtension = (e) => {
     e.preventDefault()
     const payload = { ...extEditForm }
+    // Only send password if it was actually changed
+    if (payload.password === originalExtPassword) delete payload.password
     if (!payload.password) delete payload.password
     updateExtMutation.mutate({ extId: editingExtId, payload })
   }
 
   const openEditExtension = (ext) => {
     setEditingExtId(ext.id)
+    const pw = ext.sip_password || ''
+    setOriginalExtPassword(pw)
     setExtEditForm({
       extension_number: ext.extension_number,
       display_name: ext.display_name || '',
       email: ext.email || '',
       enabled: ext.enabled,
-      password: '',
+      password: pw,
     })
+    setShowExtPassword(false)
     setExtEditDialogOpen(true)
   }
 
@@ -165,6 +172,7 @@ export default function TenantDetails() {
     setExtEditDialogOpen(false)
     setEditingExtId(null)
     setExtEditForm(EMPTY_EXT_EDIT_FORM)
+    setShowExtPassword(false)
   }
 
   const handleSubmitTrunk = (e) => {
@@ -422,11 +430,21 @@ export default function TenantDetails() {
                       onChange={(e) => setExtEditForm((f) => ({ ...f, email: e.target.value }))} />
                   </fieldset>
                   <fieldset className={s.field}>
-                    <label className={s.fieldLabel} htmlFor="ext-edit-password">New Password</label>
-                    <input id="ext-edit-password" className={s.fieldInput} type="password"
-                      placeholder="Leave empty to keep current" minLength={8}
-                      value={extEditForm.password}
-                      onChange={(e) => setExtEditForm((f) => ({ ...f, password: e.target.value }))} />
+                    <label className={s.fieldLabel} htmlFor="ext-edit-password">SIP Password</label>
+                    <section className={styles.passwordField}>
+                      <input id="ext-edit-password" className={s.fieldInput}
+                        type={showExtPassword ? 'text' : 'password'}
+                        minLength={8}
+                        value={extEditForm.password}
+                        onChange={(e) => setExtEditForm((f) => ({ ...f, password: e.target.value }))} />
+                      <button type="button" className={styles.passwordToggle}
+                        onClick={() => setShowExtPassword((v) => !v)}
+                        aria-label={showExtPassword ? 'Hide password' : 'Show password'}>
+                        {showExtPassword
+                          ? <EyeOff size={16} aria-hidden="true" />
+                          : <Eye size={16} aria-hidden="true" />}
+                      </button>
+                    </section>
                   </fieldset>
                   <fieldset className={s.field}>
                     <label className={styles.checkboxLabel}>

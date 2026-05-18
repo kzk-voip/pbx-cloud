@@ -36,6 +36,7 @@ class ExtensionResponse(BaseModel):
     enabled: bool
     created_at: datetime
     sip_username: str  # e.g. "stark_401"
+    sip_password: str | None = None
 
     model_config = {"from_attributes": True}
 
