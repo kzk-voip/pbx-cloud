@@ -14,7 +14,7 @@ const MAX_CHART_POINTS = 60
 
 const DISPOSITION_COLORS = {
   ANSWERED: 'var(--color-success)',
-  'NO ANSWER': 'var(--color-warning)',
+  'NO ANSWER': '#94a3b8',
   BUSY: '#f59e0b',
   FAILED: 'var(--color-danger)',
   UNKNOWN: 'var(--text-muted)',
@@ -216,6 +216,7 @@ export default function Dashboard() {
                     strokeWidth={2}
                     stroke="var(--bg-card)"
                     label={({ disposition, count }) => `${disposition}: ${count}`}
+                    isAnimationActive={false}
                   >
                     {cdrStats.disposition_breakdown.map((entry, i) => (
                       <Cell
