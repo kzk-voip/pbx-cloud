@@ -26,8 +26,8 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export default function SoftphoneWidget() {
-  const [isOpen, setIsOpen] = useState(false)
+export default function SoftphoneWidget({ embedded = false, onClose }) {
+  const [isOpen, setIsOpen] = useState(embedded)
   const [isMinimized, setIsMinimized] = useState(false)
   const [dialInput, setDialInput] = useState('')
   const [sipConfig, setSipConfig] = useState({
@@ -65,8 +65,8 @@ export default function SoftphoneWidget() {
 
   const isInCall = state === 'in_call' || state === 'on_hold' || state === 'calling'
 
-  // Floating toggle button when widget is closed
-  if (!isOpen) {
+  // Floating toggle button when widget is closed (only in non-embedded mode)
+  if (!isOpen && !embedded) {
     return (
       <button
         className={styles.fab}
@@ -79,9 +79,11 @@ export default function SoftphoneWidget() {
     )
   }
 
+  if (!isOpen && embedded) return null
+
   return (
     <aside
-      className={`${styles.widget} ${isMinimized ? styles.minimized : ''}`}
+      className={`${styles.widget} ${isMinimized ? styles.minimized : ''} ${embedded ? styles.embedded : ''}`}
       aria-label="Softphone"
     >
       {/* Header */}
@@ -100,7 +102,7 @@ export default function SoftphoneWidget() {
           </button>
           <button
             className={styles.headerBtn}
-            onClick={() => setIsOpen(false)}
+            onClick={() => { setIsOpen(false); onClose?.() }}
             aria-label="Close softphone"
           >
             <X size={14} aria-hidden="true" />

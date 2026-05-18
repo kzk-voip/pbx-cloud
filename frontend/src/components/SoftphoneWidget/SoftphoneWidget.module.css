@@ -49,6 +49,16 @@
   animation: slideIn var(--transition-base) ease;
 }
 
+.embedded {
+  position: static;
+  width: 100%;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  border-top: 1px solid var(--border-color);
+  animation: none;
+}
+
 .minimized {
   width: 240px;
 }

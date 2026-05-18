@@ -154,6 +154,39 @@
   color: var(--text-primary);
 }
 
+.softphoneBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  justify-content: center;
+}
+
+.softphoneBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.softphoneBtnActive {
+  color: var(--color-primary);
+  background: var(--color-primary-muted);
+}
+
+.softphonePanel {
+  border-top: 1px solid var(--border-color);
+  max-height: 480px;
+  overflow-y: auto;
+}
+
 /* Mobile overlay */
 @media (max-width: 768px) {
   .sidebar {

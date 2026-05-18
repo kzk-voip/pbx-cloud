@@ -2,15 +2,12 @@ import { useState, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
-import SoftphoneWidget from '../SoftphoneWidget/SoftphoneWidget'
 import useWebSocket from '../../hooks/useWebSocket'
 import styles from './Layout.module.css'
 
 const pageTitles = {
   '/dashboard': 'Dashboard',
   '/tenants': 'Tenants',
-  '/extensions': 'Extensions',
-  '/trunks': 'SIP Trunks',
   '/active-calls': 'Active Calls',
   '/cdr': 'CDR History',
   '/profile': 'Profile',
@@ -44,7 +41,6 @@ export default function Layout() {
           <Outlet />
         </section>
       </main>
-      <SoftphoneWidget />
     </section>
   )
 }

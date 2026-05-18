@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -5,9 +6,11 @@ import {
   PhoneCall,
   FileText,
   User,
+  Phone,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react'
+import SoftphoneWidget from '../SoftphoneWidget/SoftphoneWidget'
 import styles from './Sidebar.module.css'
 
 const mainNav = [
@@ -26,6 +29,7 @@ const accountNav = [
 
 export default function Sidebar({ collapsed, onToggle }) {
   const location = useLocation()
+  const [softphoneOpen, setSoftphoneOpen] = useState(false)
 
   const renderNavItem = ({ to, icon: Icon, label }) => (
     <NavLink
@@ -69,6 +73,14 @@ export default function Sidebar({ collapsed, onToggle }) {
 
       <footer className={styles.sidebarFooter}>
         <button
+          className={`${styles.softphoneBtn} ${softphoneOpen ? styles.softphoneBtnActive : ''}`}
+          onClick={() => setSoftphoneOpen((v) => !v)}
+          aria-label={softphoneOpen ? 'Close softphone' : 'Open softphone'}
+        >
+          <Phone size={20} aria-hidden="true" />
+          <span className={styles.navText}>Softphone</span>
+        </button>
+        <button
           className={styles.collapseBtn}
           onClick={onToggle}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -80,6 +92,12 @@ export default function Sidebar({ collapsed, onToggle }) {
           )}
         </button>
       </footer>
+
+      {softphoneOpen && (
+        <section className={styles.softphonePanel}>
+          <SoftphoneWidget embedded onClose={() => setSoftphoneOpen(false)} />
+        </section>
+      )}
     </aside>
   )
 }
