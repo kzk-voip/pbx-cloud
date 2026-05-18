@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Plus, Trash2, KeyRound, Edit, Eye, EyeOff, Settings } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, KeyRound, Edit, Eye, EyeOff, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 import * as Dialog from '@radix-ui/react-dialog'
 import toast from 'react-hot-toast'
@@ -39,6 +39,10 @@ export default function TenantDetails() {
   const [editingTrunkId, setEditingTrunkId] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
 
+  // --- Events state ---
+  const [eventsPage, setEventsPage] = useState(1)
+  const [eventsFilter, setEventsFilter] = useState('')
+
   // ==================== Queries ====================
 
   const { data: tenant, isLoading, error } = useQuery({
@@ -55,6 +59,14 @@ export default function TenantDetails() {
   const { data: trunks } = useQuery({
     queryKey: ['trunks', id],
     queryFn: () => client.get(`/tenants/${id}/trunks`).then((r) => r.data),
+    enabled: !!id,
+  })
+
+  const { data: events } = useQuery({
+    queryKey: ['events', id, eventsPage, eventsFilter],
+    queryFn: () => client.get(`/tenants/${id}/events`, {
+      params: { page: eventsPage, per_page: 20, ...(eventsFilter ? { action: eventsFilter } : {}) },
+    }).then((r) => r.data),
     enabled: !!id,
   })
 
@@ -253,6 +265,9 @@ export default function TenantDetails() {
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="trunks">
             Trunks ({trunks?.items?.length || 0})
+          </Tabs.Trigger>
+          <Tabs.Trigger className={styles.tabsTrigger} value="events">
+            Events
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -604,6 +619,73 @@ export default function TenantDetails() {
                 )}
               </tbody>
             </table>
+          </article>
+        </Tabs.Content>
+
+        {/* ==================== EVENTS TAB ==================== */}
+        <Tabs.Content className={styles.tabsContent} value="events">
+          <section className={styles.tabToolbar}>
+            <fieldset className={s.searchGroup}>
+              <label htmlFor="event-filter" className="sr-only">Filter by action</label>
+              <select id="event-filter" className={s.fieldInput} style={{ height: 40, minWidth: 180 }}
+                value={eventsFilter} onChange={(e) => { setEventsFilter(e.target.value); setEventsPage(1) }}>
+                <option value="">All actions</option>
+                <option value="extension_created">Extension Created</option>
+                <option value="extension_deleted">Extension Deleted</option>
+                <option value="trunk_created">Trunk Created</option>
+                <option value="trunk_deleted">Trunk Deleted</option>
+                <option value="config_change">Config Change</option>
+              </select>
+            </fieldset>
+          </section>
+
+          <article className={s.tableWrap}>
+            <table className={s.table}>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Action</th>
+                  <th>Source</th>
+                  <th>IP</th>
+                  <th>Extension</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events?.items?.length > 0 ? events.items.map((evt) => (
+                  <tr key={evt.id}>
+                    <td>{new Date(evt.created_at).toLocaleString()}</td>
+                    <td><code>{evt.action}</code></td>
+                    <td>{evt.source || '—'}</td>
+                    <td>{evt.ip || '—'}</td>
+                    <td>{evt.extension || '—'}</td>
+                    <td style={{ maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {evt.details ? JSON.stringify(evt.details) : '—'}
+                    </td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={6} className={s.empty}>No events recorded</td></tr>
+                )}
+              </tbody>
+            </table>
+
+            {events && events.pages > 1 && (
+              <footer className={s.pagination}>
+                <span>Page {events.page} of {events.pages} ({events.total} events)</span>
+                <section className={s.paginationBtns}>
+                  <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
+                    disabled={eventsPage <= 1} onClick={() => setEventsPage((p) => p - 1)}
+                    aria-label="Previous page">
+                    <ChevronLeft size={14} aria-hidden="true" />
+                  </button>
+                  <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
+                    disabled={eventsPage >= events.pages} onClick={() => setEventsPage((p) => p + 1)}
+                    aria-label="Next page">
+                    <ChevronRight size={14} aria-hidden="true" />
+                  </button>
+                </section>
+              </footer>
+            )}
           </article>
         </Tabs.Content>
       </Tabs.Root>

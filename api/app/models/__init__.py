@@ -10,6 +10,7 @@ from app.models.trunk import Trunk
 from app.models.cdr import CDR
 from app.models.user import User
 from app.models.ara import PjsipEndpoint, PjsipAuth, PjsipAor
+from app.models.tenant_event import TenantEvent
 
 __all__ = [
     "Tenant",
@@ -20,4 +21,5 @@ __all__ = [
     "PjsipEndpoint",
     "PjsipAuth",
     "PjsipAor",
+    "TenantEvent",
 ]

@@ -13,6 +13,7 @@ import uuid
 
 from sqlalchemy import func, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.services import event_service
 
 from app.models.tenant import Tenant
 from app.models.extension import Extension
@@ -146,6 +147,11 @@ async def create_extension(
     )
     db.add(endpoint)
 
+    await event_service.log_event(
+        db, tenant_id, "extension_created", source="api",
+        extension=data.extension_number,
+        details={"display_name": data.display_name, "sip_id": sip_id},
+    )
     await db.commit()
     await db.refresh(extension)
 
@@ -374,6 +380,11 @@ async def delete_extension(
     # Remove extension metadata
     await db.execute(delete(Extension).where(Extension.id == ext_id))
 
+    await event_service.log_event(
+        db, tenant_id, "extension_deleted", source="api",
+        extension=ext.extension_number,
+        details={"display_name": ext.display_name, "sip_id": sip_id},
+    )
     await db.commit()
 
     # Invalidate ARA cache for deleted endpoint
