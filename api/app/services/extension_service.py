@@ -146,18 +146,18 @@ async def create_extension(
         callerid=callerid,
     )
     db.add(endpoint)
-
-    await event_service.log_event(
-        db, tenant_id, "extension_created", source="api",
-        extension=data.extension_number,
-        details={"display_name": data.display_name, "sip_id": sip_id},
-    )
     await db.commit()
     await db.refresh(extension)
 
     # Invalidate ARA cache for this endpoint
     if redis_client:
         await invalidate_endpoint(redis_client, sip_id)
+
+    await event_service.log_event(
+        db, tenant_id, "extension_created", source="api",
+        extension=data.extension_number,
+        details={"display_name": data.display_name, "sip_id": sip_id},
+    )
 
     return ExtensionCredentials(
         id=extension.id,
@@ -379,17 +379,17 @@ async def delete_extension(
 
     # Remove extension metadata
     await db.execute(delete(Extension).where(Extension.id == ext_id))
+    await db.commit()
+
+    # Invalidate ARA cache for deleted endpoint
+    if redis_client:
+        await invalidate_endpoint(redis_client, sip_id)
 
     await event_service.log_event(
         db, tenant_id, "extension_deleted", source="api",
         extension=ext.extension_number,
         details={"display_name": ext.display_name, "sip_id": sip_id},
     )
-    await db.commit()
-
-    # Invalidate ARA cache for deleted endpoint
-    if redis_client:
-        await invalidate_endpoint(redis_client, sip_id)
 
     return True
 
