@@ -11,7 +11,7 @@ import s from '../shared.module.css'
 import styles from './TenantDetails.module.css'
 
 const EMPTY_EXT_FORM = { extension_number: '', display_name: '', email: '' }
-const EMPTY_EXT_EDIT_FORM = { display_name: '', email: '', enabled: true }
+const EMPTY_EXT_EDIT_FORM = { extension_number: '', display_name: '', email: '', enabled: true, password: '' }
 const EMPTY_TRUNK_FORM = {
   name: '', provider: '', host: '', port: 5060,
   transport: 'udp', codecs: 'ulaw,alaw', max_channels: 10,
@@ -144,15 +144,19 @@ export default function TenantDetails() {
 
   const handleUpdateExtension = (e) => {
     e.preventDefault()
-    updateExtMutation.mutate({ extId: editingExtId, payload: extEditForm })
+    const payload = { ...extEditForm }
+    if (!payload.password) delete payload.password
+    updateExtMutation.mutate({ extId: editingExtId, payload })
   }
 
   const openEditExtension = (ext) => {
     setEditingExtId(ext.id)
     setExtEditForm({
+      extension_number: ext.extension_number,
       display_name: ext.display_name || '',
       email: ext.email || '',
       enabled: ext.enabled,
+      password: '',
     })
     setExtEditDialogOpen(true)
   }
@@ -400,6 +404,12 @@ export default function TenantDetails() {
                 <Dialog.Title className={s.dialogTitle}>Edit Extension</Dialog.Title>
                 <form className={s.dialogForm} onSubmit={handleUpdateExtension}>
                   <fieldset className={s.field}>
+                    <label className={s.fieldLabel} htmlFor="ext-edit-number">Extension Number</label>
+                    <input id="ext-edit-number" className={s.fieldInput} required
+                      pattern="^\d+$" value={extEditForm.extension_number}
+                      onChange={(e) => setExtEditForm((f) => ({ ...f, extension_number: e.target.value }))} />
+                  </fieldset>
+                  <fieldset className={s.field}>
                     <label className={s.fieldLabel} htmlFor="ext-edit-name">Display Name</label>
                     <input id="ext-edit-name" className={s.fieldInput} required
                       value={extEditForm.display_name}
@@ -410,6 +420,13 @@ export default function TenantDetails() {
                     <input id="ext-edit-email" className={s.fieldInput} type="email"
                       value={extEditForm.email}
                       onChange={(e) => setExtEditForm((f) => ({ ...f, email: e.target.value }))} />
+                  </fieldset>
+                  <fieldset className={s.field}>
+                    <label className={s.fieldLabel} htmlFor="ext-edit-password">New Password</label>
+                    <input id="ext-edit-password" className={s.fieldInput} type="password"
+                      placeholder="Leave empty to keep current" minLength={8}
+                      value={extEditForm.password}
+                      onChange={(e) => setExtEditForm((f) => ({ ...f, password: e.target.value }))} />
                   </fieldset>
                   <fieldset className={s.field}>
                     <label className={styles.checkboxLabel}>

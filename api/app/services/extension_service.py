@@ -202,7 +202,7 @@ async def get_extension(
 async def update_extension(
     db: AsyncSession, tenant_id: uuid.UUID, ext_id: uuid.UUID, data: ExtensionUpdate
 ) -> ExtensionResponse | None:
-    """Update extension metadata (display_name, email, enabled)."""
+    """Update extension metadata, number, and/or password."""
     tenant = await _get_tenant_or_raise(db, tenant_id)
 
     result = await db.execute(
@@ -216,28 +216,113 @@ async def update_extension(
         return None
 
     update_data = data.model_dump(exclude_unset=True)
+    old_sip_id = _make_sip_id(tenant.slug, ext.extension_number)
+    password_change = update_data.pop("password", None)
+    number_change = update_data.get("extension_number")
+
+    # If extension_number is changing, check uniqueness
+    if number_change and number_change != ext.extension_number:
+        existing = await db.execute(
+            select(Extension).where(
+                Extension.tenant_id == tenant_id,
+                Extension.extension_number == number_change,
+            )
+        )
+        if existing.scalar_one_or_none() is not None:
+            raise ValueError(f"Extension {number_change} already exists for this tenant")
+
+    # Apply simple field updates (display_name, email, enabled, extension_number)
     for field, value in update_data.items():
         setattr(ext, field, value)
 
-    # If display_name changed, update callerid in ps_endpoints too
-    if "display_name" in update_data:
-        sip_id = _make_sip_id(tenant.slug, ext.extension_number)
-        ep_result = await db.execute(
-            select(PjsipEndpoint).where(PjsipEndpoint.id == sip_id)
+    new_sip_id = _make_sip_id(tenant.slug, ext.extension_number)
+
+    if number_change and number_change != ext.extension_number or number_change and old_sip_id != new_sip_id:
+        # Extension number changed — need to recreate ARA records with new SIP ID
+
+        # Get old password before deleting
+        old_auth_result = await db.execute(
+            select(PjsipAuth).where(PjsipAuth.id == old_sip_id)
         )
-        endpoint = ep_result.scalar_one_or_none()
-        if endpoint:
-            endpoint.callerid = f'"{data.display_name}" <{ext.extension_number}>'
+        old_auth = old_auth_result.scalar_one_or_none()
+        current_password = old_auth.password if old_auth else _generate_password()
+
+        # Delete old ARA records
+        await db.execute(delete(PjsipEndpoint).where(PjsipEndpoint.id == old_sip_id))
+        await db.execute(delete(PjsipAuth).where(PjsipAuth.id == old_sip_id))
+        await db.execute(delete(PjsipAor).where(PjsipAor.id == old_sip_id))
+
+        # Create new ARA records with new SIP ID
+        sip_password = password_change or current_password
+
+        aor = PjsipAor(
+            id=new_sip_id,
+            tenant_id=tenant_id,
+            max_contacts=1,
+            remove_existing=True,
+            support_path=True,
+            qualify_frequency=30,
+        )
+        db.add(aor)
+
+        auth = PjsipAuth(
+            id=new_sip_id,
+            tenant_id=tenant_id,
+            auth_type="userpass",
+            username=new_sip_id,
+            password=sip_password,
+        )
+        db.add(auth)
+
+        callerid = f'"{ext.display_name or new_sip_id}" <{ext.extension_number}>'
+        endpoint = PjsipEndpoint(
+            id=new_sip_id,
+            tenant_id=tenant_id,
+            transport="transport-udp",
+            aors=new_sip_id,
+            auth=new_sip_id,
+            context="from-kamailio",
+            disallow="all",
+            allow=tenant.codecs.split(",")[0] if tenant.codecs else "ulaw",
+            direct_media=False,
+            force_rport=True,
+            rewrite_contact=True,
+            rtp_symmetric=True,
+            dtmf_mode="rfc4733",
+            callerid=callerid,
+        )
+        db.add(endpoint)
+
+        # Invalidate old cache
+        if redis_client:
+            await invalidate_endpoint(redis_client, old_sip_id)
+    else:
+        # No number change — just update callerid and/or password in place
+        if "display_name" in update_data:
+            ep_result = await db.execute(
+                select(PjsipEndpoint).where(PjsipEndpoint.id == old_sip_id)
+            )
+            endpoint = ep_result.scalar_one_or_none()
+            if endpoint:
+                endpoint.callerid = f'"{data.display_name}" <{ext.extension_number}>'
+
+        if password_change:
+            auth_result = await db.execute(
+                select(PjsipAuth).where(PjsipAuth.id == old_sip_id)
+            )
+            auth = auth_result.scalar_one_or_none()
+            if auth:
+                auth.password = password_change
 
     await db.commit()
     await db.refresh(ext)
 
-    # Invalidate ARA cache for updated endpoint
-    sip_id_for_cache = _make_sip_id(tenant.slug, ext.extension_number)
+    # Invalidate ARA cache for new/current endpoint
     if redis_client:
-        await invalidate_endpoint(redis_client, sip_id_for_cache)
+        await invalidate_endpoint(redis_client, new_sip_id)
 
     return _ext_to_response(ext, tenant.slug)
+
 
 
 async def delete_extension(
