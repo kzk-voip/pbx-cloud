@@ -77,6 +77,7 @@ export default function TenantDetails() {
       client.post(`/tenants/${id}/extensions`, payload).then((r) => r.data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['extensions', id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
       setCredentials(data)
       setExtForm(EMPTY_EXT_FORM)
       toast.success('Extension created')
@@ -88,6 +89,7 @@ export default function TenantDetails() {
     mutationFn: (extId) => client.delete(`/tenants/${id}/extensions/${extId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['extensions', id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
       toast.success('Extension deleted')
     },
     onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete extension'),
@@ -98,6 +100,7 @@ export default function TenantDetails() {
       client.put(`/tenants/${id}/extensions/${extId}`, payload).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['extensions', id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
       closeExtEditDialog()
       toast.success('Extension updated')
     },
@@ -122,6 +125,7 @@ export default function TenantDetails() {
       client.post(`/tenants/${id}/trunks`, payload).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trunks', id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
       closeTrunkDialog()
       toast.success('Trunk created')
     },
@@ -143,6 +147,7 @@ export default function TenantDetails() {
     mutationFn: (trunkId) => client.delete(`/tenants/${id}/trunks/${trunkId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trunks', id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
       toast.success('Trunk deleted')
     },
     onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete trunk'),
