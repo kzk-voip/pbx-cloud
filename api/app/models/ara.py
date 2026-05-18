@@ -64,6 +64,7 @@ class PjsipAor(Base):
         UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE")
     )
     max_contacts: Mapped[int | None] = mapped_column(Integer)
+    remove_existing: Mapped[bool | None] = mapped_column(Boolean)
     support_path: Mapped[bool | None] = mapped_column(Boolean)
     qualify_frequency: Mapped[int | None] = mapped_column(Integer)
     qualify_timeout: Mapped[float | None] = mapped_column(Float)

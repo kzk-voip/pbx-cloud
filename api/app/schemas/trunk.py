@@ -41,6 +41,7 @@ class TrunkResponse(BaseModel):
     host: str
     port: int
     transport: str
+    username: str | None = None
     codecs: str
     max_channels: int
     enabled: bool

@@ -2,8 +2,6 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   Building2,
-  Phone,
-  GitBranch,
   PhoneCall,
   FileText,
   User,
@@ -15,8 +13,6 @@ import styles from './Sidebar.module.css'
 const mainNav = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/tenants', icon: Building2, label: 'Tenants' },
-  { to: '/extensions', icon: Phone, label: 'Extensions' },
-  { to: '/trunks', icon: GitBranch, label: 'SIP Trunks' },
 ]
 
 const monitorNav = [

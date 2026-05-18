@@ -53,6 +53,13 @@
   outline: none;
 }
 
+.tabToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: var(--space-2);
+}
+
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -80,4 +87,39 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
+}
+
+.actionBtns {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.passwordField {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  position: relative;
+}
+
+.passwordField input {
+  flex: 1;
+}
+
+.passwordToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.passwordToggle:hover {
+  color: var(--text-primary);
+  border-color: var(--color-primary);
 }

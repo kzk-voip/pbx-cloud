@@ -27,7 +27,7 @@
   transition: border-color var(--transition-fast);
 }
 
-.searchInput:focus {
+.searchInput:focus-visible {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-muted);
@@ -239,10 +239,21 @@
   transition: border-color var(--transition-fast);
 }
 
-.fieldInput:focus {
+.fieldInput:focus-visible {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-muted);
+}
+
+/* Hide number input spinner arrows */
+.fieldInput[type="number"]::-webkit-inner-spin-button,
+.fieldInput[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.fieldInput[type="number"] {
+  -moz-appearance: textfield;
 }
 
 .credentialsBox {

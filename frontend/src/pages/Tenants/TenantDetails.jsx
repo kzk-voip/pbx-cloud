@@ -1,15 +1,39 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, Plus, Trash2, KeyRound, Edit, Eye, EyeOff } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
+import * as Dialog from '@radix-ui/react-dialog'
+import toast from 'react-hot-toast'
 import client from '../../api/client'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
 import s from '../shared.module.css'
 import styles from './TenantDetails.module.css'
 
+const EMPTY_EXT_FORM = { extension_number: '', display_name: '', email: '' }
+const EMPTY_TRUNK_FORM = {
+  name: '', provider: '', host: '', port: 5060,
+  transport: 'udp', codecs: 'ulaw,alaw', max_channels: 10,
+  username: '', password: '',
+}
+
 export default function TenantDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  // --- Extension state ---
+  const [extDialogOpen, setExtDialogOpen] = useState(false)
+  const [extForm, setExtForm] = useState(EMPTY_EXT_FORM)
+  const [credentials, setCredentials] = useState(null)
+
+  // --- Trunk state ---
+  const [trunkDialogOpen, setTrunkDialogOpen] = useState(false)
+  const [trunkForm, setTrunkForm] = useState(EMPTY_TRUNK_FORM)
+  const [editingTrunkId, setEditingTrunkId] = useState(null)
+  const [showPassword, setShowPassword] = useState(false)
+
+  // ==================== Queries ====================
 
   const { data: tenant, isLoading, error } = useQuery({
     queryKey: ['tenant', id],
@@ -28,9 +52,132 @@ export default function TenantDetails() {
     enabled: !!id,
   })
 
+  // ==================== Extension Mutations ====================
+
+  const createExtMutation = useMutation({
+    mutationFn: (payload) =>
+      client.post(`/tenants/${id}/extensions`, payload).then((r) => r.data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['extensions', id] })
+      setCredentials(data)
+      setExtForm(EMPTY_EXT_FORM)
+      toast.success('Extension created')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to create extension'),
+  })
+
+  const deleteExtMutation = useMutation({
+    mutationFn: (extId) => client.delete(`/tenants/${id}/extensions/${extId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['extensions', id] })
+      toast.success('Extension deleted')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete extension'),
+  })
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (extId) =>
+      client.post(`/tenants/${id}/extensions/${extId}/reset-password`).then((r) => r.data),
+    onSuccess: (data) => {
+      setCredentials(data)
+      setExtDialogOpen(true)
+      toast.success('Password reset')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to reset password'),
+  })
+
+  // ==================== Trunk Mutations ====================
+
+  const createTrunkMutation = useMutation({
+    mutationFn: (payload) =>
+      client.post(`/tenants/${id}/trunks`, payload).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trunks', id] })
+      closeTrunkDialog()
+      toast.success('Trunk created')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to create trunk'),
+  })
+
+  const updateTrunkMutation = useMutation({
+    mutationFn: ({ trunkId, payload }) =>
+      client.put(`/tenants/${id}/trunks/${trunkId}`, payload).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trunks', id] })
+      closeTrunkDialog()
+      toast.success('Trunk updated')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to update trunk'),
+  })
+
+  const deleteTrunkMutation = useMutation({
+    mutationFn: (trunkId) => client.delete(`/tenants/${id}/trunks/${trunkId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trunks', id] })
+      toast.success('Trunk deleted')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete trunk'),
+  })
+
+  // ==================== Handlers ====================
+
+  const handleCreateExtension = (e) => {
+    e.preventDefault()
+    setCredentials(null)
+    createExtMutation.mutate(extForm)
+  }
+
+  const handleSubmitTrunk = (e) => {
+    e.preventDefault()
+    const payload = {
+      ...trunkForm,
+      username: trunkForm.username || null,
+      password: trunkForm.password || null,
+    }
+    if (editingTrunkId) {
+      updateTrunkMutation.mutate({ trunkId: editingTrunkId, payload })
+    } else {
+      createTrunkMutation.mutate(payload)
+    }
+  }
+
+  const openEditTrunk = (trunk) => {
+    setEditingTrunkId(trunk.id)
+    setTrunkForm({
+      name: trunk.name,
+      provider: trunk.provider || '',
+      host: trunk.host,
+      port: trunk.port,
+      transport: trunk.transport,
+      codecs: trunk.codecs,
+      max_channels: trunk.max_channels,
+      username: trunk.username || '',
+      password: '',
+    })
+    setShowPassword(false)
+    setTrunkDialogOpen(true)
+  }
+
+  const openCreateTrunk = () => {
+    setEditingTrunkId(null)
+    setTrunkForm(EMPTY_TRUNK_FORM)
+    setShowPassword(false)
+    setTrunkDialogOpen(true)
+  }
+
+  const closeTrunkDialog = () => {
+    setTrunkDialogOpen(false)
+    setEditingTrunkId(null)
+    setTrunkForm(EMPTY_TRUNK_FORM)
+  }
+
+  // ==================== Render ====================
+
   if (isLoading) return <p className={s.loading}>Loading tenant...</p>
   if (error) return <p className={s.error}>{error.message}</p>
   if (!tenant) return <p className={s.empty}>Tenant not found</p>
+
+  const isTrunkPending = createTrunkMutation.isPending || updateTrunkMutation.isPending
 
   return (
     <>
@@ -56,6 +203,7 @@ export default function TenantDetails() {
           </Tabs.Trigger>
         </Tabs.List>
 
+        {/* ==================== INFO TAB ==================== */}
         <Tabs.Content className={styles.tabsContent} value="info">
           <article className={styles.infoGrid}>
             <section className={styles.infoItem}>
@@ -92,7 +240,73 @@ export default function TenantDetails() {
           </article>
         </Tabs.Content>
 
+        {/* ==================== EXTENSIONS TAB ==================== */}
         <Tabs.Content className={styles.tabsContent} value="extensions">
+          <section className={styles.tabToolbar}>
+            <Dialog.Root open={extDialogOpen} onOpenChange={(open) => { setExtDialogOpen(open); if (!open) setCredentials(null) }}>
+              <Dialog.Trigger asChild>
+                <button className={`${s.btn} ${s.btnPrimary}`} id="create-extension-btn">
+                  <Plus size={16} aria-hidden="true" /> Add Extension
+                </button>
+              </Dialog.Trigger>
+              <Dialog.Portal>
+                <Dialog.Overlay className={s.dialogOverlay} />
+                <Dialog.Content className={s.dialogContent}>
+                  <Dialog.Title className={s.dialogTitle}>
+                    {credentials ? 'SIP Credentials' : 'Create Extension'}
+                  </Dialog.Title>
+
+                  {credentials ? (
+                    <article className={s.credentialsBox}>
+                      <p><strong>SIP Username:</strong> {credentials.sip_username}</p>
+                      <p><strong>SIP Password:</strong> {credentials.sip_password}</p>
+                      <p><strong>SIP Domain:</strong> {credentials.sip_domain}</p>
+                      <p><strong>Extension:</strong> {credentials.extension_number}</p>
+                    </article>
+                  ) : (
+                    <form className={s.dialogForm} onSubmit={handleCreateExtension}>
+                      <fieldset className={s.field}>
+                        <label className={s.fieldLabel} htmlFor="ext-number">Extension Number</label>
+                        <input id="ext-number" className={s.fieldInput} placeholder="101" required
+                          pattern="^\d+$" value={extForm.extension_number}
+                          onChange={(e) => setExtForm((f) => ({ ...f, extension_number: e.target.value }))} />
+                      </fieldset>
+                      <fieldset className={s.field}>
+                        <label className={s.fieldLabel} htmlFor="ext-name">Display Name</label>
+                        <input id="ext-name" className={s.fieldInput} placeholder="John Doe" required
+                          value={extForm.display_name}
+                          onChange={(e) => setExtForm((f) => ({ ...f, display_name: e.target.value }))} />
+                      </fieldset>
+                      <fieldset className={s.field}>
+                        <label className={s.fieldLabel} htmlFor="ext-email">Email (optional)</label>
+                        <input id="ext-email" className={s.fieldInput} type="email" placeholder="john@example.com"
+                          value={extForm.email}
+                          onChange={(e) => setExtForm((f) => ({ ...f, email: e.target.value }))} />
+                      </fieldset>
+                      <footer className={s.dialogActions}>
+                        <Dialog.Close asChild>
+                          <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                        </Dialog.Close>
+                        <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
+                          disabled={createExtMutation.isPending}>
+                          {createExtMutation.isPending ? 'Creating...' : 'Create'}
+                        </button>
+                      </footer>
+                    </form>
+                  )}
+
+                  {credentials && (
+                    <footer className={s.dialogActions}>
+                      <Dialog.Close asChild>
+                        <button className={`${s.btn} ${s.btnPrimary}`}>Close</button>
+                      </Dialog.Close>
+                    </footer>
+                  )}
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
+          </section>
+
           <article className={s.tableWrap}>
             <table className={s.table}>
               <thead>
@@ -100,7 +314,9 @@ export default function TenantDetails() {
                   <th>Extension</th>
                   <th>Display Name</th>
                   <th>SIP Username</th>
+                  <th>Email</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -109,17 +325,118 @@ export default function TenantDetails() {
                     <td>{ext.extension_number}</td>
                     <td>{ext.display_name || '—'}</td>
                     <td><code>{ext.sip_username}</code></td>
+                    <td>{ext.email || '—'}</td>
                     <td><StatusBadge status={ext.enabled ? 'active' : 'inactive'} /></td>
+                    <td>
+                      <section className={styles.actionBtns}>
+                        <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
+                          onClick={() => resetPasswordMutation.mutate(ext.id)}
+                          aria-label={`Reset password for ${ext.extension_number}`}>
+                          <KeyRound size={14} aria-hidden="true" />
+                        </button>
+                        <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
+                          onClick={() => {
+                            if (window.confirm(`Delete extension ${ext.extension_number}?`)) deleteExtMutation.mutate(ext.id)
+                          }}
+                          aria-label={`Delete extension ${ext.extension_number}`}>
+                          <Trash2 size={14} aria-hidden="true" />
+                        </button>
+                      </section>
+                    </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={4} className={s.empty}>No extensions</td></tr>
+                  <tr><td colSpan={6} className={s.empty}>No extensions</td></tr>
                 )}
               </tbody>
             </table>
           </article>
         </Tabs.Content>
 
+        {/* ==================== TRUNKS TAB ==================== */}
         <Tabs.Content className={styles.tabsContent} value="trunks">
+          <section className={styles.tabToolbar}>
+            <Dialog.Root open={trunkDialogOpen} onOpenChange={(open) => { if (!open) closeTrunkDialog(); else setTrunkDialogOpen(true) }}>
+              <Dialog.Trigger asChild>
+                <button className={`${s.btn} ${s.btnPrimary}`} onClick={openCreateTrunk}
+                  id="create-trunk-btn">
+                  <Plus size={16} aria-hidden="true" /> Add Trunk
+                </button>
+              </Dialog.Trigger>
+              <Dialog.Portal>
+                <Dialog.Overlay className={s.dialogOverlay} />
+                <Dialog.Content className={s.dialogContent}>
+                  <Dialog.Title className={s.dialogTitle}>
+                    {editingTrunkId ? 'Edit SIP Trunk' : 'Create SIP Trunk'}
+                  </Dialog.Title>
+                  <form className={s.dialogForm} onSubmit={handleSubmitTrunk}>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="trunk-name">Name</label>
+                      <input id="trunk-name" className={s.fieldInput} required value={trunkForm.name}
+                        onChange={(e) => setTrunkForm((f) => ({ ...f, name: e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="trunk-provider">Provider</label>
+                      <input id="trunk-provider" className={s.fieldInput} value={trunkForm.provider}
+                        onChange={(e) => setTrunkForm((f) => ({ ...f, provider: e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="trunk-host">Host</label>
+                      <input id="trunk-host" className={s.fieldInput} required value={trunkForm.host}
+                        placeholder="sip.provider.com"
+                        onChange={(e) => setTrunkForm((f) => ({ ...f, host: e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="trunk-port">Port</label>
+                      <input id="trunk-port" className={s.fieldInput} type="number" value={trunkForm.port}
+                        onChange={(e) => setTrunkForm((f) => ({ ...f, port: +e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="trunk-transport">Transport</label>
+                      <select id="trunk-transport" className={s.fieldInput} value={trunkForm.transport}
+                        onChange={(e) => setTrunkForm((f) => ({ ...f, transport: e.target.value }))}>
+                        <option value="udp">UDP</option>
+                        <option value="tcp">TCP</option>
+                        <option value="tls">TLS</option>
+                      </select>
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="trunk-username">Username (optional)</label>
+                      <input id="trunk-username" className={s.fieldInput} value={trunkForm.username}
+                        placeholder="SIP auth username"
+                        onChange={(e) => setTrunkForm((f) => ({ ...f, username: e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="trunk-password">Password (optional)</label>
+                      <section className={styles.passwordField}>
+                        <input id="trunk-password" className={s.fieldInput}
+                          type={showPassword ? 'text' : 'password'}
+                          value={trunkForm.password}
+                          placeholder={editingTrunkId ? 'Leave empty to keep current' : 'SIP auth password'}
+                          onChange={(e) => setTrunkForm((f) => ({ ...f, password: e.target.value }))} />
+                        <button type="button" className={styles.passwordToggle}
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                          {showPassword
+                            ? <EyeOff size={16} aria-hidden="true" />
+                            : <Eye size={16} aria-hidden="true" />}
+                        </button>
+                      </section>
+                    </fieldset>
+                    <footer className={s.dialogActions}>
+                      <Dialog.Close asChild>
+                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                      </Dialog.Close>
+                      <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
+                        disabled={isTrunkPending}>
+                        {isTrunkPending ? 'Saving...' : (editingTrunkId ? 'Save' : 'Create')}
+                      </button>
+                    </footer>
+                  </form>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
+          </section>
+
           <article className={s.tableWrap}>
             <table className={s.table}>
               <thead>
@@ -128,7 +445,10 @@ export default function TenantDetails() {
                   <th>Provider</th>
                   <th>Host</th>
                   <th>Transport</th>
+                  <th>Channels</th>
+                  <th>Auth</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -138,10 +458,28 @@ export default function TenantDetails() {
                     <td>{trunk.provider || '—'}</td>
                     <td>{trunk.host}:{trunk.port}</td>
                     <td>{trunk.transport.toUpperCase()}</td>
+                    <td>{trunk.max_channels}</td>
+                    <td>{trunk.username ? 'Login/Pass' : 'IP-based'}</td>
                     <td><StatusBadge status={trunk.enabled ? 'active' : 'inactive'} /></td>
+                    <td>
+                      <section className={styles.actionBtns}>
+                        <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
+                          onClick={() => openEditTrunk(trunk)}
+                          aria-label={`Edit trunk ${trunk.name}`}>
+                          <Edit size={14} aria-hidden="true" />
+                        </button>
+                        <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
+                          onClick={() => {
+                            if (window.confirm(`Delete trunk "${trunk.name}"?`)) deleteTrunkMutation.mutate(trunk.id)
+                          }}
+                          aria-label={`Delete trunk ${trunk.name}`}>
+                          <Trash2 size={14} aria-hidden="true" />
+                        </button>
+                      </section>
+                    </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={5} className={s.empty}>No trunks</td></tr>
+                  <tr><td colSpan={8} className={s.empty}>No trunks</td></tr>
                 )}
               </tbody>
             </table>
