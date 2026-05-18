@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Trash2, Edit } from 'lucide-react'
+import { Plus, Search, Trash2, Settings } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import toast from 'react-hot-toast'
 import client from '../../api/client'
@@ -166,11 +166,18 @@ export default function Tenants() {
                   <td>{t.max_concurrent_calls}</td>
                   <td><StatusBadge status={t.is_active ? 'active' : 'inactive'} /></td>
                   <td>
-                    <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
-                      onClick={(e) => { e.stopPropagation(); handleDelete(t.id, t.name) }}
-                      aria-label={`Delete tenant ${t.name}`}>
-                      <Trash2 size={14} aria-hidden="true" />
-                    </button>
+                    <section style={{ display: 'flex', gap: 'var(--space-1)' }}>
+                      <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/tenants/${t.id}/settings`) }}
+                        aria-label={`Settings for ${t.name}`}>
+                        <Settings size={14} aria-hidden="true" />
+                      </button>
+                      <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
+                        onClick={(e) => { e.stopPropagation(); handleDelete(t.id, t.name) }}
+                        aria-label={`Delete tenant ${t.name}`}>
+                        <Trash2 size={14} aria-hidden="true" />
+                      </button>
+                    </section>
                   </td>
                 </tr>
               )) : (

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Plus, Trash2, KeyRound, Edit, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, KeyRound, Edit, Eye, EyeOff, Settings } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 import * as Dialog from '@radix-ui/react-dialog'
 import toast from 'react-hot-toast'
@@ -238,6 +238,11 @@ export default function TenantDetails() {
           <p className={styles.tenantDomain}>{tenant.domain}</p>
         </section>
         <StatusBadge status={tenant.is_active ? 'active' : 'inactive'} />
+        <button className={`${s.btn} ${s.btnSecondary}`}
+          onClick={() => navigate(`/tenants/${id}/settings`)}
+          style={{ marginLeft: 'auto' }}>
+          <Settings size={16} aria-hidden="true" /> Settings
+        </button>
       </header>
 
       <Tabs.Root defaultValue="info" className={styles.tabs}>

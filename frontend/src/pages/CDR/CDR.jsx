@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Download, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Download, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import * as Dialog from '@radix-ui/react-dialog'
 import client from '../../api/client'
 import s from '../shared.module.css'
+import styles from './CDR.module.css'
 
 function formatDuration(seconds) {
   if (!seconds) return '00:00:00'
@@ -12,9 +14,20 @@ function formatDuration(seconds) {
   return [h, m, sec].map((v) => String(v).padStart(2, '0')).join(':')
 }
 
+function dispositionColor(disp) {
+  switch (disp?.toUpperCase()) {
+    case 'ANSWERED': return 'active'
+    case 'NO ANSWER': return 'warning'
+    case 'BUSY': return 'warning'
+    case 'FAILED': return 'inactive'
+    default: return 'unknown'
+  }
+}
+
 export default function CDR() {
   const [selectedTenant, setSelectedTenant] = useState('')
   const [page, setPage] = useState(1)
+  const [selectedRecord, setSelectedRecord] = useState(null)
   const perPage = 20
 
   const { data: tenants } = useQuery({
@@ -37,11 +50,12 @@ export default function CDR() {
 
   const handleExportCSV = () => {
     if (!data?.items?.length) return
-    const headers = ['Date', 'Source', 'Destination', 'Duration', 'Billsec', 'Disposition']
+    const headers = ['Date', 'Source', 'Destination', 'Duration', 'Billsec', 'Disposition', 'CallerID', 'Channel', 'DstChannel', 'UniqueID']
     const rows = data.items.map((r) => [
       new Date(r.calldate).toLocaleString(),
       r.src, r.dst, formatDuration(r.duration),
       formatDuration(r.billsec), r.disposition,
+      r.clid, r.channel, r.dstchannel, r.uniqueid,
     ])
     const csv = [headers, ...rows].map((r) => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
@@ -92,13 +106,18 @@ export default function CDR() {
             </thead>
             <tbody>
               {data?.items?.length > 0 ? data.items.map((r) => (
-                <tr key={r.id}>
+                <tr key={r.id} className={s.clickableRow}
+                  onClick={() => setSelectedRecord(r)}>
                   <td>{new Date(r.calldate).toLocaleString()}</td>
                   <td>{r.src || '—'}</td>
                   <td>{r.dst || '—'}</td>
                   <td>{formatDuration(r.duration)}</td>
                   <td>{formatDuration(r.billsec)}</td>
-                  <td>{r.disposition || '—'}</td>
+                  <td>
+                    <span className={`${styles.disposition} ${styles[dispositionColor(r.disposition)]}`}>
+                      {r.disposition || '—'}
+                    </span>
+                  </td>
                 </tr>
               )) : (
                 <tr><td colSpan={6} className={s.empty}>No CDR records</td></tr>
@@ -125,6 +144,86 @@ export default function CDR() {
           )}
         </article>
       )}
+
+      {/* CDR Detail Dialog */}
+      <Dialog.Root open={!!selectedRecord} onOpenChange={(open) => { if (!open) setSelectedRecord(null) }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className={s.dialogOverlay} />
+          <Dialog.Content className={s.dialogContent} aria-describedby="cdr-detail-desc">
+            <Dialog.Title className={s.dialogTitle}>Call Detail Record</Dialog.Title>
+            <p id="cdr-detail-desc" className="sr-only">Detailed information about the selected call</p>
+
+            {selectedRecord && (
+              <article className={styles.detailGrid}>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Date & Time</span>
+                  <span className={styles.detailValue}>
+                    {new Date(selectedRecord.calldate).toLocaleString()}
+                  </span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Caller ID</span>
+                  <span className={styles.detailValue}>{selectedRecord.clid || '—'}</span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Source</span>
+                  <span className={styles.detailValue}>{selectedRecord.src || '—'}</span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Destination</span>
+                  <span className={styles.detailValue}>{selectedRecord.dst || '—'}</span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Duration</span>
+                  <span className={styles.detailValue}>{formatDuration(selectedRecord.duration)}</span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Billable Seconds</span>
+                  <span className={styles.detailValue}>{formatDuration(selectedRecord.billsec)}</span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Disposition</span>
+                  <span className={styles.detailValue}>
+                    <span className={`${styles.disposition} ${styles[dispositionColor(selectedRecord.disposition)]}`}>
+                      {selectedRecord.disposition || '—'}
+                    </span>
+                  </span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Context</span>
+                  <span className={styles.detailValue}><code>{selectedRecord.dcontext || '—'}</code></span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Channel</span>
+                  <span className={styles.detailValue}><code>{selectedRecord.channel || '—'}</code></span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Destination Channel</span>
+                  <span className={styles.detailValue}><code>{selectedRecord.dstchannel || '—'}</code></span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Last Application</span>
+                  <span className={styles.detailValue}><code>{selectedRecord.lastapp || '—'}</code></span>
+                </section>
+                <section className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Account Code</span>
+                  <span className={styles.detailValue}>{selectedRecord.accountcode || '—'}</span>
+                </section>
+                <section className={`${styles.detailItem} ${styles.fullWidth}`}>
+                  <span className={styles.detailLabel}>Unique ID</span>
+                  <span className={styles.detailValue}><code>{selectedRecord.uniqueid || '—'}</code></span>
+                </section>
+              </article>
+            )}
+
+            <footer className={s.dialogActions}>
+              <Dialog.Close asChild>
+                <button className={`${s.btn} ${s.btnSecondary}`}>Close</button>
+              </Dialog.Close>
+            </footer>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </>
   )
 }

@@ -7,6 +7,7 @@ import Login from './pages/Login/Login'
 import Dashboard from './pages/Dashboard/Dashboard'
 import Tenants from './pages/Tenants/Tenants'
 import TenantDetails from './pages/Tenants/TenantDetails'
+import TenantSettings from './pages/Tenants/TenantSettings'
 import ActiveCalls from './pages/ActiveCalls/ActiveCalls'
 import CDR from './pages/CDR/CDR'
 import Profile from './pages/Profile/Profile'
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tenants" element={<Tenants />} />
         <Route path="/tenants/:id" element={<TenantDetails />} />
+        <Route path="/tenants/:id/settings" element={<TenantSettings />} />
         <Route path="/active-calls" element={<ActiveCalls />} />
         <Route path="/cdr" element={<CDR />} />
         <Route path="/profile" element={<Profile />} />
