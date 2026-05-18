@@ -50,6 +50,10 @@ export default function CDR() {
 
   const handleExportCSV = () => {
     if (!data?.items?.length) return
+    const escapeCSV = (val) => {
+      const str = String(val ?? '')
+      return `"${str.replace(/"/g, '""')}"`
+    }
     const headers = ['Date', 'Source', 'Destination', 'Duration', 'Billsec', 'Disposition', 'CallerID', 'Channel', 'DstChannel', 'UniqueID']
     const rows = data.items.map((r) => [
       new Date(r.calldate).toLocaleString(),
@@ -57,8 +61,9 @@ export default function CDR() {
       formatDuration(r.billsec), r.disposition,
       r.clid, r.channel, r.dstchannel, r.uniqueid,
     ])
-    const csv = [headers, ...rows].map((r) => r.join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
+    const csv = [headers, ...rows].map((r) => r.map(escapeCSV).join(',')).join('\n')
+    const bom = '\uFEFF'
+    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
