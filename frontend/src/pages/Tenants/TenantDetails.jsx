@@ -11,6 +11,7 @@ import s from '../shared.module.css'
 import styles from './TenantDetails.module.css'
 
 const EMPTY_EXT_FORM = { extension_number: '', display_name: '', email: '' }
+const EMPTY_EXT_EDIT_FORM = { display_name: '', email: '', enabled: true }
 const EMPTY_TRUNK_FORM = {
   name: '', provider: '', host: '', port: 5060,
   transport: 'udp', codecs: 'ulaw,alaw', max_channels: 10,
@@ -26,6 +27,9 @@ export default function TenantDetails() {
   const [extDialogOpen, setExtDialogOpen] = useState(false)
   const [extForm, setExtForm] = useState(EMPTY_EXT_FORM)
   const [credentials, setCredentials] = useState(null)
+  const [extEditDialogOpen, setExtEditDialogOpen] = useState(false)
+  const [extEditForm, setExtEditForm] = useState(EMPTY_EXT_EDIT_FORM)
+  const [editingExtId, setEditingExtId] = useState(null)
 
   // --- Trunk state ---
   const [trunkDialogOpen, setTrunkDialogOpen] = useState(false)
@@ -73,6 +77,17 @@ export default function TenantDetails() {
       toast.success('Extension deleted')
     },
     onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete extension'),
+  })
+
+  const updateExtMutation = useMutation({
+    mutationFn: ({ extId, payload }) =>
+      client.put(`/tenants/${id}/extensions/${extId}`, payload).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['extensions', id] })
+      closeExtEditDialog()
+      toast.success('Extension updated')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to update extension'),
   })
 
   const resetPasswordMutation = useMutation({
@@ -125,6 +140,27 @@ export default function TenantDetails() {
     e.preventDefault()
     setCredentials(null)
     createExtMutation.mutate(extForm)
+  }
+
+  const handleUpdateExtension = (e) => {
+    e.preventDefault()
+    updateExtMutation.mutate({ extId: editingExtId, payload: extEditForm })
+  }
+
+  const openEditExtension = (ext) => {
+    setEditingExtId(ext.id)
+    setExtEditForm({
+      display_name: ext.display_name || '',
+      email: ext.email || '',
+      enabled: ext.enabled,
+    })
+    setExtEditDialogOpen(true)
+  }
+
+  const closeExtEditDialog = () => {
+    setExtEditDialogOpen(false)
+    setEditingExtId(null)
+    setExtEditForm(EMPTY_EXT_EDIT_FORM)
   }
 
   const handleSubmitTrunk = (e) => {
@@ -329,6 +365,11 @@ export default function TenantDetails() {
                     <td><StatusBadge status={ext.enabled ? 'active' : 'inactive'} /></td>
                     <td>
                       <section className={styles.actionBtns}>
+                        <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
+                          onClick={() => openEditExtension(ext)}
+                          aria-label={`Edit extension ${ext.extension_number}`}>
+                          <Edit size={14} aria-hidden="true" />
+                        </button>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => resetPasswordMutation.mutate(ext.id)}
                           aria-label={`Reset password for ${ext.extension_number}`}>
