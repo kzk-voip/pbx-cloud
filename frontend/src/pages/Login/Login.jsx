@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import useAuthStore from '../../store/authStore'
 import styles from './Login.module.css'
 
@@ -9,6 +10,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const { login, isLoading } = useAuthStore()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -27,8 +29,8 @@ export default function Login() {
         <article className={styles.card}>
           <header className={styles.header}>
             <span className={styles.logoIcon} aria-hidden="true">P</span>
-            <h1 className={styles.title}>PBX Cloud</h1>
-            <p className={styles.subtitle}>Sign in to your admin panel</p>
+            <h1 className={styles.title}>{t('login.title')}</h1>
+            <p className={styles.subtitle}>{t('login.subtitle')}</p>
           </header>
 
           <form className={styles.form} onSubmit={handleSubmit}>
@@ -38,7 +40,7 @@ export default function Login() {
 
             <fieldset className={styles.field}>
               <label className={styles.label} htmlFor="login-username">
-                Username
+                {t('login.username')}
               </label>
               <input
                 id="login-username"
@@ -54,7 +56,7 @@ export default function Login() {
 
             <fieldset className={styles.field}>
               <label className={styles.label} htmlFor="login-password">
-                Password
+                {t('login.password')}
               </label>
               <input
                 id="login-password"
@@ -73,7 +75,7 @@ export default function Login() {
               className={styles.submitBtn}
               disabled={isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? t('login.signingIn') : t('login.signIn')}
             </button>
           </form>
         </article>

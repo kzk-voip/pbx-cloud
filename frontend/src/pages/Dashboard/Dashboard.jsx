@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Building2, Phone, PhoneCall, Activity, Clock, TrendingUp } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -40,6 +41,7 @@ const chartTooltipStyle = {
 
 export default function Dashboard() {
   const [callHistory, setCallHistory] = useState([])
+  const { t } = useTranslation()
 
   const { data: tenants, isLoading: tenantsLoading } = useQuery({
     queryKey: ['tenants'],
@@ -91,26 +93,26 @@ export default function Dashboard() {
       <section className={styles.grid}>
         <MetricCard
           icon={Building2}
-          label="Total Tenants"
+          label={t('dashboard.totalTenants')}
           value={totalTenants}
-          subtitle={`${activeTenants} active`}
+          subtitle={`${activeTenants} ${t('dashboard.active')}`}
           variant="primary"
         />
         <MetricCard
           icon={Phone}
-          label="Total Extensions"
+          label={t('dashboard.totalExtensions')}
           value={totalExtensions}
           variant="info"
         />
         <MetricCard
           icon={PhoneCall}
-          label="Active Calls"
+          label={t('dashboard.activeCalls')}
           value={systemStatus?.active_calls ?? '—'}
           variant="success"
         />
         <MetricCard
           icon={TrendingUp}
-          label="Total Calls (30d)"
+          label={t('dashboard.totalCalls30d')}
           value={cdrStats?.totals?.total_calls ?? '—'}
           subtitle={cdrStats?.totals ? `Avg: ${formatDuration(cdrStats.totals.avg_duration)}` : ''}
           variant="warning"
@@ -120,8 +122,8 @@ export default function Dashboard() {
       {/* Active Calls — Live chart */}
       <section className={styles.section}>
         <header className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Active Calls — Live</h2>
-          <span className={styles.badge}>Auto-refresh 5s</span>
+          <h2 className={styles.sectionTitle}>{t('dashboard.liveChart')}</h2>
+          <span className={styles.badge}>{t('dashboard.autoRefresh')}</span>
         </header>
         <article className={styles.chartCard}>
           {callHistory.length > 1 ? (
@@ -158,7 +160,7 @@ export default function Dashboard() {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <p className={styles.chartPlaceholder}>Collecting data points...</p>
+            <p className={styles.chartPlaceholder}>{t('dashboard.collecting')}</p>
           )}
         </article>
       </section>
@@ -168,7 +170,7 @@ export default function Dashboard() {
         {/* Call Volume (last 30 days) */}
         <article className={styles.chartHalf}>
           <header className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Call Volume (30 days)</h2>
+            <h2 className={styles.sectionTitle}>{t('dashboard.callVolume')}</h2>
           </header>
           <section className={styles.chartCard}>
             {cdrStats?.call_volume?.length > 0 ? (
@@ -192,7 +194,7 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className={styles.chartPlaceholder}>No CDR data available</p>
+              <p className={styles.chartPlaceholder}>{t('dashboard.noData')}</p>
             )}
           </section>
         </article>
@@ -200,7 +202,7 @@ export default function Dashboard() {
         {/* Disposition Breakdown */}
         <article className={styles.chartHalf}>
           <header className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Call Dispositions</h2>
+            <h2 className={styles.sectionTitle}>{t('dashboard.dispositions')}</h2>
           </header>
           <section className={styles.chartCard}>
             {cdrStats?.disposition_breakdown?.length > 0 ? (
@@ -229,7 +231,7 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <p className={styles.chartPlaceholder}>No CDR data available</p>
+              <p className={styles.chartPlaceholder}>{t('dashboard.noData')}</p>
             )}
           </section>
         </article>
@@ -238,7 +240,7 @@ export default function Dashboard() {
       {/* Peak Hours */}
       <section className={styles.section}>
         <header className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Peak Hours (30 days)</h2>
+          <h2 className={styles.sectionTitle}>{t('dashboard.peakHours')}</h2>
         </header>
         <article className={styles.chartCard}>
           {cdrStats?.peak_hours?.length > 0 ? (
@@ -268,7 +270,7 @@ export default function Dashboard() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className={styles.chartPlaceholder}>No CDR data available</p>
+            <p className={styles.chartPlaceholder}>{t('dashboard.noData')}</p>
           )}
         </article>
       </section>
@@ -276,21 +278,21 @@ export default function Dashboard() {
       {/* Tenants Overview table */}
       <section className={styles.section}>
         <header className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Tenants Overview</h2>
+          <h2 className={styles.sectionTitle}>{t('dashboard.tenantsOverview')}</h2>
         </header>
 
         {tenantsLoading ? (
-          <p className={styles.loading}>Loading...</p>
+          <p className={styles.loading}>{t('dashboard.loading')}</p>
         ) : (
           <article className={styles.table}>
             <table>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Domain</th>
-                  <th>Extensions</th>
-                  <th>Max Calls</th>
-                  <th>Status</th>
+                  <th>{t('tenants.name')}</th>
+                  <th>{t('tenants.domain')}</th>
+                  <th>{t('tenants.extensions')}</th>
+                  <th>{t('tenants.maxCalls')}</th>
+                  <th>{t('tenants.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -308,7 +310,7 @@ export default function Dashboard() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className={styles.empty}>No tenants found</td>
+                    <td colSpan={5} className={styles.empty}>{t('tenants.noTenants')}</td>
                   </tr>
                 )}
               </tbody>

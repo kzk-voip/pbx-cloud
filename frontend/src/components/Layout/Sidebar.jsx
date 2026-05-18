@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard,
   Building2,
@@ -13,23 +14,24 @@ import {
 import SoftphoneWidget from '../SoftphoneWidget/SoftphoneWidget'
 import styles from './Sidebar.module.css'
 
-const mainNav = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/tenants', icon: Building2, label: 'Tenants' },
-]
-
-const monitorNav = [
-  { to: '/active-calls', icon: PhoneCall, label: 'Active Calls' },
-  { to: '/cdr', icon: FileText, label: 'CDR History' },
-]
-
-const accountNav = [
-  { to: '/profile', icon: User, label: 'Profile' },
-]
-
 export default function Sidebar({ collapsed, onToggle }) {
   const location = useLocation()
+  const { t } = useTranslation()
   const [softphoneOpen, setSoftphoneOpen] = useState(false)
+
+  const mainNav = [
+    { to: '/dashboard', icon: LayoutDashboard, label: t('sidebar.dashboard') },
+    { to: '/tenants', icon: Building2, label: t('sidebar.tenants') },
+  ]
+
+  const monitorNav = [
+    { to: '/active-calls', icon: PhoneCall, label: t('sidebar.activeCalls') },
+    { to: '/cdr', icon: FileText, label: t('sidebar.cdr') },
+  ]
+
+  const accountNav = [
+    { to: '/profile', icon: User, label: t('sidebar.profile') },
+  ]
 
   const renderNavItem = ({ to, icon: Icon, label }) => (
     <NavLink
@@ -56,17 +58,17 @@ export default function Sidebar({ collapsed, onToggle }) {
 
       <nav className={styles.nav}>
         <section className={styles.navSection}>
-          <span className={styles.navLabel}>Main</span>
+          <span className={styles.navLabel}>{t('sidebar.main')}</span>
           {mainNav.map(renderNavItem)}
         </section>
 
         <section className={styles.navSection}>
-          <span className={styles.navLabel}>Monitor</span>
+          <span className={styles.navLabel}>{t('sidebar.monitor')}</span>
           {monitorNav.map(renderNavItem)}
         </section>
 
         <section className={styles.navSection}>
-          <span className={styles.navLabel}>Account</span>
+          <span className={styles.navLabel}>{t('sidebar.account')}</span>
           {accountNav.map(renderNavItem)}
         </section>
       </nav>
@@ -78,7 +80,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           aria-label={softphoneOpen ? 'Close softphone' : 'Open softphone'}
         >
           <Phone size={20} aria-hidden="true" />
-          <span className={styles.navText}>Softphone</span>
+          <span className={styles.navText}>{t('sidebar.softphone')}</span>
         </button>
         <button
           className={styles.collapseBtn}
