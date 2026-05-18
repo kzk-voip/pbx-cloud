@@ -391,6 +391,46 @@ export default function TenantDetails() {
               </tbody>
             </table>
           </article>
+
+          {/* Edit Extension Dialog */}
+          <Dialog.Root open={extEditDialogOpen} onOpenChange={(open) => { if (!open) closeExtEditDialog() }}>
+            <Dialog.Portal>
+              <Dialog.Overlay className={s.dialogOverlay} />
+              <Dialog.Content className={s.dialogContent}>
+                <Dialog.Title className={s.dialogTitle}>Edit Extension</Dialog.Title>
+                <form className={s.dialogForm} onSubmit={handleUpdateExtension}>
+                  <fieldset className={s.field}>
+                    <label className={s.fieldLabel} htmlFor="ext-edit-name">Display Name</label>
+                    <input id="ext-edit-name" className={s.fieldInput} required
+                      value={extEditForm.display_name}
+                      onChange={(e) => setExtEditForm((f) => ({ ...f, display_name: e.target.value }))} />
+                  </fieldset>
+                  <fieldset className={s.field}>
+                    <label className={s.fieldLabel} htmlFor="ext-edit-email">Email</label>
+                    <input id="ext-edit-email" className={s.fieldInput} type="email"
+                      value={extEditForm.email}
+                      onChange={(e) => setExtEditForm((f) => ({ ...f, email: e.target.value }))} />
+                  </fieldset>
+                  <fieldset className={s.field}>
+                    <label className={styles.checkboxLabel}>
+                      <input type="checkbox" checked={extEditForm.enabled}
+                        onChange={(e) => setExtEditForm((f) => ({ ...f, enabled: e.target.checked }))} />
+                      <span>Enabled</span>
+                    </label>
+                  </fieldset>
+                  <footer className={s.dialogActions}>
+                    <Dialog.Close asChild>
+                      <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                    </Dialog.Close>
+                    <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
+                      disabled={updateExtMutation.isPending}>
+                      {updateExtMutation.isPending ? 'Saving...' : 'Save'}
+                    </button>
+                  </footer>
+                </form>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
         </Tabs.Content>
 
         {/* ==================== TRUNKS TAB ==================== */}
