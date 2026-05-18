@@ -117,3 +117,96 @@ async def system_status(
         "nodes": nodes,
     }
 
+
+@router.get("/cdr-stats")
+async def cdr_stats(
+    days: int = 30,
+    user: User = Depends(require_role("super_admin")),
+):
+    """
+    Get CDR analytics for the dashboard:
+    - call_volume: calls per day (last N days)
+    - disposition_breakdown: count by disposition
+    - peak_hours: calls grouped by hour of day
+    - totals: total calls, total duration, avg duration
+    """
+    from datetime import datetime, timedelta
+
+    from sqlalchemy import func, select, cast, Integer, extract
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from app.dependencies.database import get_db
+    from app.models.cdr import CDR
+    from app.database import async_session
+
+    async with async_session() as db:
+        cutoff = datetime.utcnow() - timedelta(days=days)
+
+        # Total calls and duration
+        totals_q = select(
+            func.count().label("total_calls"),
+            func.coalesce(func.sum(CDR.duration), 0).label("total_duration"),
+            func.coalesce(func.avg(CDR.duration), 0).label("avg_duration"),
+        ).where(CDR.calldate >= cutoff)
+        totals_result = await db.execute(totals_q)
+        totals_row = totals_result.one()
+
+        # Calls per day
+        daily_q = (
+            select(
+                func.date(CDR.calldate).label("day"),
+                func.count().label("count"),
+            )
+            .where(CDR.calldate >= cutoff)
+            .group_by(func.date(CDR.calldate))
+            .order_by(func.date(CDR.calldate))
+        )
+        daily_result = await db.execute(daily_q)
+        call_volume = [
+            {"date": str(row.day), "calls": row.count}
+            for row in daily_result.all()
+        ]
+
+        # Disposition breakdown
+        disp_q = (
+            select(
+                CDR.disposition,
+                func.count().label("count"),
+            )
+            .where(CDR.calldate >= cutoff)
+            .group_by(CDR.disposition)
+            .order_by(func.count().desc())
+        )
+        disp_result = await db.execute(disp_q)
+        disposition_breakdown = [
+            {"disposition": row.disposition or "UNKNOWN", "count": row.count}
+            for row in disp_result.all()
+        ]
+
+        # Peak hours
+        hour_q = (
+            select(
+                extract("hour", CDR.calldate).label("hour"),
+                func.count().label("count"),
+            )
+            .where(CDR.calldate >= cutoff)
+            .group_by(extract("hour", CDR.calldate))
+            .order_by(extract("hour", CDR.calldate))
+        )
+        hour_result = await db.execute(hour_q)
+        peak_hours = [
+            {"hour": int(row.hour), "calls": row.count}
+            for row in hour_result.all()
+        ]
+
+    return {
+        "totals": {
+            "total_calls": totals_row.total_calls,
+            "total_duration": int(totals_row.total_duration),
+            "avg_duration": round(float(totals_row.avg_duration), 1),
+        },
+        "call_volume": call_volume,
+        "disposition_breakdown": disposition_breakdown,
+        "peak_hours": peak_hours,
+    }
+

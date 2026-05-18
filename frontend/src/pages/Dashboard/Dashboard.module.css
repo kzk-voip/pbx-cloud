@@ -9,6 +9,23 @@
   margin-bottom: var(--space-4);
 }
 
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+@media (max-width: 960px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chartHalf {
+  min-width: 0;
+}
+
 .sectionHeader {
   display: flex;
   align-items: center;

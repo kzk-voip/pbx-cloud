@@ -1,13 +1,42 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Building2, Phone, PhoneCall, Activity } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Building2, Phone, PhoneCall, Activity, Clock, TrendingUp } from 'lucide-react'
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts'
 import client from '../../api/client'
 import MetricCard from '../../components/MetricCard/MetricCard'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
 import styles from './Dashboard.module.css'
 
 const MAX_CHART_POINTS = 60
+
+const DISPOSITION_COLORS = {
+  ANSWERED: 'var(--color-success)',
+  'NO ANSWER': 'var(--color-warning)',
+  BUSY: '#f59e0b',
+  FAILED: 'var(--color-danger)',
+  UNKNOWN: 'var(--text-muted)',
+}
+
+function formatDuration(seconds) {
+  if (!seconds) return '0s'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  if (h > 0) return `${h}h ${m}m`
+  if (m > 0) return `${m}m ${s}s`
+  return `${s}s`
+}
+
+const chartTooltipStyle = {
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border-color)',
+  borderRadius: 'var(--radius-md)',
+  fontSize: 'var(--font-size-sm)',
+  color: 'var(--text-primary)',
+}
 
 export default function Dashboard() {
   const [callHistory, setCallHistory] = useState([])
@@ -21,6 +50,12 @@ export default function Dashboard() {
     queryKey: ['system-status'],
     queryFn: () => client.get('/admin/system-status').then((r) => r.data),
     refetchInterval: 5000,
+  })
+
+  const { data: cdrStats } = useQuery({
+    queryKey: ['cdr-stats'],
+    queryFn: () => client.get('/admin/cdr-stats').then((r) => r.data),
+    refetchInterval: 60000,
   })
 
   // Build CPS chart data from periodic system-status polls
@@ -39,8 +74,20 @@ export default function Dashboard() {
   const activeTenants = tenants?.items?.filter?.((t) => t.is_active)?.length ?? 0
   const totalExtensions = tenants?.items?.reduce?.((sum, t) => sum + (t.extension_count || 0), 0) ?? 0
 
+  // Fill peak hours with 0s for missing hours
+  const peakHoursData = (() => {
+    const hoursMap = {}
+    for (let i = 0; i < 24; i++) hoursMap[i] = 0
+    cdrStats?.peak_hours?.forEach((h) => { hoursMap[h.hour] = h.calls })
+    return Object.entries(hoursMap).map(([hour, calls]) => ({
+      hour: `${String(hour).padStart(2, '0')}:00`,
+      calls,
+    }))
+  })()
+
   return (
     <>
+      {/* Top metric cards */}
       <section className={styles.grid}>
         <MetricCard
           icon={Building2}
@@ -62,14 +109,15 @@ export default function Dashboard() {
           variant="success"
         />
         <MetricCard
-          icon={Activity}
-          label="System Status"
-          value={systemStatus?.status === 'ok' ? 'Healthy' : 'Unknown'}
-          variant={systemStatus?.status === 'ok' ? 'success' : 'warning'}
+          icon={TrendingUp}
+          label="Total Calls (30d)"
+          value={cdrStats?.totals?.total_calls ?? '—'}
+          subtitle={cdrStats?.totals ? `Avg: ${formatDuration(cdrStats.totals.avg_duration)}` : ''}
+          variant="warning"
         />
       </section>
 
-      {/* Active Calls Chart */}
+      {/* Active Calls — Live chart */}
       <section className={styles.section}>
         <header className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Active Calls — Live</h2>
@@ -98,15 +146,7 @@ export default function Dashboard() {
                   tickLine={false}
                   axisLine={{ stroke: 'var(--border-color)' }}
                 />
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-md)',
-                    fontSize: 'var(--font-size-sm)',
-                    color: 'var(--text-primary)',
-                  }}
-                />
+                <Tooltip contentStyle={chartTooltipStyle} />
                 <Area
                   type="monotone"
                   dataKey="calls"
@@ -123,7 +163,116 @@ export default function Dashboard() {
         </article>
       </section>
 
-      {/* Tenants Overview */}
+      {/* CDR Analytics row */}
+      <section className={styles.chartsRow}>
+        {/* Call Volume (last 30 days) */}
+        <article className={styles.chartHalf}>
+          <header className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Call Volume (30 days)</h2>
+          </header>
+          <section className={styles.chartCard}>
+            {cdrStats?.call_volume?.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={cdrStats.call_volume} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+                    tickLine={false}
+                    axisLine={{ stroke: 'var(--border-color)' }}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+                    tickLine={false}
+                    axisLine={{ stroke: 'var(--border-color)' }}
+                  />
+                  <Tooltip contentStyle={chartTooltipStyle} />
+                  <Bar dataKey="calls" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Calls" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className={styles.chartPlaceholder}>No CDR data available</p>
+            )}
+          </section>
+        </article>
+
+        {/* Disposition Breakdown */}
+        <article className={styles.chartHalf}>
+          <header className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Call Dispositions</h2>
+          </header>
+          <section className={styles.chartCard}>
+            {cdrStats?.disposition_breakdown?.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={cdrStats.disposition_breakdown}
+                    dataKey="count"
+                    nameKey="disposition"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    strokeWidth={2}
+                    stroke="var(--bg-card)"
+                    label={({ disposition, count }) => `${disposition}: ${count}`}
+                  >
+                    {cdrStats.disposition_breakdown.map((entry, i) => (
+                      <Cell
+                        key={entry.disposition}
+                        fill={DISPOSITION_COLORS[entry.disposition] || `hsl(${i * 90}, 60%, 55%)`}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={chartTooltipStyle} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className={styles.chartPlaceholder}>No CDR data available</p>
+            )}
+          </section>
+        </article>
+      </section>
+
+      {/* Peak Hours */}
+      <section className={styles.section}>
+        <header className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Peak Hours (30 days)</h2>
+        </header>
+        <article className={styles.chartCard}>
+          {cdrStats?.peak_hours?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={peakHoursData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="hourGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-info)" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.8} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis
+                  dataKey="hour"
+                  tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+                  tickLine={false}
+                  axisLine={{ stroke: 'var(--border-color)' }}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+                  tickLine={false}
+                  axisLine={{ stroke: 'var(--border-color)' }}
+                />
+                <Tooltip contentStyle={chartTooltipStyle} />
+                <Bar dataKey="calls" fill="url(#hourGradient)" radius={[4, 4, 0, 0]} name="Calls" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className={styles.chartPlaceholder}>No CDR data available</p>
+          )}
+        </article>
+      </section>
+
+      {/* Tenants Overview table */}
       <section className={styles.section}>
         <header className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Tenants Overview</h2>
