@@ -8,7 +8,11 @@
     "activeCalls": "Active Calls",
     "cdr": "CDR History",
     "profile": "Profile",
-    "softphone": "Softphone"
+    "softphone": "Softphone",
+    "myDashboard": "My Dashboard",
+    "myCalls": "My Calls",
+    "inboundRules": "Inbound Rules",
+    "callRoutes": "Call Routes"
   },
   "dashboard": {
     "totalTenants": "Total Tenants",
@@ -191,6 +195,46 @@
     "preset_week": "Week",
     "preset_month": "Month",
     "preset_quarter": "Quarter"
+  },
+  "extDashboard": {
+    "welcome": "Welcome, {{name}}",
+    "totalCalls": "Total Calls",
+    "answeredCalls": "Answered",
+    "talkTime": "Talk Time",
+    "recentCalls": "Recent Calls",
+    "noCalls": "No calls yet"
+  },
+  "inboundRules": {
+    "title": "Inbound Rules",
+    "addRule": "Add Inbound Rule",
+    "editRule": "Edit Inbound Rule",
+    "didNumber": "DID / Phone Number",
+    "destType": "Destination Type",
+    "destValue": "Destination Value",
+    "priority": "Priority",
+    "enabled": "Enabled",
+    "actions": "Actions",
+    "noRules": "No inbound rules configured",
+    "typeExtension": "Extension",
+    "typeRingGroup": "Ring Group",
+    "typeVoicemail": "Voicemail",
+    "typeIvr": "IVR Menu"
+  },
+  "callRoutes": {
+    "title": "Outbound Routes",
+    "addRoute": "Add Call Route",
+    "editRoute": "Edit Call Route",
+    "name": "Route Name",
+    "pattern": "Pattern",
+    "trunk": "Trunk",
+    "strip": "Strip Digits",
+    "prepend": "Prepend Prefix",
+    "priority": "Priority",
+    "enabled": "Enabled",
+    "actions": "Actions",
+    "noRoutes": "No outbound call routes configured",
+    "patternHint": "Asterisk patterns (e.g. _9. to strip prefix 9)",
+    "selectTrunk": "-- Select a Trunk --"
   },
   "common": {
     "close": "Close",

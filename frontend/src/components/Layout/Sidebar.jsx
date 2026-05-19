@@ -10,24 +10,45 @@ import {
   Phone,
   PanelLeftClose,
   PanelLeftOpen,
+  PhoneIncoming,
+  Route,
 } from 'lucide-react'
+import useAuthStore from '../../store/authStore'
 import SoftphoneWidget from '../SoftphoneWidget/SoftphoneWidget'
 import styles from './Sidebar.module.css'
 
 export default function Sidebar({ collapsed, onToggle }) {
   const location = useLocation()
   const { t } = useTranslation()
+  const { user } = useAuthStore()
   const [softphoneOpen, setSoftphoneOpen] = useState(false)
 
-  const mainNav = [
+  const isExtUser = user?.role === 'user'
+
+  // Admin nav (super_admin + tenant_admin)
+  const adminMainNav = [
     { to: '/dashboard', icon: LayoutDashboard, label: t('sidebar.dashboard') },
     { to: '/tenants', icon: Building2, label: t('sidebar.tenants') },
+    { to: '/inbound-rules', icon: PhoneIncoming, label: t('sidebar.inboundRules') || 'Inbound Rules' },
+    { to: '/call-routes', icon: Route, label: t('sidebar.callRoutes') || 'Call Routes' },
   ]
 
-  const monitorNav = [
+  const adminMonitorNav = [
     { to: '/active-calls', icon: PhoneCall, label: t('sidebar.activeCalls') },
     { to: '/cdr', icon: FileText, label: t('sidebar.cdr') },
   ]
+
+  // Extension user nav
+  const extMainNav = [
+    { to: '/my-dashboard', icon: LayoutDashboard, label: t('sidebar.myDashboard') },
+  ]
+
+  const extMonitorNav = [
+    { to: '/my-calls', icon: FileText, label: t('sidebar.myCalls') },
+  ]
+
+  const mainNav = isExtUser ? extMainNav : adminMainNav
+  const monitorNav = isExtUser ? extMonitorNav : adminMonitorNav
 
   const accountNav = [
     { to: '/profile', icon: User, label: t('sidebar.profile') },
@@ -103,3 +124,4 @@ export default function Sidebar({ collapsed, onToggle }) {
     </aside>
   )
 }
+

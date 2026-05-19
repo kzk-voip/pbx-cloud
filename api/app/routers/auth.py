@@ -56,6 +56,7 @@ async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
         "sub": str(user.id),
         "role": user.role,
         "tenant_id": str(user.tenant_id) if user.tenant_id else None,
+        "extension_id": str(user.extension_id) if user.extension_id else None,
     }
 
     return TokenResponse(
@@ -97,6 +98,7 @@ async def refresh(request: RefreshRequest, db: AsyncSession = Depends(get_db)):
         "sub": str(user.id),
         "role": user.role,
         "tenant_id": str(user.tenant_id) if user.tenant_id else None,
+        "extension_id": str(user.extension_id) if user.extension_id else None,
     }
 
     return TokenResponse(
@@ -106,11 +108,32 @@ async def refresh(request: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-async def me(current_user: User = Depends(get_current_user)):
+async def me(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     """
     Get the currently authenticated user's information.
     """
-    return current_user
+    # For user role, load extension number
+    extension_number = None
+    if current_user.extension_id:
+        from app.models.extension import Extension
+        result = await db.execute(
+            select(Extension.extension_number).where(Extension.id == current_user.extension_id)
+        )
+        extension_number = result.scalar_one_or_none()
+
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        role=current_user.role,
+        tenant_id=current_user.tenant_id,
+        is_active=current_user.is_active,
+        created_at=current_user.created_at,
+        extension_id=current_user.extension_id,
+        extension_number=extension_number,
+    )
 
 
 @router.put("/change-password")

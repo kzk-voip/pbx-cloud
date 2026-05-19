@@ -11,6 +11,8 @@ from app.models.cdr import CDR
 from app.models.user import User
 from app.models.ara import PjsipEndpoint, PjsipAuth, PjsipAor
 from app.models.tenant_event import TenantEvent
+from app.models.inbound_rule import InboundRule
+from app.models.call_route import CallRoute
 
 __all__ = [
     "Tenant",
@@ -22,4 +24,7 @@ __all__ = [
     "PjsipAuth",
     "PjsipAor",
     "TenantEvent",
+    "InboundRule",
+    "CallRoute",
 ]
+

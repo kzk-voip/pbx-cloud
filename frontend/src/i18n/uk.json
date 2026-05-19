@@ -8,7 +8,11 @@
     "activeCalls": "Активні дзвінки",
     "cdr": "Історія дзвінків",
     "profile": "Профіль",
-    "softphone": "Софтфон"
+    "softphone": "Софтфон",
+    "myDashboard": "Мій дашборд",
+    "myCalls": "Мої дзвінки",
+    "inboundRules": "Вхідні правила",
+    "callRoutes": "Вихідні маршрути"
   },
   "dashboard": {
     "totalTenants": "Всього тенантів",
@@ -191,6 +195,46 @@
     "preset_week": "Тиждень",
     "preset_month": "Місяць",
     "preset_quarter": "Квартал"
+  },
+  "extDashboard": {
+    "welcome": "Вітаю, {{name}}",
+    "totalCalls": "Всього дзвінків",
+    "answeredCalls": "Відповіді",
+    "talkTime": "Час розмов",
+    "recentCalls": "Останні дзвінки",
+    "noCalls": "Дзвінків поки немає"
+  },
+  "inboundRules": {
+    "title": "Вхідні правила",
+    "addRule": "Додати правило",
+    "editRule": "Редагувати правило",
+    "didNumber": "DID / Номер телефону",
+    "destType": "Тип призначення",
+    "destValue": "Значення призначення",
+    "priority": "Пріоритет",
+    "enabled": "Увімкнено",
+    "actions": "Дії",
+    "noRules": "Вхідні правила не налаштовані",
+    "typeExtension": "Внутрішній номер",
+    "typeRingGroup": "Група виклику",
+    "typeVoicemail": "Голосова пошта",
+    "typeIvr": "IVR меню"
+  },
+  "callRoutes": {
+    "title": "Вихідна маршрутизація",
+    "addRoute": "Додати маршрут",
+    "editRoute": "Редагувати маршрут",
+    "name": "Назва маршруту",
+    "pattern": "Шаблон",
+    "trunk": "Транк",
+    "strip": "Вирізати цифри",
+    "prepend": "Додати префікс",
+    "priority": "Пріоритет",
+    "enabled": "Увімкнено",
+    "actions": "Дії",
+    "noRoutes": "Вихідні маршрути не налаштовані",
+    "patternHint": "Шаблони Asterisk (напр., _9. для вирізання префікса 9)",
+    "selectTrunk": "-- Оберіть транк --"
   },
   "common": {
     "close": "Закрити",

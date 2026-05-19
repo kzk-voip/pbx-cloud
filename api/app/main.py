@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import async_session
 from app.redis import init_redis, close_redis
-from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist, ws, events, reports
+from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist, ws, events, reports, inbound_rules, call_routes
 from app.services import kamailio_service
 
 # Configure logging for all app.* loggers
@@ -108,6 +108,8 @@ app.include_router(blacklist.router)
 app.include_router(ws.router)
 app.include_router(events.router)
 app.include_router(reports.router)
+app.include_router(inbound_rules.router)
+app.include_router(call_routes.router)
 
 from prometheus_fastapi_instrumentator import Instrumentator
 Instrumentator().instrument(app).expose(app)

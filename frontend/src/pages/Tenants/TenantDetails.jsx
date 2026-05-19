@@ -9,6 +9,8 @@ import client from '../../api/client'
 import useTimezone from '../../hooks/useTimezone'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
 import TenantReports from './TenantReports'
+import TenantInboundRules from './TenantInboundRules'
+import TenantCallRoutes from './TenantCallRoutes'
 import s from '../shared.module.css'
 import styles from './TenantDetails.module.css'
 
@@ -279,6 +281,12 @@ export default function TenantDetails() {
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="reports">
             Reports
+          </Tabs.Trigger>
+          <Tabs.Trigger className={styles.tabsTrigger} value="inbound-rules">
+            Inbound Rules
+          </Tabs.Trigger>
+          <Tabs.Trigger className={styles.tabsTrigger} value="call-routes">
+            Call Routes
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -703,6 +711,16 @@ export default function TenantDetails() {
         {/* ==================== REPORTS TAB ==================== */}
         <Tabs.Content className={styles.tabsContent} value="reports">
           <TenantReports tenantId={id} />
+        </Tabs.Content>
+
+        {/* ==================== INBOUND RULES TAB ==================== */}
+        <Tabs.Content className={styles.tabsContent} value="inbound-rules">
+          <TenantInboundRules tenantId={id} />
+        </Tabs.Content>
+
+        {/* ==================== CALL ROUTES TAB ==================== */}
+        <Tabs.Content className={styles.tabsContent} value="call-routes">
+          <TenantCallRoutes tenantId={id} />
         </Tabs.Content>
       </Tabs.Root>
     </>

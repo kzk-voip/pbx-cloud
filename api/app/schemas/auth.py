@@ -30,6 +30,8 @@ class UserResponse(BaseModel):
     tenant_id: uuid.UUID | None
     is_active: bool
     created_at: datetime
+    extension_id: uuid.UUID | None = None
+    extension_number: str | None = None
 
     model_config = {"from_attributes": True}
 

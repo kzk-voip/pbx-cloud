@@ -17,7 +17,8 @@ export default function Login() {
     setError('')
     const result = await login(username, password)
     if (result.success) {
-      navigate('/dashboard')
+      const role = useAuthStore.getState().user?.role
+      navigate(role === 'user' ? '/my-dashboard' : '/dashboard')
     } else {
       setError(result.error)
     }

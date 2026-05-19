@@ -25,6 +25,11 @@ class User(Base):
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=True,  # NULL for super_admin
     )
+    extension_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("extensions.id", ondelete="SET NULL"),
+        nullable=True,  # Only set for 'user' role
+    )
     username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, server_default="user")
@@ -33,6 +38,7 @@ class User(Base):
 
     # Relationships
     tenant = relationship("Tenant")
+    extension = relationship("Extension", foreign_keys=[extension_id])
 
     def __repr__(self) -> str:
         return f"<User {self.username} (role={self.role})>"

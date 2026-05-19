@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies.auth import get_current_user
@@ -49,14 +50,20 @@ async def get_cdr(
             detail="Insufficient permissions",
         )
 
-    # For 'user' role: restrict to their own calls (by username)
-    user_src = None
-    user_dst = None
+    # For 'user' role: restrict to their own calls by extension number
     if user.role == "user":
-        # user's SIP username is {tenant_slug}_{extension}, but we filter on
-        # the extension number part (src/dst in CDR are extension numbers)
-        user_src = src  # keep user-supplied filter if any
-        user_dst = dst
+        if user.extension_id is None:
+            # User has no extension linked — return empty
+            return CDRListResponse(items=[], total=0, page=1, per_page=per_page, pages=0)
+        from app.models.extension import Extension
+        ext_result = await db.execute(
+            select(Extension.extension_number).where(Extension.id == user.extension_id)
+        )
+        ext_number = ext_result.scalar_one_or_none()
+        if ext_number is None:
+            return CDRListResponse(items=[], total=0, page=1, per_page=per_page, pages=0)
+        # Force src filter to user's extension
+        src = ext_number
 
     return await cdr_service.query_cdr(
         db=db,

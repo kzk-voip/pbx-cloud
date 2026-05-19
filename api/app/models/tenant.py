@@ -34,6 +34,8 @@ class Tenant(Base):
     # Relationships
     extensions = relationship("Extension", back_populates="tenant", cascade="all, delete-orphan")
     trunks = relationship("Trunk", back_populates="tenant", cascade="all, delete-orphan")
+    inbound_rules = relationship("InboundRule", back_populates="tenant", cascade="all, delete-orphan")
+    call_routes = relationship("CallRoute", back_populates="tenant", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<Tenant {self.slug} ({self.domain})>"
