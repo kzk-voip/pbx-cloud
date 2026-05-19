@@ -12,13 +12,25 @@ import TenantSettings from './pages/Tenants/TenantSettings'
 import ActiveCalls from './pages/ActiveCalls/ActiveCalls'
 import CDR from './pages/CDR/CDR'
 import Profile from './pages/Profile/Profile'
-import InboundRules from './pages/InboundRules/InboundRules'
-import CallRoutesPage from './pages/Routes/Routes'
+
+/** Role-based guard — redirects unauthorized roles to their default page */
+function RoleGuard({ allowed, children }) {
+  const { user } = useAuthStore()
+  if (!user) return null
+  if (allowed.includes(user.role)) return children
+  // Redirect to role-appropriate default
+  if (user.role === 'user') return <Navigate to="/my-dashboard" replace />
+  if (user.role === 'tenant_admin') return <Navigate to={`/tenants/${user.tenant_id}`} replace />
+  return <Navigate to="/dashboard" replace />
+}
 
 /** Redirect to role-appropriate default page */
 function DefaultRedirect() {
   const { user } = useAuthStore()
   if (user?.role === 'user') return <Navigate to="/my-dashboard" replace />
+  if (user?.role === 'tenant_admin' && user?.tenant_id) {
+    return <Navigate to={`/tenants/${user.tenant_id}`} replace />
+  }
   return <Navigate to="/dashboard" replace />
 }
 
@@ -45,15 +57,39 @@ export default function App() {
           </PrivateRoute>
         }
       >
+        {/* Super admin only routes */}
+        <Route path="/dashboard" element={
+          <RoleGuard allowed={['super_admin']}>
+            <Dashboard />
+          </RoleGuard>
+        } />
+        <Route path="/tenants" element={
+          <RoleGuard allowed={['super_admin']}>
+            <Tenants />
+          </RoleGuard>
+        } />
+
         {/* Admin routes (super_admin + tenant_admin) */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/tenants" element={<Tenants />} />
-        <Route path="/tenants/:id" element={<TenantDetails />} />
-        <Route path="/tenants/:id/settings" element={<TenantSettings />} />
-        <Route path="/active-calls" element={<ActiveCalls />} />
-        <Route path="/cdr" element={<CDR />} />
-        <Route path="/inbound-rules" element={<InboundRules />} />
-        <Route path="/call-routes" element={<CallRoutesPage />} />
+        <Route path="/tenants/:id" element={
+          <RoleGuard allowed={['super_admin', 'tenant_admin']}>
+            <TenantDetails />
+          </RoleGuard>
+        } />
+        <Route path="/tenants/:id/settings" element={
+          <RoleGuard allowed={['super_admin', 'tenant_admin']}>
+            <TenantSettings />
+          </RoleGuard>
+        } />
+        <Route path="/active-calls" element={
+          <RoleGuard allowed={['super_admin', 'tenant_admin']}>
+            <ActiveCalls />
+          </RoleGuard>
+        } />
+        <Route path="/cdr" element={
+          <RoleGuard allowed={['super_admin', 'tenant_admin']}>
+            <CDR />
+          </RoleGuard>
+        } />
 
         {/* Extension user routes */}
         <Route path="/my-dashboard" element={<ExtensionDashboard />} />
@@ -67,4 +103,3 @@ export default function App() {
     </Routes>
   )
 }
-

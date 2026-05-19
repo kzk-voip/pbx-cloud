@@ -1,15 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
 import client from '../../api/client'
+import useAuthStore from '../../store/authStore'
 import s from '../shared.module.css'
 
 export default function ActiveCalls() {
+  const { user } = useAuthStore()
+  const isSuperAdmin = user?.role === 'super_admin'
+
   const [selectedTenant, setSelectedTenant] = useState('')
+
+  // For non-super_admin, auto-set tenant to their own
+  useEffect(() => {
+    if (!isSuperAdmin && user?.tenant_id) {
+      setSelectedTenant(user.tenant_id)
+    }
+  }, [isSuperAdmin, user?.tenant_id])
 
   const { data: tenants } = useQuery({
     queryKey: ['tenants'],
     queryFn: () => client.get('/tenants').then((r) => r.data),
+    enabled: isSuperAdmin,
   })
 
   const { data, isLoading, refetch, isFetching } = useQuery({
@@ -19,23 +31,26 @@ export default function ActiveCalls() {
     refetchInterval: 5000,
   })
 
-  if (!selectedTenant && tenants?.items?.length > 0) {
+  // For super_admin, auto-select first tenant if none selected
+  if (isSuperAdmin && !selectedTenant && tenants?.items?.length > 0) {
     setSelectedTenant(tenants.items[0].id)
   }
 
   return (
     <>
       <section className={s.toolbar}>
-        <fieldset className={s.searchGroup}>
-          <label htmlFor="calls-tenant-select" className="sr-only">Select Tenant</label>
-          <select id="calls-tenant-select" className={s.fieldInput} style={{ height: 40 }}
-            value={selectedTenant} onChange={(e) => setSelectedTenant(e.target.value)}>
-            <option value="">Select tenant...</option>
-            {tenants?.items?.map((t) => (
-              <option key={t.id} value={t.id}>{t.name} ({t.slug})</option>
-            ))}
-          </select>
-        </fieldset>
+        {isSuperAdmin && (
+          <fieldset className={s.searchGroup}>
+            <label htmlFor="calls-tenant-select" className="sr-only">Select Tenant</label>
+            <select id="calls-tenant-select" className={s.fieldInput} style={{ height: 40 }}
+              value={selectedTenant} onChange={(e) => setSelectedTenant(e.target.value)}>
+              <option value="">Select tenant...</option>
+              {tenants?.items?.map((t) => (
+                <option key={t.id} value={t.id}>{t.name} ({t.slug})</option>
+              ))}
+            </select>
+          </fieldset>
+        )}
 
         <button className={`${s.btn} ${s.btnSecondary}`} onClick={() => refetch()}
           disabled={isFetching} id="refresh-calls-btn">

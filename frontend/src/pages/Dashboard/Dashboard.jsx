@@ -7,6 +7,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import client from '../../api/client'
+import useAuthStore from '../../store/authStore'
 import MetricCard from '../../components/MetricCard/MetricCard'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
 import styles from './Dashboard.module.css'
@@ -42,22 +43,28 @@ const chartTooltipStyle = {
 export default function Dashboard() {
   const [callHistory, setCallHistory] = useState([])
   const { t } = useTranslation()
+  const { user } = useAuthStore()
+
+  const isSuperAdmin = user?.role === 'super_admin'
 
   const { data: tenants, isLoading: tenantsLoading } = useQuery({
     queryKey: ['tenants'],
     queryFn: () => client.get('/tenants').then((r) => r.data),
+    enabled: isSuperAdmin,
   })
 
   const { data: systemStatus, dataUpdatedAt } = useQuery({
     queryKey: ['system-status'],
     queryFn: () => client.get('/admin/system-status').then((r) => r.data),
     refetchInterval: 5000,
+    enabled: isSuperAdmin,
   })
 
   const { data: cdrStats } = useQuery({
     queryKey: ['cdr-stats'],
     queryFn: () => client.get('/admin/cdr-stats').then((r) => r.data),
     refetchInterval: 60000,
+    enabled: isSuperAdmin,
   })
 
   // Build CPS chart data from periodic system-status polls

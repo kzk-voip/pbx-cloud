@@ -5,18 +5,24 @@ When an extension is created, the service automatically provisions
 the corresponding ps_endpoints, ps_auths, and ps_aors records
 so the SIP client can register immediately without Asterisk restart.
 
+Also auto-provisions a web User so the agent can log in to the
+web UI (including WebRTC softphone) using SIP credentials.
+
 Phase 5: Redis cache invalidation on create/update/delete.
 """
 
+import logging
 import secrets
 import uuid
 
 from sqlalchemy import func, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services import event_service
+from app.services.auth_service import hash_password
 
 from app.models.tenant import Tenant
 from app.models.extension import Extension
+from app.models.user import User
 from app.models.ara import PjsipEndpoint, PjsipAuth, PjsipAor
 from app.redis import redis_client
 from app.services.ara_cache_service import invalidate_endpoint
@@ -27,6 +33,8 @@ from app.schemas.extension import (
     ExtensionCredentials,
     ExtensionListResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _make_sip_id(tenant_slug: str, ext_number: str) -> str:
@@ -154,6 +162,26 @@ async def create_extension(
     )
     await db.commit()
     await db.refresh(extension)
+
+    # Auto-create web User for this extension so the agent can
+    # immediately log in to the web UI / WebRTC softphone.
+    try:
+        web_user = User(
+            tenant_id=tenant_id,
+            extension_id=extension.id,
+            username=sip_id,
+            password_hash=hash_password(sip_password),
+            role="user",
+            is_active=True,
+        )
+        db.add(web_user)
+        await db.commit()
+        logger.info(f"Auto-created web user '{sip_id}' for extension {data.extension_number}")
+    except Exception as e:
+        # Don't fail the extension creation if user creation fails
+        # (e.g. username already exists from a previous cycle)
+        await db.rollback()
+        logger.warning(f"Could not auto-create web user for {sip_id}: {e}")
 
     # Invalidate ARA cache for this endpoint
     if redis_client:
@@ -372,6 +400,11 @@ async def delete_extension(
 
     sip_id = _make_sip_id(tenant.slug, ext.extension_number)
 
+    # Remove linked web User (auto-created on extension creation)
+    await db.execute(
+        delete(User).where(User.extension_id == ext_id)
+    )
+
     # Remove ARA records
     await db.execute(delete(PjsipEndpoint).where(PjsipEndpoint.id == sip_id))
     await db.execute(delete(PjsipAuth).where(PjsipAuth.id == sip_id))
@@ -420,7 +453,16 @@ async def reset_password(
     auth = auth_result.scalar_one_or_none()
     if auth:
         auth.password = new_password
-        await db.commit()
+
+    # Sync web User password so agent can also log in with new password
+    user_result = await db.execute(
+        select(User).where(User.extension_id == ext.id)
+    )
+    linked_user = user_result.scalar_one_or_none()
+    if linked_user:
+        linked_user.password_hash = hash_password(new_password)
+
+    await db.commit()
 
     # Invalidate ARA cache for password-reset endpoint
     if redis_client:

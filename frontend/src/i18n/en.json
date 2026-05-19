@@ -5,6 +5,7 @@
     "account": "Account",
     "dashboard": "Dashboard",
     "tenants": "Tenants",
+    "myTenant": "My Tenant",
     "activeCalls": "Active Calls",
     "cdr": "CDR History",
     "profile": "Profile",
