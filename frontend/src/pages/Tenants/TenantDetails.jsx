@@ -21,6 +21,8 @@ const EMPTY_TRUNK_FORM = {
   transport: 'udp', codecs: 'ulaw,alaw', max_channels: 10,
   username: '', password: '',
 }
+const EMPTY_USER_FORM = { username: '', password: '', role: 'user', extension_id: '', is_active: true }
+const EMPTY_USER_EDIT_FORM = { username: '', password: '', role: 'user', extension_id: '', is_active: true }
 
 export default function TenantDetails() {
   const { id } = useParams()
@@ -48,6 +50,13 @@ export default function TenantDetails() {
   const [eventsPage, setEventsPage] = useState(1)
   const [eventsFilter, setEventsFilter] = useState('')
 
+  // --- Users state ---
+  const [userDialogOpen, setUserDialogOpen] = useState(false)
+  const [userForm, setUserForm] = useState(EMPTY_USER_FORM)
+  const [userEditDialogOpen, setUserEditDialogOpen] = useState(false)
+  const [userEditForm, setUserEditForm] = useState(EMPTY_USER_EDIT_FORM)
+  const [editingUserId, setEditingUserId] = useState(null)
+
   // ==================== Queries ====================
 
   const { data: tenant, isLoading, error } = useQuery({
@@ -72,6 +81,12 @@ export default function TenantDetails() {
     queryFn: () => client.get(`/tenants/${id}/events`, {
       params: { page: eventsPage, per_page: 20, ...(eventsFilter ? { action: eventsFilter } : {}) },
     }).then((r) => r.data),
+    enabled: !!id,
+  })
+
+  const { data: users } = useQuery({
+    queryKey: ['users', id],
+    queryFn: () => client.get(`/tenants/${id}/users`).then((r) => r.data),
     enabled: !!id,
   })
 
@@ -241,6 +256,72 @@ export default function TenantDetails() {
     setTrunkForm(EMPTY_TRUNK_FORM)
   }
 
+  // ==================== User Mutations ====================
+
+  const createUserMutation = useMutation({
+    mutationFn: (payload) =>
+      client.post(`/tenants/${id}/users`, payload).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
+      setUserForm(EMPTY_USER_FORM)
+      setUserDialogOpen(false)
+      toast.success('User created')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to create user'),
+  })
+
+  const updateUserMutation = useMutation({
+    mutationFn: ({ userId, payload }) =>
+      client.put(`/tenants/${id}/users/${userId}`, payload).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
+      setUserEditDialogOpen(false)
+      setEditingUserId(null)
+      toast.success('User updated')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to update user'),
+  })
+
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId) => client.delete(`/tenants/${id}/users/${userId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
+      toast.success('User deleted')
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete user'),
+  })
+
+  const handleCreateUser = (e) => {
+    e.preventDefault()
+    const payload = { ...userForm, extension_id: userForm.extension_id || null }
+    createUserMutation.mutate(payload)
+  }
+
+  const handleUpdateUser = (e) => {
+    e.preventDefault()
+    const payload = { 
+      ...userEditForm, 
+      extension_id: userEditForm.extension_id || null,
+      password: userEditForm.password || null 
+    }
+    updateUserMutation.mutate({ userId: editingUserId, payload })
+  }
+
+  const openEditUser = (u) => {
+    setEditingUserId(u.id)
+    setUserEditForm({
+      username: u.username,
+      password: '',
+      role: u.role,
+      extension_id: u.extension_id || '',
+      is_active: u.is_active,
+    })
+    setUserEditDialogOpen(true)
+  }
+
   // ==================== Render ====================
 
   if (isLoading) return <p className={s.loading}>Loading tenant...</p>
@@ -287,6 +368,9 @@ export default function TenantDetails() {
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="call-routes">
             Call Routes
+          </Tabs.Trigger>
+          <Tabs.Trigger className={styles.tabsTrigger} value="users">
+            Users ({users?.items?.length || 0})
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -721,6 +805,177 @@ export default function TenantDetails() {
         {/* ==================== CALL ROUTES TAB ==================== */}
         <Tabs.Content className={styles.tabsContent} value="call-routes">
           <TenantCallRoutes tenantId={id} />
+        </Tabs.Content>
+
+        {/* ==================== USERS TAB ==================== */}
+        <Tabs.Content className={styles.tabsContent} value="users">
+          <section className={styles.tabToolbar}>
+            <Dialog.Root open={userDialogOpen} onOpenChange={(open) => { setUserDialogOpen(open); if (!open) setUserForm(EMPTY_USER_FORM) }}>
+              <Dialog.Trigger asChild>
+                <button className={`${s.btn} ${s.btnPrimary}`} id="create-user-btn">
+                  <Plus size={16} aria-hidden="true" /> Add User
+                </button>
+              </Dialog.Trigger>
+              <Dialog.Portal>
+                <Dialog.Overlay className={s.dialogOverlay} />
+                <Dialog.Content className={s.dialogContent}>
+                  <Dialog.Title className={s.dialogTitle}>Create Web User</Dialog.Title>
+                  <form className={s.dialogForm} onSubmit={handleCreateUser}>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="user-username">Username</label>
+                      <input id="user-username" className={s.fieldInput} placeholder="john_doe" required
+                        value={userForm.username}
+                        onChange={(e) => setUserForm((f) => ({ ...f, username: e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="user-password">Password</label>
+                      <input id="user-password" className={s.fieldInput} type="password" placeholder="••••••••" required
+                        value={userForm.password}
+                        onChange={(e) => setUserForm((f) => ({ ...f, password: e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="user-role">Role</label>
+                      <select id="user-role" className={s.fieldInput}
+                        value={userForm.role}
+                        onChange={(e) => setUserForm((f) => ({ ...f, role: e.target.value }))}>
+                        <option value="user">User</option>
+                        <option value="tenant_admin">Tenant Admin</option>
+                      </select>
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="user-extension">Linked Extension (Optional)</label>
+                      <select id="user-extension" className={s.fieldInput}
+                        value={userForm.extension_id}
+                        onChange={(e) => setUserForm((f) => ({ ...f, extension_id: e.target.value }))}>
+                        <option value="">None</option>
+                        {extensions?.items?.map((ext) => (
+                          <option key={ext.id} value={ext.id}>
+                            {ext.extension_number} - {ext.display_name}
+                          </option>
+                        ))}
+                      </select>
+                    </fieldset>
+                    <footer className={s.dialogActions}>
+                      <Dialog.Close asChild>
+                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                      </Dialog.Close>
+                      <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
+                        disabled={createUserMutation.isPending}>
+                        {createUserMutation.isPending ? 'Creating...' : 'Create'}
+                      </button>
+                    </footer>
+                  </form>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
+
+            <Dialog.Root open={userEditDialogOpen} onOpenChange={(open) => { if (!open) setUserEditDialogOpen(false) }}>
+              <Dialog.Portal>
+                <Dialog.Overlay className={s.dialogOverlay} />
+                <Dialog.Content className={s.dialogContent}>
+                  <Dialog.Title className={s.dialogTitle}>Edit Web User</Dialog.Title>
+                  <form className={s.dialogForm} onSubmit={handleUpdateUser}>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="user-edit-username">Username</label>
+                      <input id="user-edit-username" className={s.fieldInput} placeholder="john_doe" required
+                        value={userEditForm.username}
+                        onChange={(e) => setUserEditForm((f) => ({ ...f, username: e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="user-edit-password">Password (leave blank to keep current)</label>
+                      <input id="user-edit-password" className={s.fieldInput} type="password" placeholder="••••••••"
+                        value={userEditForm.password}
+                        onChange={(e) => setUserEditForm((f) => ({ ...f, password: e.target.value }))} />
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="user-edit-role">Role</label>
+                      <select id="user-edit-role" className={s.fieldInput}
+                        value={userEditForm.role}
+                        onChange={(e) => setUserEditForm((f) => ({ ...f, role: e.target.value }))}>
+                        <option value="user">User</option>
+                        <option value="tenant_admin">Tenant Admin</option>
+                      </select>
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={s.fieldLabel} htmlFor="user-edit-extension">Linked Extension (Optional)</label>
+                      <select id="user-edit-extension" className={s.fieldInput}
+                        value={userEditForm.extension_id}
+                        onChange={(e) => setUserEditForm((f) => ({ ...f, extension_id: e.target.value }))}>
+                        <option value="">None</option>
+                        {extensions?.items?.map((ext) => (
+                          <option key={ext.id} value={ext.id}>
+                            {ext.extension_number} - {ext.display_name}
+                          </option>
+                        ))}
+                      </select>
+                    </fieldset>
+                    <fieldset className={s.field}>
+                      <label className={styles.checkboxLabel} htmlFor="user-edit-active" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input id="user-edit-active" type="checkbox" checked={userEditForm.is_active}
+                          onChange={(e) => setUserEditForm((f) => ({ ...f, is_active: e.target.checked }))} />
+                        <span>Active Account</span>
+                      </label>
+                    </fieldset>
+                    <footer className={s.dialogActions}>
+                      <Dialog.Close asChild>
+                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                      </Dialog.Close>
+                      <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
+                        disabled={updateUserMutation.isPending}>
+                        {updateUserMutation.isPending ? 'Saving...' : 'Save'}
+                      </button>
+                    </footer>
+                  </form>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
+          </section>
+
+          <article className={s.tableWrap}>
+            <table className={s.table}>
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Linked Extension</th>
+                  <th>Status</th>
+                  <th>Created At</th>
+                  <th style={{ width: 100 }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users?.items?.length ? users.items.map((u) => (
+                  <tr key={u.id}>
+                    <td><strong>{u.username}</strong></td>
+                    <td style={{ textTransform: 'capitalize' }}>{u.role.replace('_', ' ')}</td>
+                    <td>{u.extension_number ? `${u.extension_number}` : 'None'}</td>
+                    <td>
+                      <StatusBadge status={u.is_active ? 'active' : 'inactive'} />
+                    </td>
+                    <td>{formatDate(u.created_at)}</td>
+                    <td>
+                      <section className={s.tableActions}>
+                        <button className={`${s.btn} ${s.btnSecondary} ${s.btnIcon}`}
+                          onClick={() => openEditUser(u)} title="Edit user" aria-label="Edit user">
+                          <Edit size={14} aria-hidden="true" />
+                        </button>
+                        <button className={`${s.btn} ${s.btnDanger} ${s.btnIcon}`}
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete user ${u.username}?`)) {
+                              deleteUserMutation.mutate(u.id)
+                            }
+                          }} title="Delete user" aria-label="Delete user">
+                          <Trash2 size={14} aria-hidden="true" />
+                        </button>
+                      </section>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={6} className={s.empty}>No users found</td></tr>
+                )}
+              </tbody>
+            </table>
+          </article>
         </Tabs.Content>
       </Tabs.Root>
     </>
