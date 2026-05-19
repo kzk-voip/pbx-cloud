@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import client from '../../api/client'
 import useTimezone from '../../hooks/useTimezone'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
+import TenantReports from './TenantReports'
 import s from '../shared.module.css'
 import styles from './TenantDetails.module.css'
 
@@ -275,6 +276,9 @@ export default function TenantDetails() {
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="events">
             Events
+          </Tabs.Trigger>
+          <Tabs.Trigger className={styles.tabsTrigger} value="reports">
+            Reports
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -694,6 +698,11 @@ export default function TenantDetails() {
               </footer>
             )}
           </article>
+        </Tabs.Content>
+
+        {/* ==================== REPORTS TAB ==================== */}
+        <Tabs.Content className={styles.tabsContent} value="reports">
+          <TenantReports tenantId={id} />
         </Tabs.Content>
       </Tabs.Root>
     </>
