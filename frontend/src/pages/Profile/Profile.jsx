@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Lock, Globe } from 'lucide-react'
 import toast from 'react-hot-toast'
 import useAuthStore from '../../store/authStore'
+import useTimezone from '../../hooks/useTimezone'
 import client from '../../api/client'
 import s from '../shared.module.css'
 import styles from './Profile.module.css'
@@ -13,10 +14,30 @@ const LANGUAGES = [
   { code: 'uk', label: 'Українська' },
 ]
 
+const TIMEZONES = [
+  'UTC',
+  'Europe/Kyiv',
+  'Europe/London',
+  'Europe/Berlin',
+  'Europe/Paris',
+  'Europe/Warsaw',
+  'Europe/Moscow',
+  'Europe/Istanbul',
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Shanghai',
+  'Asia/Tokyo',
+  'Australia/Sydney',
+]
 export default function Profile() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
+  const { timezone, setTimezone, formatDate } = useTimezone()
   const [form, setForm] = useState({ current_password: '', new_password: '', confirm: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -85,7 +106,7 @@ export default function Profile() {
           </article>
           <article className={styles.infoItem}>
             <span className={styles.infoLabel}>{t('profile.created')}</span>
-            <span className={styles.infoValue}>{new Date(user.created_at).toLocaleString()}</span>
+            <span className={styles.infoValue}>{formatDate(user.created_at)}</span>
           </article>
         </section>
       </article>
@@ -108,6 +129,20 @@ export default function Profile() {
             >
               {LANGUAGES.map((lang) => (
                 <option key={lang.code} value={lang.code}>{lang.label}</option>
+              ))}
+            </select>
+          </fieldset>
+          <fieldset className={s.field}>
+            <label className={s.fieldLabel} htmlFor="timezone-select">{t('profile.timezone')}</label>
+            <select
+              id="timezone-select"
+              className={s.fieldInput}
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+              style={{ height: 40 }}
+            >
+              {TIMEZONES.map((tz) => (
+                <option key={tz} value={tz}>{tz.replace(/_/g, ' ')}</option>
               ))}
             </select>
           </fieldset>

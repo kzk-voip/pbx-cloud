@@ -6,6 +6,7 @@ import * as Tabs from '@radix-ui/react-tabs'
 import * as Dialog from '@radix-ui/react-dialog'
 import toast from 'react-hot-toast'
 import client from '../../api/client'
+import useTimezone from '../../hooks/useTimezone'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
 import s from '../shared.module.css'
 import styles from './TenantDetails.module.css'
@@ -22,6 +23,7 @@ export default function TenantDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { formatDate } = useTimezone()
 
   // --- Extension state ---
   const [extDialogOpen, setExtDialogOpen] = useState(false)
@@ -659,7 +661,7 @@ export default function TenantDetails() {
               <tbody>
                 {events?.items?.length > 0 ? events.items.map((evt) => (
                   <tr key={evt.id}>
-                    <td>{new Date(evt.created_at).toLocaleString()}</td>
+                    <td>{formatDate(evt.created_at)}</td>
                     <td><code>{evt.action}</code></td>
                     <td>{evt.source || '—'}</td>
                     <td>{evt.ip || '—'}</td>

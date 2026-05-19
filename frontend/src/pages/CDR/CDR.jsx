@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Download, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import client from '../../api/client'
+import useTimezone from '../../hooks/useTimezone'
 import s from '../shared.module.css'
 import styles from './CDR.module.css'
 
@@ -28,6 +29,7 @@ export default function CDR() {
   const [selectedTenant, setSelectedTenant] = useState('')
   const [page, setPage] = useState(1)
   const [selectedRecord, setSelectedRecord] = useState(null)
+  const { formatDate } = useTimezone()
   const perPage = 20
 
   const { data: tenants } = useQuery({
@@ -113,7 +115,7 @@ export default function CDR() {
               {data?.items?.length > 0 ? data.items.map((r) => (
                 <tr key={r.id} className={s.clickableRow}
                   onClick={() => setSelectedRecord(r)}>
-                  <td>{new Date(r.calldate).toLocaleString()}</td>
+                  <td>{formatDate(r.calldate)}</td>
                   <td>{r.src || '—'}</td>
                   <td>{r.dst || '—'}</td>
                   <td>{formatDuration(r.duration)}</td>
@@ -163,7 +165,7 @@ export default function CDR() {
                 <section className={styles.detailItem}>
                   <span className={styles.detailLabel}>Date & Time</span>
                   <span className={styles.detailValue}>
-                    {new Date(selectedRecord.calldate).toLocaleString()}
+                    {formatDate(selectedRecord.calldate)}
                   </span>
                 </section>
                 <section className={styles.detailItem}>
