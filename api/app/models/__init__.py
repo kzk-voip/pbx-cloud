@@ -13,6 +13,8 @@ from app.models.ara import PjsipEndpoint, PjsipAuth, PjsipAor
 from app.models.tenant_event import TenantEvent
 from app.models.inbound_rule import InboundRule
 from app.models.call_route import CallRoute
+from app.models.global_ip_whitelist import GlobalIpWhitelist
+from app.models.tenant_ip_acl import TenantIpAcl
 
 __all__ = [
     "Tenant",
@@ -26,5 +28,7 @@ __all__ = [
     "TenantEvent",
     "InboundRule",
     "CallRoute",
+    "GlobalIpWhitelist",
+    "TenantIpAcl",
 ]
 
