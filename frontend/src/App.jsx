@@ -92,8 +92,16 @@ export default function App() {
         } />
 
         {/* Extension user routes */}
-        <Route path="/my-dashboard" element={<ExtensionDashboard />} />
-        <Route path="/my-calls" element={<CDR />} />
+        <Route path="/my-dashboard" element={
+          <RoleGuard allowed={['user']}>
+            <ExtensionDashboard />
+          </RoleGuard>
+        } />
+        <Route path="/my-calls" element={
+          <RoleGuard allowed={['user']}>
+            <CDR />
+          </RoleGuard>
+        } />
 
         {/* Shared routes */}
         <Route path="/profile" element={<Profile />} />

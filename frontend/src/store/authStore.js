@@ -7,6 +7,7 @@ const useAuthStore = create((set, get) => ({
   refreshToken: localStorage.getItem('refresh_token'),
   isAuthenticated: !!localStorage.getItem('access_token'),
   isLoading: false,
+  isUserLoaded: false,
 
   login: async (username, password) => {
     set({ isLoading: true })
@@ -24,6 +25,7 @@ const useAuthStore = create((set, get) => ({
         user,
         isAuthenticated: true,
         isLoading: false,
+        isUserLoaded: true,
       })
       return { success: true }
     } catch (error) {
@@ -43,6 +45,7 @@ const useAuthStore = create((set, get) => ({
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
+      isUserLoaded: false,
     })
   },
 
@@ -50,7 +53,7 @@ const useAuthStore = create((set, get) => ({
     if (!get().accessToken) return
     try {
       const { data } = await client.get('/auth/me')
-      set({ user: data, isAuthenticated: true })
+      set({ user: data, isAuthenticated: true, isUserLoaded: true })
     } catch {
       get().logout()
     }
