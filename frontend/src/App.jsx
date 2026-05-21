@@ -12,6 +12,7 @@ import TenantSettings from './pages/Tenants/TenantSettings'
 import ActiveCalls from './pages/ActiveCalls/ActiveCalls'
 import CDR from './pages/CDR/CDR'
 import Profile from './pages/Profile/Profile'
+import IpAccess from './pages/IpAccess/IpAccess'
 
 /** Role-based guard — redirects unauthorized roles to their default page */
 function RoleGuard({ allowed, children }) {
@@ -66,6 +67,11 @@ export default function App() {
         <Route path="/tenants" element={
           <RoleGuard allowed={['super_admin']}>
             <Tenants />
+          </RoleGuard>
+        } />
+        <Route path="/ip-access" element={
+          <RoleGuard allowed={['super_admin']}>
+            <IpAccess />
           </RoleGuard>
         } />
 

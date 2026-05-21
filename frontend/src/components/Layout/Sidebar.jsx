@@ -8,6 +8,7 @@ import {
   FileText,
   User,
   Phone,
+  Shield,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react'
@@ -31,6 +32,7 @@ export default function Sidebar({ collapsed, onToggle }) {
   const superAdminMonitorNav = [
     { to: '/active-calls', icon: PhoneCall, label: t('sidebar.activeCalls') },
     { to: '/cdr', icon: FileText, label: t('sidebar.cdr') },
+    { to: '/ip-access', icon: Shield, label: t('sidebar.ipAccess') },
   ]
 
   // ── tenant_admin nav ──

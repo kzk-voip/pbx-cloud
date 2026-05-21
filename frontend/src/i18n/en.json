@@ -13,7 +13,8 @@
     "myDashboard": "My Dashboard",
     "myCalls": "My Calls",
     "inboundRules": "Inbound Rules",
-    "callRoutes": "Call Routes"
+    "callRoutes": "Call Routes",
+    "ipAccess": "IP Access"
   },
   "dashboard": {
     "totalTenants": "Total Tenants",

@@ -6,11 +6,13 @@ import * as Tabs from '@radix-ui/react-tabs'
 import * as Dialog from '@radix-ui/react-dialog'
 import toast from 'react-hot-toast'
 import client from '../../api/client'
+import useAuthStore from '../../store/authStore'
 import useTimezone from '../../hooks/useTimezone'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
 import TenantReports from './TenantReports'
 import TenantInboundRules from './TenantInboundRules'
 import TenantCallRoutes from './TenantCallRoutes'
+import TenantIpAcl from './TenantIpAcl'
 import s from '../shared.module.css'
 import styles from './TenantDetails.module.css'
 
@@ -29,6 +31,8 @@ export default function TenantDetails() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { formatDate } = useTimezone()
+  const { user: currentUser } = useAuthStore()
+  const isSuperAdmin = currentUser?.role === 'super_admin'
 
   // --- Extension state ---
   const [extDialogOpen, setExtDialogOpen] = useState(false)
@@ -372,6 +376,11 @@ export default function TenantDetails() {
           <Tabs.Trigger className={styles.tabsTrigger} value="users">
             Users ({users?.items?.length || 0})
           </Tabs.Trigger>
+          {isSuperAdmin && (
+            <Tabs.Trigger className={styles.tabsTrigger} value="ip-acl">
+              IP ACL
+            </Tabs.Trigger>
+          )}
         </Tabs.List>
 
         {/* ==================== INFO TAB ==================== */}
@@ -977,6 +986,13 @@ export default function TenantDetails() {
             </table>
           </article>
         </Tabs.Content>
+
+        {/* ==================== IP ACL TAB ==================== */}
+        {isSuperAdmin && (
+          <Tabs.Content className={styles.tabsContent} value="ip-acl">
+            <TenantIpAcl tenantId={id} />
+          </Tabs.Content>
+        )}
       </Tabs.Root>
     </>
   )

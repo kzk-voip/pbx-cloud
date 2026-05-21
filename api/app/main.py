@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import async_session
 from app.redis import init_redis, close_redis
-from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist, ws, events, reports, inbound_rules, call_routes, users, internal
+from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist, ws, events, reports, inbound_rules, call_routes, users, internal, ip_whitelist, tenant_ip_acl
 from app.services import kamailio_service
 
 # Configure logging for all app.* loggers
@@ -66,6 +66,22 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"Startup: Kamailio htable sync failed (non-fatal): {e}")
 
+    # Sync global IP whitelist to Kamailio htable
+    try:
+        async with async_session() as db:
+            synced = await kamailio_service.sync_global_whitelist_from_db(db)
+            logger.info(f"Startup: synced {synced} IPs to Kamailio whitelist")
+    except Exception as e:
+        logger.warning(f"Startup: whitelist sync failed (non-fatal): {e}")
+
+    # Sync tenant IP ACLs to Kamailio htable
+    try:
+        async with async_session() as db:
+            synced = await kamailio_service.sync_tenant_acls_from_db(db)
+            logger.info(f"Startup: synced {synced} tenant ACL entries")
+    except Exception as e:
+        logger.warning(f"Startup: tenant ACL sync failed (non-fatal): {e}")
+
     # Start custom prometheus metrics collector
     metrics_task = asyncio.create_task(collect_asterisk_metrics())
 
@@ -112,6 +128,8 @@ app.include_router(inbound_rules.router)
 app.include_router(call_routes.router)
 app.include_router(users.router)
 app.include_router(internal.router)
+app.include_router(ip_whitelist.router)
+app.include_router(tenant_ip_acl.router)
 
 from prometheus_fastapi_instrumentator import Instrumentator
 Instrumentator().instrument(app).expose(app)

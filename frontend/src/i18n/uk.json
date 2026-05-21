@@ -13,7 +13,8 @@
     "myDashboard": "Мій дашборд",
     "myCalls": "Мої дзвінки",
     "inboundRules": "Вхідні правила",
-    "callRoutes": "Вихідні маршрути"
+    "callRoutes": "Вихідні маршрути",
+    "ipAccess": "IP Доступ"
   },
   "dashboard": {
     "totalTenants": "Всього тенантів",
