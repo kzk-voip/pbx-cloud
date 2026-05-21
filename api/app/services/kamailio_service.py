@@ -171,6 +171,19 @@ async def unblacklist_ip(ip: str) -> bool:
     return False
 
 
+async def is_ip_blacklisted(ip: str) -> bool:
+    """Check if an IP is in the Kamailio blacklist."""
+    # We dump the blacklist and check locally since htable.get over JSONRPC might not be standard
+    result = await dump_blacklist()
+    if result and "result" in result:
+        for slot in result["result"]:
+            if "slot" in slot:
+                for item in slot["slot"]:
+                    if item.get("name") == ip:
+                        return True
+    return False
+
+
 # ---- Global IP Whitelist Management ----
 
 async def dump_whitelist() -> dict | None:

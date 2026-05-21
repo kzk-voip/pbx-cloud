@@ -2,11 +2,11 @@
 Auth router — login, refresh, and current user endpoints.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies.auth import get_current_user
+from app.dependencies.auth import get_current_user, verify_tenant_ip_acl
 from app.dependencies.database import get_db
 from app.models.user import User
 from app.schemas.auth import (
@@ -28,7 +28,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
+async def login(request: LoginRequest, fastapi_req: Request, db: AsyncSession = Depends(get_db)):
     """
     Authenticate with username and password.
     Returns JWT access token (15min) and refresh token (7 days).
@@ -50,6 +50,9 @@ async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is disabled",
         )
+
+    if user.tenant_id:
+        await verify_tenant_ip_acl(user.tenant_id, fastapi_req, db)
 
     # Create tokens with user ID as subject
     token_data = {
