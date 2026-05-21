@@ -73,27 +73,38 @@ async def verify_tenant_ip_acl(tenant_id, request: Request, db: AsyncSession):
     Check if the request IP is allowed by the tenant's IP ACL.
     If the ACL has entries, the IP must be in the list.
     If the ACL is empty, all IPs are allowed.
+    If the table does not exist yet, silently allow.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     forwarded = request.headers.get("X-Forwarded-For")
     ip = forwarded.split(",")[0].strip() if forwarded else request.client.host
 
-    # Check if ACL is active (has entries)
-    acl_count = await db.scalar(
-        select(func.count()).select_from(TenantIpAcl).where(TenantIpAcl.tenant_id == tenant_id)
-    )
-    
-    if acl_count > 0:
-        is_allowed = await db.scalar(
-            select(TenantIpAcl).where(
-                TenantIpAcl.tenant_id == tenant_id,
-                TenantIpAcl.ip_address == ip
-            )
+    try:
+        # Check if ACL is active (has entries)
+        acl_count = await db.scalar(
+            select(func.count()).select_from(TenantIpAcl).where(TenantIpAcl.tenant_id == tenant_id)
         )
-        if not is_allowed:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="IP Not Authorized for Tenant",
+
+        if acl_count > 0:
+            is_allowed = await db.scalar(
+                select(TenantIpAcl).where(
+                    TenantIpAcl.tenant_id == tenant_id,
+                    TenantIpAcl.ip_address == ip
+                )
             )
+            if not is_allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="IP Not Authorized for Tenant",
+                )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.warning("IP ACL check failed (table may not exist): %s", exc)
+        # Roll back the failed transaction so subsequent queries work
+        await db.rollback()
 
 
 def require_role(*allowed_roles: str):
