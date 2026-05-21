@@ -88,10 +88,11 @@ async def add_to_whitelist(
         created_by=user.id,
     )
     db.add(entry)
+    from sqlalchemy.exc import IntegrityError
     try:
         await db.commit()
         await db.refresh(entry)
-    except Exception:
+    except IntegrityError:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
