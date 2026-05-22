@@ -120,6 +120,7 @@ Always name the exact menu item or tab. Reply in the user's language.
 RULES:
 1. Name exact page and tab (e.g. "go to Tenants, then Extensions tab").
 2. Keep answers short — max 3 sentences, plain text only.
+3. Do NOT use markdown formatting like **bold** or *italic*. Write plain text.
 """
 
 
@@ -264,6 +265,12 @@ def _clean_reply(raw: str) -> str:
                 return parsed["reply"]
         except (json.JSONDecodeError, TypeError):
             pass
+
+    # Strip markdown formatting (bold, italic)
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # **bold** → bold
+    text = re.sub(r'\*(.+?)\*', r'\1', text)       # *italic* → italic
+    text = re.sub(r'__(.+?)__', r'\1', text)       # __bold__ → bold
+    text = re.sub(r'_(.+?)_', r'\1', text)         # _italic_ → italic
 
     return text
 

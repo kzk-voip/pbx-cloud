@@ -158,8 +158,13 @@
       "route": "/tenants/:id/settings",
       "roles": ["super_admin", "tenant_admin"],
       "description": "Advanced settings for a specific tenant"
+    },
+    {
+      "name": "WebRTC Softphone",
+      "location": "sidebar_bottom",
+      "roles": ["tenant_admin", "user"],
+      "sidebar_id": "nav-softphone",
+      "description": "Built-in browser-based phone (WebRTC). Located at the bottom of the sidebar — click the phone icon to open. Allows making and receiving calls directly from the browser. Requires SIP credentials from the Extensions tab (extension number, SIP password, and WebSocket URI). The softphone panel slides out from the sidebar."
     }
-  ],
-  "highlight_instructions": "When the user asks about a specific UI element, you MUST include highlight actions in your response. Use the sidebar_id or tab_id values from this map. You may return 1-3 highlights per response. If the question is general, return an empty highlights array.",
-  "response_format": "You MUST respond with valid JSON only. No markdown, no code fences. Format: {\"reply\": \"text\", \"highlights\": [{\"element_id\": \"id-value\", \"label\": \"description\"}]}"
+  ]
 }

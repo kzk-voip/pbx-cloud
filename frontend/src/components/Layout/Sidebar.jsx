@@ -115,6 +115,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           className={`${styles.softphoneBtn} ${softphoneOpen ? styles.softphoneBtnActive : ''}`}
           onClick={() => setSoftphoneOpen((v) => !v)}
           aria-label={softphoneOpen ? 'Close softphone' : 'Open softphone'}
+          id="nav-softphone"
         >
           <Phone size={20} aria-hidden="true" />
           <span className={styles.navText}>{t('sidebar.softphone')}</span>
