@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, X, Send, Sparkles, Trash2 } from 'lucide-react'
 import client from '../../api/client'
@@ -112,6 +113,7 @@ export default function AIAssistantWidget() {
       setMessages((prev) => [...prev, botMsg])
 
       // Apply spotlight highlights
+      console.log('[AI Assistant] Response highlights:', data.highlights)
       if (data.highlights?.length) {
         applyHighlights(data.highlights)
       }
@@ -155,8 +157,8 @@ export default function AIAssistantWidget() {
     if (open) clearHighlights()
   }
 
-  return (
-    <aside className={styles.wrapper} aria-label="AI Assistant">
+  return createPortal(
+    <>
       {/* Chat Window */}
       {open && (
         <section
@@ -279,6 +281,7 @@ export default function AIAssistantWidget() {
           <MessageCircle size={24} aria-hidden="true" />
         )}
       </button>
-    </aside>
+    </>,
+    document.body
   )
 }
