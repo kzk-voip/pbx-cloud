@@ -94,7 +94,7 @@ class ChatResponse(BaseModel):
 
 # ── Gemini client ──
 
-_GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+_GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
 
 
 async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
@@ -125,18 +125,22 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
         "generationConfig": {
             "temperature": 0.3,
             "maxOutputTokens": 512,
-            "responseMimeType": "application/json",
         },
     }
 
     url = (
         "https://generativelanguage.googleapis.com/v1beta/"
-        f"models/{_GEMINI_MODEL}:generateContent?key={api_key}"
+        f"models/{_GEMINI_MODEL}:generateContent"
     )
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-goog-api-key": api_key,
+    }
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as http:
-            resp = await http.post(url, json=payload)
+            resp = await http.post(url, json=payload, headers=headers)
     except httpx.RequestError as exc:
         logger.error("Gemini network error: %s", exc)
         return {
