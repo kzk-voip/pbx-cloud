@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, X, Send, Sparkles, Trash2 } from 'lucide-react'
 import client from '../../api/client'
+import useAuthStore from '../../store/authStore'
 import styles from './AIAssistantWidget.module.css'
 
 const SUGGESTIONS = {
@@ -21,6 +22,7 @@ const SUGGESTIONS = {
 }
 
 export default function AIAssistantWidget() {
+  const { user } = useAuthStore()
   const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([])
@@ -157,6 +159,9 @@ export default function AIAssistantWidget() {
     setOpen((v) => !v)
     if (open) clearHighlights()
   }
+
+  // Hide widget for super_admin
+  if (user?.role === 'super_admin') return null
 
   return createPortal(
     <>
