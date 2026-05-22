@@ -354,30 +354,30 @@ export default function TenantDetails() {
 
       <Tabs.Root defaultValue="info" className={styles.tabs}>
         <Tabs.List className={styles.tabsList} aria-label="Tenant details">
-          <Tabs.Trigger className={styles.tabsTrigger} value="info">Info</Tabs.Trigger>
-          <Tabs.Trigger className={styles.tabsTrigger} value="extensions">
+          <Tabs.Trigger className={styles.tabsTrigger} value="info" id="tab-info">Info</Tabs.Trigger>
+          <Tabs.Trigger className={styles.tabsTrigger} value="extensions" id="tab-extensions">
             Extensions ({extensions?.items?.length || 0})
           </Tabs.Trigger>
-          <Tabs.Trigger className={styles.tabsTrigger} value="trunks">
+          <Tabs.Trigger className={styles.tabsTrigger} value="trunks" id="tab-trunks">
             Trunks ({trunks?.items?.length || 0})
           </Tabs.Trigger>
-          <Tabs.Trigger className={styles.tabsTrigger} value="events">
+          <Tabs.Trigger className={styles.tabsTrigger} value="events" id="tab-events">
             Events
           </Tabs.Trigger>
-          <Tabs.Trigger className={styles.tabsTrigger} value="reports">
+          <Tabs.Trigger className={styles.tabsTrigger} value="reports" id="tab-reports">
             Reports
           </Tabs.Trigger>
-          <Tabs.Trigger className={styles.tabsTrigger} value="inbound-rules">
+          <Tabs.Trigger className={styles.tabsTrigger} value="inbound-rules" id="tab-inbound-rules">
             Inbound Rules
           </Tabs.Trigger>
-          <Tabs.Trigger className={styles.tabsTrigger} value="call-routes">
+          <Tabs.Trigger className={styles.tabsTrigger} value="call-routes" id="tab-call-routes">
             Call Routes
           </Tabs.Trigger>
-          <Tabs.Trigger className={styles.tabsTrigger} value="users">
+          <Tabs.Trigger className={styles.tabsTrigger} value="users" id="tab-users">
             Users ({users?.items?.length || 0})
           </Tabs.Trigger>
           {isSuperAdmin && (
-            <Tabs.Trigger className={styles.tabsTrigger} value="ip-acl">
+            <Tabs.Trigger className={styles.tabsTrigger} value="ip-acl" id="tab-ip-acl">
               IP ACL
             </Tabs.Trigger>
           )}

@@ -26,30 +26,30 @@ export default function Sidebar({ collapsed, onToggle }) {
 
   // ── super_admin nav ──
   const superAdminMainNav = [
-    { to: '/dashboard', icon: LayoutDashboard, label: t('sidebar.dashboard') },
-    { to: '/tenants', icon: Building2, label: t('sidebar.tenants') },
+    { to: '/dashboard', icon: LayoutDashboard, label: t('sidebar.dashboard'), id: 'nav-dashboard' },
+    { to: '/tenants', icon: Building2, label: t('sidebar.tenants'), id: 'nav-tenants' },
   ]
   const superAdminMonitorNav = [
-    { to: '/active-calls', icon: PhoneCall, label: t('sidebar.activeCalls') },
-    { to: '/cdr', icon: FileText, label: t('sidebar.cdr') },
-    { to: '/ip-access', icon: Shield, label: t('sidebar.ipAccess') },
+    { to: '/active-calls', icon: PhoneCall, label: t('sidebar.activeCalls'), id: 'nav-active-calls' },
+    { to: '/cdr', icon: FileText, label: t('sidebar.cdr'), id: 'nav-cdr' },
+    { to: '/ip-access', icon: Shield, label: t('sidebar.ipAccess'), id: 'nav-ip-access' },
   ]
 
   // ── tenant_admin nav ──
   const tenantAdminMainNav = [
-    { to: tenantId ? `/tenants/${tenantId}` : '/profile', icon: Building2, label: t('sidebar.myTenant') || 'My Tenant' },
+    { to: tenantId ? `/tenants/${tenantId}` : '/profile', icon: Building2, label: t('sidebar.myTenant') || 'My Tenant', id: 'nav-my-tenant' },
   ]
   const tenantAdminMonitorNav = [
-    { to: '/active-calls', icon: PhoneCall, label: t('sidebar.activeCalls') },
-    { to: '/cdr', icon: FileText, label: t('sidebar.cdr') },
+    { to: '/active-calls', icon: PhoneCall, label: t('sidebar.activeCalls'), id: 'nav-active-calls' },
+    { to: '/cdr', icon: FileText, label: t('sidebar.cdr'), id: 'nav-cdr' },
   ]
 
   // ── extension user nav ──
   const extMainNav = [
-    { to: '/my-dashboard', icon: LayoutDashboard, label: t('sidebar.myDashboard') },
+    { to: '/my-dashboard', icon: LayoutDashboard, label: t('sidebar.myDashboard'), id: 'nav-my-dashboard' },
   ]
   const extMonitorNav = [
-    { to: '/my-calls', icon: FileText, label: t('sidebar.myCalls') },
+    { to: '/my-calls', icon: FileText, label: t('sidebar.myCalls'), id: 'nav-my-calls' },
   ]
 
   // Pick correct nav set
@@ -66,13 +66,14 @@ export default function Sidebar({ collapsed, onToggle }) {
   }
 
   const accountNav = [
-    { to: '/profile', icon: User, label: t('sidebar.profile') },
+    { to: '/profile', icon: User, label: t('sidebar.profile'), id: 'nav-profile' },
   ]
 
-  const renderNavItem = ({ to, icon: Icon, label }) => (
+  const renderNavItem = ({ to, icon: Icon, label, id }) => (
     <NavLink
       key={to}
       to={to}
+      id={id}
       className={({ isActive }) =>
         `${styles.navItem} ${isActive ? styles.active : ''}`
       }

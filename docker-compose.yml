@@ -127,6 +127,7 @@ services:
       - AMI_PORT=5038
       - AMI_USERNAME=${AMI_USERNAME:-admin}
       - AMI_PASSWORD=${AMI_PASSWORD:-changeme}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     volumes:
       - ./api:/app
     restart: unless-stopped
