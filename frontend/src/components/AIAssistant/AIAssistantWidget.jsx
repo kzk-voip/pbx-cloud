@@ -174,7 +174,7 @@ export default function AIAssistantWidget() {
               <p className={styles.chatHeaderSubtitle}>
                 {lang === 'uk'
                   ? 'Допоможу знайти потрібне'
-                  : 'I'll help you navigate'}
+                  : 'I\u2019ll help you navigate'}
               </p>
             </section>
             {messages.length > 0 && (
