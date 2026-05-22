@@ -26,9 +26,10 @@ export default function AIAssistantWidget() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [highlightedIds, setHighlightedIds] = useState([])
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
+  const highlightedRef = useRef([])
+  const highlightTimerRef = useRef(null)
 
   const lang = i18n.language?.startsWith('uk') ? 'uk' : 'en'
   const suggestions = SUGGESTIONS[lang] || SUGGESTIONS.en
@@ -45,51 +46,51 @@ export default function AIAssistantWidget() {
     }
   }, [open])
 
-  // ── Clear spotlight highlights ──
+  // ── Highlight helpers (ref-based, no state, no re-renders) ──
   const clearHighlights = useCallback(() => {
-    highlightedIds.forEach((id) => {
+    if (highlightTimerRef.current) {
+      clearTimeout(highlightTimerRef.current)
+      highlightTimerRef.current = null
+    }
+    highlightedRef.current.forEach((id) => {
       const el = document.getElementById(id)
-      if (el) {
-        el.classList.remove('ai-spotlight')
-      }
+      if (el) el.classList.remove('ai-spotlight')
     })
-    setHighlightedIds([])
-  }, [highlightedIds])
+    highlightedRef.current = []
+  }, [])
 
-  // ── Apply spotlight highlights ──
   const applyHighlights = useCallback((highlights) => {
     clearHighlights()
     if (!highlights?.length) return
 
-    const newIds = []
+    const applied = []
     highlights.forEach(({ element_id }) => {
       const el = document.getElementById(element_id)
       if (el) {
         el.classList.add('ai-spotlight')
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        newIds.push(element_id)
+        applied.push(element_id)
       }
     })
-    setHighlightedIds(newIds)
+    highlightedRef.current = applied
+    console.log('[AI Assistant] Highlights applied:', applied)
 
     // Auto-remove after 6 seconds
-    if (newIds.length > 0) {
-      setTimeout(() => {
-        newIds.forEach((id) => {
+    if (applied.length > 0) {
+      highlightTimerRef.current = setTimeout(() => {
+        applied.forEach((id) => {
           const el = document.getElementById(id)
           if (el) el.classList.remove('ai-spotlight')
         })
-        setHighlightedIds((prev) =>
-          prev.filter((id) => !newIds.includes(id))
-        )
+        highlightedRef.current = []
       }, 6000)
     }
   }, [clearHighlights])
 
-  // ── Clean up highlights on unmount ──
+  // ── Clean up highlights on unmount only ──
   useEffect(() => {
     return () => clearHighlights()
-  }, [clearHighlights])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Send message ──
   const sendMessage = async (text) => {
