@@ -14,6 +14,10 @@ set -e
 CONF_DIR="/tmp/asterisk-conf"
 mkdir -p "$CONF_DIR"
 
+# 0. Fix ownership on the recordings volume (mounted as root by Docker)
+mkdir -p /var/spool/asterisk/recordings
+chown -R asterisk:asterisk /var/spool/asterisk/recordings
+
 # 1. Copy ALL configs to the working directory, stripping Windows CRLF
 for f in /etc/asterisk/*.conf; do
     sed 's/\r$//' "$f" > "$CONF_DIR/$(basename "$f")"
@@ -31,5 +35,5 @@ sed -i "s/\${ASTERISK_SIP_PORT}/${ASTERISK_SIP_PORT:-5070}/g" "$CONF_DIR/pjsip.c
 # 4. Substitute AMI_PORT in manager.conf (each node needs a unique AMI port)
 sed -i "s/\${AMI_PORT}/${AMI_PORT:-5038}/g" "$CONF_DIR/manager.conf"
 
-# 5. Start Asterisk, pointing it to our processed config directory
-exec asterisk -f -C "$CONF_DIR/asterisk.conf"
+# 5. Drop privileges and start Asterisk as 'asterisk' user
+exec gosu asterisk asterisk -f -C "$CONF_DIR/asterisk.conf"

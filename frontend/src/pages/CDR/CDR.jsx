@@ -194,7 +194,6 @@ export default function CDR() {
                         onClick={(e) => {
                           e.stopPropagation()
                           if (playingId === r.id) {
-                            audioRef.current?.pause()
                             setPlayingId(null)
                           } else {
                             setPlayingId(r.id)
