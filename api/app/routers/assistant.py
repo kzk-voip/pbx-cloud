@@ -11,6 +11,7 @@ so that the file can be regenerated independently when the UI changes.
 import json
 import logging
 import os
+import re
 from pathlib import Path
 
 import httpx
@@ -30,28 +31,77 @@ router = APIRouter(prefix="/assistant", tags=["AI Assistant"])
 _CONTEXT_DIR = Path(__file__).resolve().parent.parent.parent / "ai_context"
 _UI_MAP_PATH = _CONTEXT_DIR / "ui_map.json"
 
-def _load_ui_map() -> str:
-    """Read the structured UI map and return it as a formatted string."""
+
+def _load_ui_map() -> tuple[str, dict]:
+    """Read the structured UI map, return (text_for_prompt, raw_dict)."""
     try:
         with open(_UI_MAP_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
-        return json.dumps(data, ensure_ascii=False, indent=2)
+        return json.dumps(data, ensure_ascii=False, indent=2), data
     except FileNotFoundError:
         logger.warning("UI map not found at %s — using fallback", _UI_MAP_PATH)
-        return "{}"
+        return "{}", {}
     except json.JSONDecodeError as exc:
         logger.error("Invalid JSON in UI map: %s", exc)
-        return "{}"
+        return "{}", {}
 
 
-_UI_MAP_TEXT = _load_ui_map()
+_UI_MAP_TEXT, _UI_MAP_DATA = _load_ui_map()
+
+
+# ── Build keyword → highlight mapping from UI map ──
+
+def _build_highlight_index(ui_map: dict) -> list[tuple[re.Pattern, dict]]:
+    """
+    Create a list of (compiled_regex, highlight_info) pairs from the UI map.
+    When the AI reply contains a keyword, we auto-attach the matching highlight.
+    """
+    entries = []
+    for page in ui_map.get("pages", []):
+        name = page.get("name", "")
+        sidebar_id = page.get("sidebar_id", "")
+        if sidebar_id and name:
+            # Match page name (case-insensitive, whole word)
+            pattern = re.compile(re.escape(name), re.IGNORECASE)
+            entries.append((pattern, {"element_id": sidebar_id, "label": name}))
+
+        # Also index tabs inside pages
+        for tab in page.get("tabs", []):
+            tab_name = tab.get("name", "")
+            tab_id = tab.get("tab_id", "")
+            if tab_id and tab_name:
+                pattern = re.compile(re.escape(tab_name), re.IGNORECASE)
+                entries.append((pattern, {"element_id": tab_id, "label": tab_name}))
+
+    return entries
+
+
+_HIGHLIGHT_INDEX = _build_highlight_index(_UI_MAP_DATA)
+
+
+def _detect_highlights(reply_text: str) -> list[dict]:
+    """Scan reply text for known UI element names and return highlights."""
+    found = []
+    seen_ids = set()
+    for pattern, hl_info in _HIGHLIGHT_INDEX:
+        if pattern.search(reply_text) and hl_info["element_id"] not in seen_ids:
+            found.append(hl_info)
+            seen_ids.add(hl_info["element_id"])
+            if len(found) >= 3:
+                break
+    return found
+
+
+# ── System prompt ──
 
 _SYSTEM_PROMPT = f"""\
-You are a friendly navigation assistant for the PBX Cloud admin panel.
+You are a friendly navigation assistant for the PBX Cloud admin panel — \
+a multi-tenant cloud PBX management system built on Asterisk and Kamailio.
 
 Your ONLY job is to help the user find things in the web interface.
-Answer concisely (2-4 sentences max). Always mention the exact menu item or
-tab name the user should click. Reply in the same language the user writes in.
+Answer concisely (2-4 sentences max). Always mention the exact menu item \
+or tab name the user should click. Reply in the same language the user \
+writes in.
 
 Below is the complete map of the application UI in JSON format.
 Use it to answer questions accurately.
@@ -61,13 +111,9 @@ Use it to answer questions accurately.
 --- END UI MAP ---
 
 RULES:
-1. When the user asks about a specific UI element, include highlight actions
-   using the sidebar_id or tab_id values from the map above.
-2. You may return 1-3 highlights per response.
-3. If the question is general or does not map to a specific element, return
-   an empty highlights array.
-4. You MUST respond with valid JSON only. No markdown, no code fences.
-   Format: {{"reply": "your text", "highlights": [{{"element_id": "nav-cdr", "label": "CDR History"}}]}}
+1. Always mention the exact page name or tab name from the UI map.
+2. Be specific: say "go to Tenants, then open the Extensions tab" not just "check extensions".
+3. Keep your answer to plain text only. Do NOT use JSON or code formatting.
 """
 
 
@@ -167,36 +213,12 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
             "highlights": [],
         }
 
-    # Parse JSON response
-    clean = text.strip()
-    # Strip markdown code fences if present
-    if clean.startswith("```"):
-        lines = clean.split("\n")
-        lines = [ln for ln in lines if not ln.strip().startswith("```")]
-        clean = "\n".join(lines).strip()
+    reply = text.strip()
 
-    try:
-        parsed = json.loads(clean)
-        return {
-            "reply": parsed.get("reply", clean),
-            "highlights": parsed.get("highlights", []),
-        }
-    except json.JSONDecodeError:
-        # Fallback: try to extract "reply" value from truncated JSON
-        import re
-        match = re.search(r'"reply"\s*:\s*"((?:[^"\\]|\\.)*)', clean)
-        if match:
-            reply_text = match.group(1)
-            # Try to extract highlights too
-            hl = []
-            for hl_match in re.finditer(
-                r'"element_id"\s*:\s*"([^"]+)"(?:.*?"label"\s*:\s*"([^"]*)")?',
-                clean,
-            ):
-                hl.append({"element_id": hl_match.group(1), "label": hl_match.group(2) or ""})
-            return {"reply": reply_text, "highlights": hl}
-        # Absolute fallback — return raw text
-        return {"reply": text.strip(), "highlights": []}
+    # Auto-detect highlights from reply text using the UI map index
+    highlights = _detect_highlights(reply)
+
+    return {"reply": reply, "highlights": highlights}
 
 
 # ── Endpoint ──
