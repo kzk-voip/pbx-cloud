@@ -1,0 +1,165 @@
+{
+  "app_name": "PBX Cloud Admin Panel",
+  "description": "Multi-tenant cloud PBX management system built on Asterisk and Kamailio",
+  "roles": ["super_admin", "tenant_admin", "user"],
+  "languages": ["en", "uk"],
+  "pages": [
+    {
+      "name": "Dashboard",
+      "route": "/dashboard",
+      "roles": ["super_admin"],
+      "sidebar_id": "nav-dashboard",
+      "description": "Main system overview for super administrators",
+      "elements": [
+        {"type": "metric_card", "label": "Total Tenants", "description": "Number of registered tenant organizations"},
+        {"type": "metric_card", "label": "Total Extensions", "description": "Number of SIP extension accounts across all tenants"},
+        {"type": "metric_card", "label": "Active Calls", "description": "Real-time count of ongoing phone calls"},
+        {"type": "chart", "label": "Call Volume (30 days)", "description": "Bar chart showing call volume trends over the last 30 days"},
+        {"type": "chart", "label": "Call Disposition", "description": "Pie chart showing answered vs missed vs failed calls"},
+        {"type": "chart", "label": "Peak Hours", "description": "Chart showing busiest calling hours"}
+      ]
+    },
+    {
+      "name": "Tenants List",
+      "route": "/tenants",
+      "roles": ["super_admin"],
+      "sidebar_id": "nav-tenants",
+      "description": "List of all tenant organizations with search and creation",
+      "elements": [
+        {"type": "table", "label": "Tenants table", "description": "Table listing all tenants with name, domain, extension count, status"},
+        {"type": "button", "label": "Create Tenant", "description": "Opens dialog to create a new tenant organization"}
+      ]
+    },
+    {
+      "name": "Tenant Details",
+      "route": "/tenants/:id",
+      "roles": ["super_admin", "tenant_admin"],
+      "sidebar_id": "nav-my-tenant",
+      "description": "Detailed view of a single tenant with multiple management tabs",
+      "tabs": [
+        {
+          "name": "Info",
+          "tab_id": "tab-info",
+          "description": "Basic tenant information: name, slug, domain, SIP domain, max extensions limit, creation date"
+        },
+        {
+          "name": "Extensions",
+          "tab_id": "tab-extensions",
+          "description": "SIP accounts / phone extensions. Table with columns: extension number, display name, SIP password, status (online/offline). Has a Create Extension button (id: create-extension-btn) to add new SIP accounts",
+          "key_actions": ["Create extension", "Edit extension", "Delete extension", "View online status"]
+        },
+        {
+          "name": "Trunks",
+          "tab_id": "tab-trunks",
+          "description": "SIP trunks for outbound calling via external providers. Table with trunk name, host, port, status. Has Create Trunk button (id: create-trunk-btn)",
+          "key_actions": ["Create trunk", "Edit trunk", "Delete trunk"]
+        },
+        {
+          "name": "Events",
+          "tab_id": "tab-events",
+          "description": "Audit log showing all administrative actions performed on this tenant. Shows: timestamp, user, action type, details. Useful for tracking who made changes"
+        },
+        {
+          "name": "Reports",
+          "tab_id": "tab-reports",
+          "description": "Call statistics and analytics for this tenant. Charts showing call volume, peak hours, and call duration distribution"
+        },
+        {
+          "name": "Inbound Rules",
+          "tab_id": "tab-inbound-rules",
+          "description": "DID (phone number) routing rules. Configure which incoming phone numbers route to which extensions or groups. Supports time-based routing"
+        },
+        {
+          "name": "Call Routes",
+          "tab_id": "tab-call-routes",
+          "description": "Outbound call routing patterns. Define which trunk to use for different number patterns (e.g., international calls via trunk A, local calls via trunk B)"
+        },
+        {
+          "name": "Users",
+          "tab_id": "tab-users",
+          "description": "Web panel user accounts for this tenant. Manage who can log in to the admin panel. Has Create User button (id: create-user-btn). Each user has a role and can be linked to an extension",
+          "key_actions": ["Create user", "Edit user", "Delete user", "Assign extension"]
+        },
+        {
+          "name": "IP ACL",
+          "tab_id": "tab-ip-acl",
+          "roles": ["super_admin"],
+          "description": "Per-tenant IP Access Control List. Whitelist specific IP addresses that are allowed to access this tenant's resources"
+        }
+      ]
+    },
+    {
+      "name": "Active Calls",
+      "route": "/active-calls",
+      "roles": ["super_admin", "tenant_admin"],
+      "sidebar_id": "nav-active-calls",
+      "description": "Real-time list of ongoing phone calls",
+      "elements": [
+        {"type": "table", "label": "Active calls table", "description": "Shows caller number, callee number, duration, codec, call state. Auto-refreshes every 5 seconds"},
+        {"type": "button", "label": "Hangup", "description": "Terminate an active call"}
+      ]
+    },
+    {
+      "name": "CDR History",
+      "route": "/cdr",
+      "roles": ["super_admin", "tenant_admin"],
+      "sidebar_id": "nav-cdr",
+      "description": "Call Detail Records — full history of all phone calls",
+      "elements": [
+        {"type": "filter", "label": "Date range filter", "description": "Filter calls by start and end date"},
+        {"type": "filter", "label": "Number filter", "description": "Search by caller or callee number"},
+        {"type": "filter", "label": "Disposition filter", "description": "Filter by call result: answered, no answer, busy, failed"},
+        {"type": "table", "label": "CDR table", "description": "Table with: date/time, source number, destination number, duration, disposition, recording"},
+        {"type": "button", "label": "Export CSV", "description": "Download all filtered records as a CSV file"}
+      ]
+    },
+    {
+      "name": "IP Access",
+      "route": "/ip-access",
+      "roles": ["super_admin"],
+      "sidebar_id": "nav-ip-access",
+      "description": "Global IP address management for security",
+      "elements": [
+        {"type": "section", "label": "IP Whitelist", "description": "Global whitelist — IPs added here are immune from rate limiting and blocking"},
+        {"type": "section", "label": "IP Blacklist", "description": "Manually blocked IP addresses that cannot access the system"},
+        {"type": "button", "label": "Add IP", "description": "Add a new IP address to whitelist or blacklist"}
+      ]
+    },
+    {
+      "name": "My Dashboard",
+      "route": "/my-dashboard",
+      "roles": ["user"],
+      "sidebar_id": "nav-my-dashboard",
+      "description": "Personal dashboard for extension users (non-admin). Shows the user's own extension info, recent calls, and call statistics"
+    },
+    {
+      "name": "My Calls",
+      "route": "/my-calls",
+      "roles": ["user"],
+      "sidebar_id": "nav-my-calls",
+      "description": "Personal call history for extension users. Same as CDR but filtered to only show the user's own calls"
+    },
+    {
+      "name": "Profile",
+      "route": "/profile",
+      "roles": ["super_admin", "tenant_admin", "user"],
+      "sidebar_id": "nav-profile",
+      "description": "User profile and application settings",
+      "elements": [
+        {"type": "info", "label": "Username", "description": "Current user's login name"},
+        {"type": "info", "label": "Role", "description": "User's role in the system"},
+        {"type": "info", "label": "Account creation date", "description": "When the account was created"},
+        {"type": "select", "label": "Language", "description": "Switch interface language between English and Ukrainian"},
+        {"type": "select", "label": "Timezone", "description": "Set preferred timezone for displaying dates and times"}
+      ]
+    },
+    {
+      "name": "Tenant Settings",
+      "route": "/tenants/:id/settings",
+      "roles": ["super_admin", "tenant_admin"],
+      "description": "Advanced settings for a specific tenant"
+    }
+  ],
+  "highlight_instructions": "When the user asks about a specific UI element, you MUST include highlight actions in your response. Use the sidebar_id or tab_id values from this map. You may return 1-3 highlights per response. If the question is general, return an empty highlights array.",
+  "response_format": "You MUST respond with valid JSON only. No markdown, no code fences. Format: {\"reply\": \"text\", \"highlights\": [{\"element_id\": \"id-value\", \"label\": \"description\"}]}"
+}

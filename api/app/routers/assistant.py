@@ -3,11 +3,17 @@ AI Assistant router — chat endpoint powered by Google Gemini.
 
 Provides a navigation-aware assistant that helps users find their way
 around the PBX Cloud admin panel and highlights relevant UI elements.
+
+The UI context is loaded from ``ai_context/ui_map.json`` at import time
+so that the file can be regenerated independently when the UI changes.
 """
 
+import json
 import logging
-from typing import Optional
+import os
+from pathlib import Path
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
@@ -17,6 +23,52 @@ from app.models.user import User
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/assistant", tags=["AI Assistant"])
+
+
+# ── Load UI context from file ──
+
+_CONTEXT_DIR = Path(__file__).resolve().parent.parent.parent / "ai_context"
+_UI_MAP_PATH = _CONTEXT_DIR / "ui_map.json"
+
+def _load_ui_map() -> str:
+    """Read the structured UI map and return it as a formatted string."""
+    try:
+        with open(_UI_MAP_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return json.dumps(data, ensure_ascii=False, indent=2)
+    except FileNotFoundError:
+        logger.warning("UI map not found at %s — using fallback", _UI_MAP_PATH)
+        return "{}"
+    except json.JSONDecodeError as exc:
+        logger.error("Invalid JSON in UI map: %s", exc)
+        return "{}"
+
+
+_UI_MAP_TEXT = _load_ui_map()
+
+_SYSTEM_PROMPT = f"""\
+You are a friendly navigation assistant for the PBX Cloud admin panel.
+
+Your ONLY job is to help the user find things in the web interface.
+Answer concisely (2-4 sentences max). Always mention the exact menu item or
+tab name the user should click. Reply in the same language the user writes in.
+
+Below is the complete map of the application UI in JSON format.
+Use it to answer questions accurately.
+
+--- BEGIN UI MAP ---
+{_UI_MAP_TEXT}
+--- END UI MAP ---
+
+RULES:
+1. When the user asks about a specific UI element, include highlight actions
+   using the sidebar_id or tab_id values from the map above.
+2. You may return 1-3 highlights per response.
+3. If the question is general or does not map to a specific element, return
+   an empty highlights array.
+4. You MUST respond with valid JSON only. No markdown, no code fences.
+   Format: {{"reply": "your text", "highlights": [{{"element_id": "nav-cdr", "label": "CDR History"}}]}}
+"""
 
 
 # ── Schemas ──
@@ -40,87 +92,13 @@ class ChatResponse(BaseModel):
     highlights: list[HighlightAction] = []
 
 
-# ── System prompt (UI map) ──
-
-SYSTEM_PROMPT = """\
-You are a friendly navigation assistant for the **PBX Cloud** admin panel — \
-a multi-tenant cloud PBX management system built on Asterisk and Kamailio.
-
-Your ONLY job is to help the user find things in the web interface. \
-Answer concisely (2-4 sentences max). Always mention the exact menu item or \
-tab name. Reply in the same language the user writes in.
-
-## UI MAP (what exists and where)
-
-### Sidebar Navigation
-| Menu item | Route | ID to highlight | Available to |
-|-----------|-------|-----------------|--------------|
-| Dashboard | /dashboard | nav-dashboard | super_admin |
-| Tenants | /tenants | nav-tenants | super_admin |
-| My Tenant | /tenants/{id} | nav-my-tenant | tenant_admin |
-| Active Calls | /active-calls | nav-active-calls | super_admin, tenant_admin |
-| CDR History | /cdr | nav-cdr | super_admin, tenant_admin |
-| IP Access | /ip-access | nav-ip-access | super_admin |
-| My Dashboard | /my-dashboard | nav-my-dashboard | user |
-| My Calls | /my-calls | nav-my-calls | user |
-| Profile | /profile | nav-profile | all roles |
-
-### Tenant Details page (tabs inside /tenants/:id)
-| Tab name | What it shows | ID to highlight |
-|----------|---------------|-----------------|
-| Info | Tenant name, domain, limits, creation date | tab-info |
-| Extensions | SIP accounts (extension number, name, password) | tab-extensions |
-| Trunks | SIP trunks for outbound calling | tab-trunks |
-| Events | Audit log of all admin actions | tab-events |
-| Reports | Call statistics & charts for this tenant | tab-reports |
-| Inbound Rules | DID routing & time-based rules | tab-inbound-rules |
-| Call Routes | Outbound call routing patterns | tab-call-routes |
-| Users | Web panel user accounts for this tenant | tab-users |
-| IP ACL | Per-tenant IP whitelist (super_admin only) | tab-ip-acl |
-
-### Dashboard page (/dashboard, super_admin only)
-Shows: total tenants, total extensions, active calls (live), \
-call volume chart (30 days), call disposition pie chart, peak hours chart.
-
-### CDR History page (/cdr)
-Shows: full call detail records with filters by date, number, disposition. \
-Has CSV export button.
-
-### Active Calls page (/active-calls)
-Shows: real-time list of ongoing calls with caller/callee, duration, codec. \
-Auto-refreshes every 5 seconds.
-
-### IP Access page (/ip-access, super_admin only)
-Shows: Global IP Whitelist (IPs immune from rate limiting) and \
-Global IP Blacklist (manually blocked IPs).
-
-### Profile page (/profile)
-Shows: username, role, account creation date. \
-Settings: language selector (English/Ukrainian), timezone selector.
-
-## HIGHLIGHT RULES
-When the user asks about a specific UI element, include a highlight action \
-in your response. The highlight object must have:
-- element_id: the ID from the tables above
-- label: a short description
-
-Return highlights as a JSON array. You may return 1-3 highlights per response. \
-If the question is general or doesn't map to a specific element, return an empty array.
-
-## RESPONSE FORMAT
-You MUST respond with valid JSON only, no markdown, no code fences:
-{"reply": "your text answer here", "highlights": [{"element_id": "nav-cdr", "label": "CDR History"}]}
-"""
-
-
 # ── Gemini client ──
+
+_GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+
 
 async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
     """Call Google Gemini API and return parsed response."""
-    import os
-    import json
-    import httpx
-
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key:
         return {
@@ -130,8 +108,6 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
 
     # Build conversation for Gemini
     contents = []
-
-    # Add user/model message pairs
     for msg in messages:
         role = "user" if msg.role == "user" else "model"
         contents.append({
@@ -142,23 +118,31 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
     payload = {
         "system_instruction": {
             "parts": [
-                {"text": SYSTEM_PROMPT + f"\n\nCurrent user role: {user_role}"}
+                {"text": _SYSTEM_PROMPT + f"\n\nCurrent user role: {user_role}"}
             ]
         },
         "contents": contents,
         "generationConfig": {
             "temperature": 0.3,
             "maxOutputTokens": 512,
+            "responseMimeType": "application/json",
         },
     }
 
     url = (
         "https://generativelanguage.googleapis.com/v1beta/"
-        f"models/gemini-2.0-flash:generateContent?key={api_key}"
+        f"models/{_GEMINI_MODEL}:generateContent?key={api_key}"
     )
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(url, json=payload)
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as http:
+            resp = await http.post(url, json=payload)
+    except httpx.RequestError as exc:
+        logger.error("Gemini network error: %s", exc)
+        return {
+            "reply": "Cannot reach the AI service. Please try again later.",
+            "highlights": [],
+        }
 
     if resp.status_code != 200:
         logger.error("Gemini API error %s: %s", resp.status_code, resp.text)
@@ -174,15 +158,17 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
         text = data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError):
         logger.error("Unexpected Gemini response: %s", data)
-        return {"reply": "I couldn't process that. Please try again.", "highlights": []}
+        return {
+            "reply": "I couldn't process that. Please try again.",
+            "highlights": [],
+        }
 
-    # Parse JSON from the model response
-    # Strip markdown code fences if present
+    # Parse JSON response
     clean = text.strip()
+    # Strip markdown code fences if present
     if clean.startswith("```"):
         lines = clean.split("\n")
-        # Remove first and last lines (``` markers)
-        lines = [l for l in lines if not l.strip().startswith("```")]
+        lines = [ln for ln in lines if not ln.strip().startswith("```")]
         clean = "\n".join(lines).strip()
 
     try:
@@ -192,7 +178,7 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
             "highlights": parsed.get("highlights", []),
         }
     except json.JSONDecodeError:
-        # Model didn't return valid JSON — return raw text, no highlights
+        # Model returned plain text instead of JSON
         return {"reply": text.strip(), "highlights": []}
 
 
