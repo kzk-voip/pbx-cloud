@@ -92,28 +92,34 @@ def _detect_highlights(reply_text: str) -> list[dict]:
     return found
 
 
-# ── System prompt ──
+# ── System prompt (compact) ──
+
+def _build_compact_prompt(ui_map: dict) -> str:
+    """Build a compact text prompt from the ui_map data."""
+    lines = []
+    for page in ui_map.get("pages", []):
+        roles = ", ".join(page.get("roles", []))
+        desc = page.get("description", "")
+        lines.append(f"- **{page['name']}** ({page.get('route','')}) [{roles}]: {desc}")
+        for tab in page.get("tabs", []):
+            tab_roles = ", ".join(tab.get("roles", page.get("roles", [])))
+            lines.append(f"  - Tab \"{tab['name']}\": {tab.get('description', '')}")
+    return "\n".join(lines)
+
+
+_COMPACT_MAP = _build_compact_prompt(_UI_MAP_DATA)
 
 _SYSTEM_PROMPT = f"""\
-You are a friendly navigation assistant for the PBX Cloud admin panel — \
-a multi-tenant cloud PBX management system built on Asterisk and Kamailio.
+You are a navigation assistant for PBX Cloud — a cloud PBX admin panel.
+Help users find features in the interface. Be concise (2-3 sentences).
+Always name the exact menu item or tab. Reply in the user's language.
 
-Your ONLY job is to help the user find things in the web interface.
-Answer concisely (2-4 sentences max). Always mention the exact menu item \
-or tab name the user should click. Reply in the same language the user \
-writes in.
-
-Below is the complete map of the application UI in JSON format.
-Use it to answer questions accurately.
-
---- BEGIN UI MAP ---
-{_UI_MAP_TEXT}
---- END UI MAP ---
+## Pages & Tabs
+{_COMPACT_MAP}
 
 RULES:
-1. Always mention the exact page name or tab name from the UI map.
-2. Be specific: say "go to Tenants, then open the Extensions tab" not just "check extensions".
-3. Keep your answer to plain text only. Do NOT use JSON or code formatting.
+1. Name exact page and tab (e.g. "go to Tenants, then Extensions tab").
+2. Keep answers short — max 3 sentences, plain text only.
 """
 
 
