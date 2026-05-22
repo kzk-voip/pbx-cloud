@@ -156,13 +156,12 @@ export default function AIAssistantWidget() {
   }
 
   return (
-    <>
+    <aside className={styles.wrapper} aria-label="AI Assistant">
       {/* Chat Window */}
       {open && (
-        <aside
+        <section
           className={styles.chatWindow}
           role="complementary"
-          aria-label="AI Assistant"
         >
           {/* Header */}
           <header className={styles.chatHeader}>
@@ -264,7 +263,7 @@ export default function AIAssistantWidget() {
               <Send size={18} aria-hidden="true" />
             </button>
           </form>
-        </aside>
+        </section>
       )}
 
       {/* Floating Action Button */}
@@ -280,6 +279,6 @@ export default function AIAssistantWidget() {
           <MessageCircle size={24} aria-hidden="true" />
         )}
       </button>
-    </>
+    </aside>
   )
 }

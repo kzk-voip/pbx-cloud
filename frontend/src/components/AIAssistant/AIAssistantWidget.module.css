@@ -4,6 +4,15 @@
    and prefers-reduced-motion support
    ────────────────────────────────────────────────── */
 
+/* ── Wrapper: transparent to pointer events ── */
+
+.wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  pointer-events: none;
+}
+
 /* ── Floating Action Button ── */
 
 .fab {
@@ -11,6 +20,7 @@
   bottom: var(--space-3);
   right: var(--space-3);
   z-index: 250;
+  pointer-events: auto;
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full);
@@ -62,6 +72,7 @@
   right: var(--space-3);
   z-index: 250;
   width: 400px;
+  pointer-events: auto;
   max-height: 520px;
   border-radius: var(--radius-lg);
   background: var(--bg-card);

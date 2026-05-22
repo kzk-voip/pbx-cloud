@@ -213,12 +213,53 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
             "highlights": [],
         }
 
-    reply = text.strip()
+    reply = _clean_reply(text)
 
     # Auto-detect highlights from reply text using the UI map index
     highlights = _detect_highlights(reply)
 
     return {"reply": reply, "highlights": highlights}
+
+
+def _clean_reply(raw: str) -> str:
+    """Extract clean reply text from model output, stripping JSON/markdown."""
+    text = raw.strip()
+
+    # Strip markdown code fences (```json ... ``` or ``` ... ```)
+    if text.startswith("```"):
+        lines = text.split("\n")
+        # Remove first line (```json or ```) and last line (```)
+        lines = [ln for ln in lines[1:] if ln.strip() != "```"]
+        text = "\n".join(lines).strip()
+
+    # Try to parse as JSON and extract "reply" field
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, dict) and "reply" in parsed:
+            return parsed["reply"]
+    except (json.JSONDecodeError, TypeError):
+        pass
+
+    # Regex fallback: extract "reply": "..." from partial/broken JSON
+    match = re.search(r'"reply"\s*:\s*"((?:[^"\\]|\\.)*)"?', text)
+    if match:
+        return match.group(1).replace('\\"', '"').replace("\\n", "\n")
+
+    # If text starts with JSON-like characters, try harder to clean
+    if text.startswith("{") or text.startswith("Analyse"):
+        # Remove JSON artifact prefixes
+        for prefix in ('Analyse the JSON structure:', 'Analyze the JSON structure:'):
+            if text.startswith(prefix):
+                text = text[len(prefix):].strip()
+        # Try JSON parse again after cleanup
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, dict) and "reply" in parsed:
+                return parsed["reply"]
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    return text
 
 
 # ── Endpoint ──
