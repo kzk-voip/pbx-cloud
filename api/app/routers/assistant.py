@@ -124,7 +124,7 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
         "contents": contents,
         "generationConfig": {
             "temperature": 0.3,
-            "maxOutputTokens": 512,
+            "maxOutputTokens": 1024,
         },
     }
 
@@ -182,7 +182,20 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
             "highlights": parsed.get("highlights", []),
         }
     except json.JSONDecodeError:
-        # Model returned plain text instead of JSON
+        # Fallback: try to extract "reply" value from truncated JSON
+        import re
+        match = re.search(r'"reply"\s*:\s*"((?:[^"\\]|\\.)*)', clean)
+        if match:
+            reply_text = match.group(1)
+            # Try to extract highlights too
+            hl = []
+            for hl_match in re.finditer(
+                r'"element_id"\s*:\s*"([^"]+)"(?:.*?"label"\s*:\s*"([^"]*)")?',
+                clean,
+            ):
+                hl.append({"element_id": hl_match.group(1), "label": hl_match.group(2) or ""})
+            return {"reply": reply_text, "highlights": hl}
+        # Absolute fallback — return raw text
         return {"reply": text.strip(), "highlights": []}
 
 
