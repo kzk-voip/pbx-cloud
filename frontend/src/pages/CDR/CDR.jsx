@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Download, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { Download, ChevronLeft, ChevronRight, X, Play, Square } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import client from '../../api/client'
 import useAuthStore from '../../store/authStore'
@@ -26,6 +26,51 @@ function dispositionColor(disp) {
   }
 }
 
+function RecordingPlayer({ tenantId, cdrId, onClose }) {
+  const [blobUrl, setBlobUrl] = useState(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    let revoke = null
+    client
+      .get(`/tenants/${tenantId}/cdr/${cdrId}/recording`, { responseType: 'blob' })
+      .then((res) => {
+        const url = URL.createObjectURL(res.data)
+        revoke = url
+        setBlobUrl(url)
+      })
+      .catch(() => setError(true))
+
+    return () => { if (revoke) URL.revokeObjectURL(revoke) }
+  }, [tenantId, cdrId])
+
+  if (error) {
+    return (
+      <section className={styles.audioPlayer}>
+        <span className={styles.noRecording}>Recording unavailable</span>
+        <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
+          onClick={onClose} aria-label="Close player">
+          <X size={14} aria-hidden="true" />
+        </button>
+      </section>
+    )
+  }
+
+  return (
+    <section className={styles.audioPlayer}>
+      {blobUrl ? (
+        <audio controls autoPlay src={blobUrl} onEnded={onClose} />
+      ) : (
+        <span className={styles.noRecording}>Loading...</span>
+      )}
+      <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
+        onClick={onClose} aria-label="Close player">
+        <X size={14} aria-hidden="true" />
+      </button>
+    </section>
+  )
+}
+
 export default function CDR() {
   const { user } = useAuthStore()
   const isSuperAdmin = user?.role === 'super_admin'
@@ -33,6 +78,7 @@ export default function CDR() {
   const [selectedTenant, setSelectedTenant] = useState('')
   const [page, setPage] = useState(1)
   const [selectedRecord, setSelectedRecord] = useState(null)
+  const [playingId, setPlayingId] = useState(null)
   const { formatDate } = useTimezone()
   const perPage = 20
 
@@ -124,6 +170,7 @@ export default function CDR() {
                 <th>Duration</th>
                 <th>Billsec</th>
                 <th>Disposition</th>
+                <th>Recording</th>
               </tr>
             </thead>
             <tbody>
@@ -140,12 +187,44 @@ export default function CDR() {
                       {r.disposition || '—'}
                     </span>
                   </td>
+                  <td>
+                    {r.has_recording ? (
+                      <button
+                        className={`${styles.playBtn} ${playingId === r.id ? styles.playBtnActive : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (playingId === r.id) {
+                            audioRef.current?.pause()
+                            setPlayingId(null)
+                          } else {
+                            setPlayingId(r.id)
+                          }
+                        }}
+                        aria-label={playingId === r.id ? 'Stop recording' : 'Play recording'}
+                      >
+                        {playingId === r.id
+                          ? <Square size={14} aria-hidden="true" />
+                          : <Play size={14} aria-hidden="true" />}
+                      </button>
+                    ) : (
+                      <span className={styles.noRecording}>—</span>
+                    )}
+                  </td>
                 </tr>
               )) : (
-                <tr><td colSpan={6} className={s.empty}>No CDR records</td></tr>
+                <tr><td colSpan={7} className={s.empty}>No CDR records</td></tr>
               )}
             </tbody>
           </table>
+
+          {/* Inline Audio Player */}
+          {playingId && (
+            <RecordingPlayer
+              tenantId={selectedTenant}
+              cdrId={playingId}
+              onClose={() => setPlayingId(null)}
+            />
+          )}
 
           {data && data.pages > 1 && (
             <footer className={s.pagination}>

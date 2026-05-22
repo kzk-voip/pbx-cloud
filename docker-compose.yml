@@ -38,6 +38,7 @@ services:
       - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
       - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
       - ./asterisk/etc/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf
+      - recordings_data:/var/spool/asterisk/recordings
     restart: unless-stopped
 
   asterisk-2:
@@ -63,6 +64,7 @@ services:
       - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
       - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
       - ./asterisk/etc/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf
+      - recordings_data:/var/spool/asterisk/recordings
     restart: unless-stopped
 
   postgres:
@@ -130,6 +132,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     volumes:
       - ./api:/app
+      - recordings_data:/recordings:ro
     restart: unless-stopped
 
   frontend:
@@ -187,3 +190,4 @@ volumes:
   redis_data:
   fail2ban_data:
   nginx_logs:
+  recordings_data:

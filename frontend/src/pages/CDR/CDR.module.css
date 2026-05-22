@@ -66,3 +66,59 @@
   padding: 2px var(--space-1);
   border-radius: var(--radius-sm);
 }
+
+/* ── Recording Play Button ── */
+
+.playBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.playBtn:hover {
+  background: color-mix(in srgb, var(--color-primary) 25%, transparent);
+  transform: scale(1.1);
+}
+
+.playBtnActive {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+
+.noRecording {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* ── Inline Audio Player ── */
+
+.audioPlayer {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.audioPlayer audio {
+  flex: 1;
+  height: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playBtn:hover {
+    transform: none;
+  }
+}

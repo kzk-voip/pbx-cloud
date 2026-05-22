@@ -3,14 +3,18 @@ CDR service — business logic for CDR queries with tenant-scoped filtering.
 """
 
 import math
+import os
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cdr import CDR
 from app.schemas.cdr import CDRResponse, CDRListResponse
+
+RECORDINGS_DIR = Path(os.getenv("RECORDINGS_DIR", "/recordings"))
 
 
 async def query_cdr(
@@ -62,7 +66,14 @@ async def query_cdr(
     result = await db.execute(data_query)
     records = result.scalars().all()
 
-    items = [CDRResponse.model_validate(r) for r in records]
+    items = []
+    for r in records:
+        item = CDRResponse.model_validate(r)
+        # Check if recording file exists on disk
+        if r.accountcode and r.uniqueid:
+            rec_path = RECORDINGS_DIR / r.accountcode / f"{r.uniqueid}.wav"
+            item.has_recording = rec_path.is_file()
+        items.append(item)
 
     return CDRListResponse(
         items=items,
@@ -71,3 +82,4 @@ async def query_cdr(
         per_page=per_page,
         pages=math.ceil(total / per_page) if per_page > 0 else 0,
     )
+
