@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.context import client_ip_var
 from app.database import async_session
 from app.redis import init_redis, close_redis
 from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist, ws, events, reports, inbound_rules, call_routes, users, internal, ip_whitelist, tenant_ip_acl, assistant
@@ -115,22 +116,26 @@ app.add_middleware(
 @app.middleware("http")
 async def ip_blacklist_middleware(request: Request, call_next):
     path = request.url.path
-    if path.startswith("/internal") or path.startswith("/docs") or path.startswith("/redoc") or path == "/metrics":
-        return await call_next(request)
-        
     forwarded = request.headers.get("X-Forwarded-For")
-    ip = forwarded.split(",")[0].strip() if forwarded else request.client.host
+    ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else None)
 
+    token = client_ip_var.set(ip)
     try:
-        if await kamailio_service.is_ip_blacklisted(ip):
-            return JSONResponse(
-                status_code=403,
-                content={"detail": "Your IP has been blocked."}
-            )
-    except Exception as e:
-        logger.error(f"IP blacklist check failed: {e}")
+        if path.startswith("/internal") or path.startswith("/docs") or path.startswith("/redoc") or path == "/metrics":
+            return await call_next(request)
 
-    return await call_next(request)
+        try:
+            if ip and await kamailio_service.is_ip_blacklisted(ip):
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Your IP has been blocked."}
+                )
+        except Exception as e:
+            logger.error(f"IP blacklist check failed: {e}")
+
+        return await call_next(request)
+    finally:
+        client_ip_var.reset(token)
 
 # Register routers
 app.include_router(health.router)

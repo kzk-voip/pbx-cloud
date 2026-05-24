@@ -6,6 +6,7 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.context import client_ip_var
 from app.models.tenant_event import TenantEvent
 
 
@@ -19,6 +20,9 @@ async def log_event(
     details: dict | None = None,
 ) -> None:
     """Log a tenant event. Does not commit — caller should commit."""
+    if ip is None:
+        ip = client_ip_var.get()
+
     event = TenantEvent(
         tenant_id=tenant_id,
         action=action,
