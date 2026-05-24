@@ -191,8 +191,8 @@ export default function TenantCallRoutes({ tenantId }) {
                     onChange={(e) => setForm((f) => ({ ...f, trunk_id: e.target.value }))}
                   >
                     <option value="">{t('callRoutes.selectTrunk')}</option>
-                    {trunks.map((t) => (
-                      <option key={t.id} value={t.id}>{t.name} ({t.host})</option>
+                    {trunks.map((trunk) => (
+                      <option key={trunk.id} value={trunk.id}>{trunk.name} ({trunk.host})</option>
                     ))}
                   </select>
                 </fieldset>

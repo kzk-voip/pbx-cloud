@@ -69,10 +69,10 @@ export default function Tenants() {
     }
   }
 
-  const items = data?.items?.filter((t) =>
-    !search || t.name.toLowerCase().includes(search.toLowerCase()) ||
-    t.slug.toLowerCase().includes(search.toLowerCase()) ||
-    t.domain.toLowerCase().includes(search.toLowerCase())
+  const items = data?.items?.filter((tenant) =>
+    !search || tenant.name.toLowerCase().includes(search.toLowerCase()) ||
+    tenant.slug.toLowerCase().includes(search.toLowerCase()) ||
+    tenant.domain.toLowerCase().includes(search.toLowerCase())
   ) || []
 
   return (
@@ -158,24 +158,24 @@ export default function Tenants() {
               </tr>
             </thead>
             <tbody>
-              {items.length > 0 ? items.map((t) => (
-                <tr key={t.id} className={s.clickableRow}
-                  onClick={() => navigate(`/tenants/${t.id}`)}>
-                  <td>{t.name}</td>
-                  <td>{t.slug}</td>
-                  <td>{t.domain}</td>
-                  <td>{t.extension_count || 0}</td>
-                  <td>{t.max_concurrent_calls}</td>
-                  <td><StatusBadge status={t.is_active ? 'active' : 'inactive'} /></td>
+              {items.length > 0 ? items.map((tenant) => (
+                <tr key={tenant.id} className={s.clickableRow}
+                  onClick={() => navigate(`/tenants/${tenant.id}`)}>
+                  <td>{tenant.name}</td>
+                  <td>{tenant.slug}</td>
+                  <td>{tenant.domain}</td>
+                  <td>{tenant.extension_count || 0}</td>
+                  <td>{tenant.max_concurrent_calls}</td>
+                  <td><StatusBadge status={tenant.is_active ? 'active' : 'inactive'} /></td>
                   <td>
                     <section style={{ display: 'flex', gap: 'var(--space-1)' }}>
                       <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
-                        onClick={(e) => { e.stopPropagation(); navigate(`/tenants/${t.id}/settings`) }}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/tenants/${tenant.id}/settings`) }}
                         aria-label={t('tenants.settings')}>
                         <Settings size={14} aria-hidden="true" />
                       </button>
                       <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
-                        onClick={(e) => { e.stopPropagation(); handleDelete(t.id, t.name) }}
+                        onClick={(e) => { e.stopPropagation(); handleDelete(tenant.id, tenant.name) }}
                         aria-label={t('tenants.deleteTenant')}>
                         <Trash2 size={14} aria-hidden="true" />
                       </button>

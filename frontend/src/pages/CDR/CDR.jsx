@@ -156,8 +156,8 @@ export default function CDR() {
             <select id="cdr-tenant-select" className={s.fieldInput} style={{ height: 40 }}
               value={selectedTenant} onChange={(e) => { setSelectedTenant(e.target.value); setPage(1) }}>
               <option value="">{t('cdr.selectTenant')}</option>
-              {tenants?.items?.map((t) => (
-                <option key={t.id} value={t.id}>{t.name} ({t.slug})</option>
+              {tenants?.items?.map((tenant) => (
+                <option key={tenant.id} value={tenant.id}>{tenant.name} ({tenant.slug})</option>
               ))}
             </select>
           </fieldset>
