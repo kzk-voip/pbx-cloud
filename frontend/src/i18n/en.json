@@ -396,6 +396,7 @@
     "empty": "No IP restrictions — all IPs are allowed",
     "toastAdded": "IP added to tenant ACL",
     "toastRemoved": "IP removed from tenant ACL",
+    "addBtn": "Add",
     "removeAria": "Remove {{ip}}"
   },
   "tenantDetails": {
