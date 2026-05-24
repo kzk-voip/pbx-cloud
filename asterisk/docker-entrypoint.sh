@@ -14,9 +14,10 @@ set -e
 CONF_DIR="/tmp/asterisk-conf"
 mkdir -p "$CONF_DIR"
 
-# 0. Fix ownership on the recordings volume (mounted as root by Docker)
+# 0. Fix ownership and permissions on the recordings volume (mounted as root by Docker)
 mkdir -p /var/spool/asterisk/recordings
-chown -R asterisk:asterisk /var/spool/asterisk/recordings
+chown -R asterisk:asterisk /var/spool/asterisk/recordings || true
+chmod 777 /var/spool/asterisk/recordings || true
 
 # 1. Copy ALL configs to the working directory, stripping Windows CRLF
 for f in /etc/asterisk/*.conf; do
