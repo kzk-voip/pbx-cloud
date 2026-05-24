@@ -339,9 +339,11 @@ export default function TenantDetails() {
   return (
     <>
       <header className={styles.header}>
-        <button className={`${s.btn} ${s.btnSecondary}`} onClick={() => navigate('/tenants')}>
-          <ArrowLeft size={16} aria-hidden="true" /> {t('tenantDetails.back')}
-        </button>
+        {isSuperAdmin && (
+          <button className={`${s.btn} ${s.btnSecondary}`} onClick={() => navigate('/tenants')}>
+            <ArrowLeft size={16} aria-hidden="true" /> {t('tenantDetails.back')}
+          </button>
+        )}
         <section>
           <h2 className={styles.tenantName}>{tenant.name}</h2>
           <p className={styles.tenantDomain}>{tenant.domain}</p>
