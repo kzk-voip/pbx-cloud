@@ -48,28 +48,20 @@ function RecordingPlayer({ tenantId, cdrId, onClose }) {
 
   if (error) {
     return (
-      <section className={styles.audioPlayer}>
-        <span className={styles.noRecording}>{t('cdr.recordingPlayer.unavailable')}</span>
-        <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
-          onClick={onClose} aria-label={t('cdr.recordingPlayer.closeAria')}>
-          <X size={14} aria-hidden="true" />
-        </button>
-      </section>
+      <div className={styles.playerError}>
+        {t('cdr.recordingPlayer.unavailable')}
+      </div>
     )
   }
 
   return (
-    <section className={styles.audioPlayer}>
+    <div className={styles.playerWrapper}>
       {blobUrl ? (
         <audio controls autoPlay src={blobUrl} onEnded={onClose} />
       ) : (
         <span className={styles.noRecording}>{t('cdr.recordingPlayer.loading')}</span>
       )}
-      <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
-        onClick={onClose} aria-label={t('cdr.recordingPlayer.closeAria')}>
-        <X size={14} aria-hidden="true" />
-      </button>
-    </section>
+    </div>
   )
 }
 
@@ -207,17 +199,11 @@ export default function CDR() {
                         className={`${styles.playBtn} ${playingId === r.id ? styles.playBtnActive : ''}`}
                         onClick={(e) => {
                           e.stopPropagation()
-                          if (playingId === r.id) {
-                            setPlayingId(null)
-                          } else {
-                            setPlayingId(r.id)
-                          }
+                          setPlayingId(r.id)
                         }}
-                        aria-label={playingId === r.id ? t('cdr.stopRecording') : t('cdr.playRecording')}
+                        aria-label={t('cdr.playRecording')}
                       >
-                        {playingId === r.id
-                          ? <Square size={14} aria-hidden="true" />
-                          : <Play size={14} aria-hidden="true" />}
+                        <Play size={14} aria-hidden="true" />
                       </button>
                     ) : (
                       <span className={styles.noRecording}>—</span>
@@ -229,15 +215,6 @@ export default function CDR() {
               )}
             </tbody>
           </table>
-
-          {/* Inline Audio Player */}
-          {playingId && (
-            <RecordingPlayer
-              tenantId={selectedTenant}
-              cdrId={playingId}
-              onClose={() => setPlayingId(null)}
-            />
-          )}
 
           {data && data.pages > 1 && (
             <footer className={s.pagination}>
@@ -331,6 +308,31 @@ export default function CDR() {
             )}
 
             <footer className={s.dialogActions}>
+              <Dialog.Close asChild>
+                <button className={`${s.btn} ${s.btnSecondary}`}>{t('cdr.detailDialog.close')}</button>
+              </Dialog.Close>
+            </footer>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      {/* Recording Player Dialog */}
+      <Dialog.Root open={!!playingId} onOpenChange={(open) => { if (!open) setPlayingId(null) }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className={s.dialogOverlay} />
+          <Dialog.Content className={s.dialogContent} style={{ maxWidth: '400px' }} aria-describedby="audio-player-desc">
+            <Dialog.Title className={s.dialogTitle}>{t('cdr.recording')}</Dialog.Title>
+            <p id="audio-player-desc" className="sr-only">Listen to call recording</p>
+
+            {playingId && (
+              <RecordingPlayer
+                tenantId={selectedTenant}
+                cdrId={playingId}
+                onClose={() => setPlayingId(null)}
+              />
+            )}
+
+            <footer className={s.dialogActions} style={{ marginTop: 'var(--space-3)' }}>
               <Dialog.Close asChild>
                 <button className={`${s.btn} ${s.btnSecondary}`}>{t('cdr.detailDialog.close')}</button>
               </Dialog.Close>
