@@ -223,7 +223,9 @@ export default function TenantInboundRules({ tenantId }) {
                   <td style={{ fontFamily: 'var(--font-mono, monospace)' }}>{rule.did_number}</td>
                   <td>
                     <span style={{ textTransform: 'capitalize' }}>
-                      {rule.destination_type === 'ivr_menu' ? t('inboundRules.typeIvr') : t(`inboundRules.type${rule.destination_type.replace(/_./g, x => x[1].toUpperCase())}`)}
+                      {rule.destination_type === 'ivr_menu' 
+                        ? t('inboundRules.typeIvr') 
+                        : t(`inboundRules.type${rule.destination_type.replace(/_./g, x => x[1].toUpperCase()).replace(/^[a-z]/, c => c.toUpperCase())}`)}
                     </span>
                   </td>
                   <td>{rule.destination_value}</td>
