@@ -123,10 +123,7 @@ export default function AIAssistantWidget() {
     } catch (err) {
       const errorMsg = {
         role: 'assistant',
-        content:
-          lang === 'uk'
-            ? 'Вибачте, сталася помилка. Спробуйте ще раз.'
-            : 'Sorry, something went wrong. Please try again.',
+        content: t('aiAssistant.errorMsg'),
       }
       setMessages((prev) => [...prev, errorMsg])
     } finally {
@@ -177,18 +174,14 @@ export default function AIAssistantWidget() {
               <Sparkles size={18} aria-hidden="true" />
             </span>
             <section className={styles.chatHeaderInfo}>
-              <p className={styles.chatHeaderTitle}>PBX Assistant</p>
-              <p className={styles.chatHeaderSubtitle}>
-                {lang === 'uk'
-                  ? 'Допоможу знайти потрібне'
-                  : 'I\u2019ll help you navigate'}
-              </p>
+              <p className={styles.chatHeaderTitle}>{t('aiAssistant.title')}</p>
+              <p className={styles.chatHeaderSubtitle}>{t('aiAssistant.subtitle')}</p>
             </section>
             {messages.length > 0 && (
               <button
                 className={styles.chatClearBtn}
                 onClick={handleClear}
-                aria-label="Clear chat history"
+                aria-label={t('aiAssistant.clearChat')}
               >
                 <Trash2 size={16} aria-hidden="true" />
               </button>
@@ -202,12 +195,10 @@ export default function AIAssistantWidget() {
                 <Sparkles size={28} aria-hidden="true" />
               </span>
               <p className={styles.greetingTitle}>
-                {lang === 'uk' ? 'Привіт! 👋' : 'Hello! 👋'}
+                {t('aiAssistant.greetingTitle')}
               </p>
               <p className={styles.greetingText}>
-                {lang === 'uk'
-                  ? 'Запитайте мене де знайти потрібну інформацію в панелі керування'
-                  : 'Ask me where to find anything in the admin panel'}
+                {t('aiAssistant.greetingText')}
               </p>
               <nav className={styles.suggestions} aria-label="Suggested questions">
                 {suggestions.map((s) => (
@@ -234,7 +225,7 @@ export default function AIAssistantWidget() {
                 </article>
               ))}
               {loading && (
-                <span className={styles.typing} aria-label="AI is typing">
+                <span className={styles.typing} aria-label={t('aiAssistant.typing')}>
                   <span className={styles.typingDot} />
                   <span className={styles.typingDot} />
                   <span className={styles.typingDot} />
@@ -252,11 +243,7 @@ export default function AIAssistantWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={
-                lang === 'uk'
-                  ? 'Запитайте щось...'
-                  : 'Ask something...'
-              }
+              placeholder={t('aiAssistant.inputPlaceholder')}
               rows={1}
               disabled={loading}
               id="ai-assistant-input"
@@ -265,7 +252,7 @@ export default function AIAssistantWidget() {
               type="submit"
               className={styles.sendBtn}
               disabled={!input.trim() || loading}
-              aria-label="Send message"
+              aria-label={t('aiAssistant.send')}
               id="ai-assistant-send"
             >
               <Send size={18} aria-hidden="true" />
@@ -278,7 +265,7 @@ export default function AIAssistantWidget() {
       <button
         className={`${styles.fab} ${open ? styles.fabOpen : ''}`}
         onClick={toggleOpen}
-        aria-label={open ? 'Close AI Assistant' : 'Open AI Assistant'}
+        aria-label={open ? t('aiAssistant.close') : t('aiAssistant.open')}
         id="ai-assistant-fab"
       >
         {open ? (

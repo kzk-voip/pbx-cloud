@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Sun, Moon, LogOut, Menu } from 'lucide-react'
 import useAuthStore from '../../store/authStore'
 import styles from './TopBar.module.css'
 
 export default function TopBar({ collapsed, onMenuClick, title }) {
+  const { t } = useTranslation()
   const { user, logout, toggleTheme } = useAuthStore()
   const navigate = useNavigate()
 
@@ -20,18 +22,18 @@ export default function TopBar({ collapsed, onMenuClick, title }) {
         <button
           className={styles.menuBtn}
           onClick={onMenuClick}
-          aria-label="Toggle menu"
+          aria-label={t('topBar.toggleMenu')}
         >
           <Menu size={20} aria-hidden="true" />
         </button>
-        <h1 className={styles.pageTitle}>{title || 'Dashboard'}</h1>
+        <h1 className={styles.pageTitle}>{title}</h1>
       </section>
 
       <section className={styles.right}>
         <button
           className={styles.themeBtn}
           onClick={toggleTheme}
-          aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+          aria-label={isDark ? t('topBar.themeLight') : t('topBar.themeDark')}
         >
           {isDark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
         </button>
@@ -51,7 +53,7 @@ export default function TopBar({ collapsed, onMenuClick, title }) {
         <button
           className={styles.logoutBtn}
           onClick={handleLogout}
-          aria-label="Logout"
+          aria-label={t('topBar.logout')}
         >
           <LogOut size={18} aria-hidden="true" />
         </button>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ShieldAlert, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import client from '../../api/client'
@@ -7,6 +8,7 @@ import s from '../shared.module.css'
 import styles from '../IpAccess/IpAccess.module.css'
 
 export default function TenantIpAcl({ tenantId }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [ip, setIp] = useState('')
   const [desc, setDesc] = useState('')
@@ -23,18 +25,18 @@ export default function TenantIpAcl({ tenantId }) {
       queryClient.invalidateQueries({ queryKey: ['tenant-ip-acl', tenantId] })
       setIp('')
       setDesc('')
-      toast.success('IP added to tenant ACL')
+      toast.success(t('tenantIpAcl.toastAdded'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to add'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('ipAccess.toastWhitelistFailed')),
   })
 
   const removeEntry = useMutation({
     mutationFn: (entryId) => client.delete(`/tenants/${tenantId}/ip-acl/${entryId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenant-ip-acl', tenantId] })
-      toast.success('IP removed from tenant ACL')
+      toast.success(t('tenantIpAcl.toastRemoved'))
     },
-    onError: () => toast.error('Failed to remove'),
+    onError: () => toast.error(t('ipAccess.toastWhitelistRemoveFailed')),
   })
 
   const handleSubmit = (e) => {
@@ -52,8 +54,8 @@ export default function TenantIpAcl({ tenantId }) {
         <AlertTriangle size={16} className={styles.warningIcon} aria-hidden="true" />
         <span>
           {aclEnabled
-            ? 'IP ACL is ACTIVE — only listed IPs can register SIP endpoints and access this tenant'
-            : 'IP ACL is disabled — all IPs are allowed. Adding the first IP enables strict mode.'
+            ? t('tenantIpAcl.warningActive')
+            : t('tenantIpAcl.warningDisabled')
           }
         </span>
       </aside>
@@ -62,7 +64,7 @@ export default function TenantIpAcl({ tenantId }) {
         <header className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>
             <ShieldAlert size={20} className={styles.sectionIcon} aria-hidden="true" />
-            Allowed IP Addresses
+            {t('tenantIpAcl.title')}
             {data?.total > 0 && (
               <span className={styles.sectionBadge}>{data.total}</span>
             )}
@@ -71,11 +73,11 @@ export default function TenantIpAcl({ tenantId }) {
 
         <form className={styles.addForm} onSubmit={handleSubmit}>
           <label className={styles.formField}>
-            <span className={styles.formLabel}>IP Address</span>
+            <span className={styles.formLabel}>{t('ipAccess.ipAddress')}</span>
             <input
               className={styles.formInput}
               type="text"
-              placeholder="10.0.1.50"
+              placeholder={t('tenantIpAcl.placeholderIp')}
               value={ip}
               onChange={(e) => setIp(e.target.value)}
               autoComplete="off"
@@ -83,11 +85,11 @@ export default function TenantIpAcl({ tenantId }) {
             />
           </label>
           <label className={styles.formField}>
-            <span className={styles.formLabel}>Description</span>
+            <span className={styles.formLabel}>{t('ipAccess.description')}</span>
             <input
               className={styles.formInput}
               type="text"
-              placeholder="Office, VPN server..."
+              placeholder={t('tenantIpAcl.placeholderDesc')}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               autoComplete="off"
@@ -101,22 +103,22 @@ export default function TenantIpAcl({ tenantId }) {
             id="add-tenant-acl-btn"
           >
             <Plus size={16} aria-hidden="true" />
-            Add
+            {t('tenantIpAcl.addBtn')}
           </button>
         </form>
 
         {isLoading ? (
-          <p className={s.loading}>Loading…</p>
+          <p className={s.loading}>{t('tenantIpAcl.loading')}</p>
         ) : !data?.items?.length ? (
-          <p className={s.empty}>No IP restrictions — all IPs are allowed</p>
+          <p className={s.empty}>{t('tenantIpAcl.empty')}</p>
         ) : (
           <table className={s.table}>
             <thead>
               <tr>
-                <th>IP Address</th>
-                <th>Description</th>
-                <th>Added</th>
-                <th style={{ width: 48 }}>Action</th>
+                <th>{t('ipAccess.ipAddress')}</th>
+                <th>{t('ipAccess.description')}</th>
+                <th>{t('ipAccess.added')}</th>
+                <th style={{ width: 48 }}>{t('ipAccess.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -129,7 +131,7 @@ export default function TenantIpAcl({ tenantId }) {
                     <button
                       className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                       onClick={() => removeEntry.mutate(item.id)}
-                      aria-label={`Remove ${item.ip_address}`}
+                      aria-label={t('tenantIpAcl.removeAria', { ip: item.ip_address })}
                       id={`remove-acl-${item.id}`}
                     >
                       <Trash2 size={14} aria-hidden="true" />

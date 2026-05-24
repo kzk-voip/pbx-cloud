@@ -70,7 +70,7 @@ export default function TenantReports({ tenantId }) {
       t('reports.agent'), t('reports.name'), t('reports.calls'),
       t('reports.uniqueCalls'), t('reports.ringTime'), t('reports.talkTime'),
       t('reports.totalTime'), t('reports.answered'), t('reports.noAnswer'),
-      'ASR%', 'ACD',
+      t('reports.asr', 'ASR%'), t('reports.acd', 'ACD'),
     ]
     const rows = report.items.map((r) => [
       r.agent, r.display_name || '', r.calls,
@@ -186,8 +186,8 @@ export default function TenantReports({ tenantId }) {
                 <th>{t('reports.totalTime')}</th>
                 <th>{t('reports.answered')}</th>
                 <th>{t('reports.noAnswer')}</th>
-                <th>ASR%</th>
-                <th>ACD</th>
+                <th>{t('reports.asr', 'ASR%')}</th>
+                <th>{t('reports.acd', 'ACD')}</th>
               </tr>
             </thead>
             <tbody>

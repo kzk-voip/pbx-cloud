@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { ShieldCheck, ShieldBan, Plus, Trash2, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import client from '../../api/client'
@@ -7,6 +8,7 @@ import s from '../shared.module.css'
 import styles from './IpAccess.module.css'
 
 export default function IpAccess() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
 
   // ── Whitelist state ──
@@ -34,18 +36,18 @@ export default function IpAccess() {
       queryClient.invalidateQueries({ queryKey: ['ip-whitelist'] })
       setWlIp('')
       setWlDesc('')
-      toast.success('IP added to whitelist')
+      toast.success(t('ipAccess.toastWhitelistAdded'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to add'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('ipAccess.toastWhitelistFailed')),
   })
 
   const removeWhitelist = useMutation({
     mutationFn: (id) => client.delete(`/admin/ip-whitelist/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ip-whitelist'] })
-      toast.success('IP removed from whitelist')
+      toast.success(t('ipAccess.toastWhitelistRemoved'))
     },
-    onError: () => toast.error('Failed to remove'),
+    onError: () => toast.error(t('ipAccess.toastWhitelistRemoveFailed')),
   })
 
   // ── Blacklist mutations ──
@@ -54,18 +56,18 @@ export default function IpAccess() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ip-blacklist'] })
       setBlIp('')
-      toast.success('IP blacklisted')
+      toast.success(t('ipAccess.toastBlacklistAdded'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to blacklist'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('ipAccess.toastBlacklistFailed')),
   })
 
   const removeBlacklist = useMutation({
     mutationFn: (ip) => client.delete(`/admin/ip-blacklist/${ip}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ip-blacklist'] })
-      toast.success('IP unblocked')
+      toast.success(t('ipAccess.toastBlacklistRemoved'))
     },
-    onError: () => toast.error('Failed to unblock'),
+    onError: () => toast.error(t('ipAccess.toastBlacklistRemoveFailed')),
   })
 
   const handleAddWhitelist = (e) => {
@@ -83,9 +85,9 @@ export default function IpAccess() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>IP Access Control</h1>
+        <h1 className={styles.title}>{t('ipAccess.title')}</h1>
         <p className={styles.subtitle}>
-          Manage global IP whitelist and blacklist for the entire PBX system
+          {t('ipAccess.subtitle')}
         </p>
       </header>
 
@@ -95,7 +97,7 @@ export default function IpAccess() {
           <header className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>
               <ShieldCheck size={20} className={styles.sectionIcon} aria-hidden="true" />
-              Global Whitelist
+              {t('ipAccess.whitelistTitle')}
               {whitelist?.total > 0 && (
                 <span className={styles.sectionBadge}>{whitelist.total}</span>
               )}
@@ -104,16 +106,16 @@ export default function IpAccess() {
 
           <aside className={styles.warningBanner}>
             <AlertTriangle size={16} className={styles.warningIcon} aria-hidden="true" />
-            Whitelisted IPs are immune from pike rate-limiting and fail2ban blocking
+            {t('ipAccess.whitelistWarning')}
           </aside>
 
           <form className={styles.addForm} onSubmit={handleAddWhitelist}>
             <label className={styles.formField}>
-              <span className={styles.formLabel}>IP Address</span>
+              <span className={styles.formLabel}>{t('ipAccess.ipAddress')}</span>
               <input
                 className={styles.formInput}
                 type="text"
-                placeholder="192.168.1.100"
+                placeholder={t('ipAccess.placeholderIp')}
                 value={wlIp}
                 onChange={(e) => setWlIp(e.target.value)}
                 autoComplete="off"
@@ -121,11 +123,11 @@ export default function IpAccess() {
               />
             </label>
             <label className={styles.formField}>
-              <span className={styles.formLabel}>Description</span>
+              <span className={styles.formLabel}>{t('ipAccess.description')}</span>
               <input
                 className={styles.formInput}
                 type="text"
-                placeholder="Office VPN, Monitoring server..."
+                placeholder={t('ipAccess.placeholderDesc')}
                 value={wlDesc}
                 onChange={(e) => setWlDesc(e.target.value)}
                 autoComplete="off"
@@ -139,22 +141,22 @@ export default function IpAccess() {
               id="add-whitelist-btn"
             >
               <Plus size={16} aria-hidden="true" />
-              Add
+              {t('ipAccess.addBtn')}
             </button>
           </form>
 
           {wlLoading ? (
-            <p className={s.loading}>Loading…</p>
+            <p className={s.loading}>{t('ipAccess.loading')}</p>
           ) : !whitelist?.items?.length ? (
-            <p className={s.empty}>No whitelisted IPs yet</p>
+            <p className={s.empty}>{t('ipAccess.emptyWhitelist')}</p>
           ) : (
             <table className={s.table}>
               <thead>
                 <tr>
-                  <th>IP Address</th>
-                  <th>Description</th>
-                  <th>Added</th>
-                  <th style={{ width: 48 }}>Action</th>
+                  <th>{t('ipAccess.ipAddress')}</th>
+                  <th>{t('ipAccess.description')}</th>
+                  <th>{t('ipAccess.added')}</th>
+                  <th style={{ width: 48 }}>{t('ipAccess.action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,7 +169,7 @@ export default function IpAccess() {
                       <button
                         className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                         onClick={() => removeWhitelist.mutate(item.id)}
-                        aria-label={`Remove ${item.ip_address} from whitelist`}
+                        aria-label={t('ipAccess.removeAria', { ip: item.ip_address })}
                         id={`remove-wl-${item.id}`}
                       >
                         <Trash2 size={14} aria-hidden="true" />
@@ -185,7 +187,7 @@ export default function IpAccess() {
           <header className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>
               <ShieldBan size={20} className={`${styles.sectionIcon}`} style={{ color: 'var(--color-error)' }} aria-hidden="true" />
-              Active Blacklist
+              {t('ipAccess.blacklistTitle')}
               {blacklist?.total > 0 && (
                 <span className={`${styles.sectionBadge} ${styles.dangerBadge}`}>{blacklist.total}</span>
               )}
@@ -194,16 +196,16 @@ export default function IpAccess() {
 
           <aside className={styles.warningBanner}>
             <AlertTriangle size={16} className={styles.warningIcon} aria-hidden="true" />
-            Includes both pike auto-blocked (1h expiry) and manually blocked IPs
+            {t('ipAccess.blacklistWarning')}
           </aside>
 
           <form className={styles.addForm} onSubmit={handleAddBlacklist}>
             <label className={styles.formField}>
-              <span className={styles.formLabel}>IP Address</span>
+              <span className={styles.formLabel}>{t('ipAccess.ipAddress')}</span>
               <input
                 className={styles.formInput}
                 type="text"
-                placeholder="10.0.0.50"
+                placeholder={t('ipAccess.placeholderIpBlacklist')}
                 value={blIp}
                 onChange={(e) => setBlIp(e.target.value)}
                 autoComplete="off"
@@ -217,36 +219,36 @@ export default function IpAccess() {
               id="add-blacklist-btn"
             >
               <ShieldBan size={16} aria-hidden="true" />
-              Block IP
+              {t('ipAccess.blockIpBtn')}
             </button>
           </form>
 
           {blLoading ? (
-            <p className={s.loading}>Loading…</p>
+            <p className={s.loading}>{t('ipAccess.loading')}</p>
           ) : !blacklist?.entries?.length ? (
-            <p className={s.empty}>No blocked IPs</p>
+            <p className={s.empty}>{t('ipAccess.emptyBlacklist')}</p>
           ) : (
             <table className={s.table}>
               <thead>
                 <tr>
-                  <th>IP Address</th>
-                  <th>Status</th>
-                  <th style={{ width: 48 }}>Action</th>
+                  <th>{t('ipAccess.ipAddress')}</th>
+                  <th>{t('common.status')}</th>
+                  <th style={{ width: 48 }}>{t('ipAccess.action')}</th>
                 </tr>
               </thead>
               <tbody>
                 {blacklist.entries.map((entry) => (
                   <tr key={entry.ip}>
                     <td className={styles.ipCell}>{entry.ip}</td>
-                    <td>Blocked</td>
+                    <td>{t('ipAccess.blockedStatus')}</td>
                     <td>
                       <button
                         className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                         onClick={() => removeBlacklist.mutate(entry.ip)}
-                        aria-label={`Unblock ${entry.ip}`}
+                        aria-label={t('ipAccess.unblockAria', { ip: entry.ip })}
                         id={`unblock-${entry.ip}`}
                       >
-                        Unblock
+                        {t('ipAccess.unblockBtn')}
                       </button>
                     </td>
                   </tr>

@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Download, ChevronLeft, ChevronRight, X, Play, Square } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import client from '../../api/client'
@@ -27,6 +28,7 @@ function dispositionColor(disp) {
 }
 
 function RecordingPlayer({ tenantId, cdrId, onClose }) {
+  const { t } = useTranslation()
   const [blobUrl, setBlobUrl] = useState(null)
   const [error, setError] = useState(false)
 
@@ -47,9 +49,9 @@ function RecordingPlayer({ tenantId, cdrId, onClose }) {
   if (error) {
     return (
       <section className={styles.audioPlayer}>
-        <span className={styles.noRecording}>Recording unavailable</span>
+        <span className={styles.noRecording}>{t('cdr.recordingPlayer.unavailable')}</span>
         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
-          onClick={onClose} aria-label="Close player">
+          onClick={onClose} aria-label={t('cdr.recordingPlayer.closeAria')}>
           <X size={14} aria-hidden="true" />
         </button>
       </section>
@@ -61,10 +63,10 @@ function RecordingPlayer({ tenantId, cdrId, onClose }) {
       {blobUrl ? (
         <audio controls autoPlay src={blobUrl} onEnded={onClose} />
       ) : (
-        <span className={styles.noRecording}>Loading...</span>
+        <span className={styles.noRecording}>{t('cdr.recordingPlayer.loading')}</span>
       )}
       <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
-        onClick={onClose} aria-label="Close player">
+        onClick={onClose} aria-label={t('cdr.recordingPlayer.closeAria')}>
         <X size={14} aria-hidden="true" />
       </button>
     </section>
@@ -72,6 +74,7 @@ function RecordingPlayer({ tenantId, cdrId, onClose }) {
 }
 
 export default function CDR() {
+  const { t } = useTranslation()
   const { user } = useAuthStore()
   const isSuperAdmin = user?.role === 'super_admin'
 
@@ -115,7 +118,18 @@ export default function CDR() {
       const str = String(val ?? '')
       return `"${str.replace(/"/g, '""')}"`
     }
-    const headers = ['Date', 'Source', 'Destination', 'Duration', 'Billsec', 'Disposition', 'CallerID', 'Channel', 'DstChannel', 'UniqueID']
+    const headers = [
+      t('cdr.detailDialog.date'),
+      t('cdr.detailDialog.source'),
+      t('cdr.detailDialog.destination'),
+      t('cdr.detailDialog.duration'),
+      t('cdr.detailDialog.billableSeconds'),
+      t('cdr.detailDialog.disposition'),
+      t('cdr.detailDialog.callerId'),
+      t('cdr.detailDialog.channel'),
+      t('cdr.detailDialog.dstChannel'),
+      t('cdr.detailDialog.uniqueId')
+    ]
     const rows = data.items.map((r) => [
       new Date(r.calldate).toLocaleString(),
       r.src, r.dst, formatDuration(r.duration),
@@ -138,10 +152,10 @@ export default function CDR() {
       <section className={s.toolbar}>
         {isSuperAdmin && (
           <fieldset className={s.searchGroup}>
-            <label htmlFor="cdr-tenant-select" className="sr-only">Select Tenant</label>
+            <label htmlFor="cdr-tenant-select" className="sr-only">{t('activeCalls.labelTenant')}</label>
             <select id="cdr-tenant-select" className={s.fieldInput} style={{ height: 40 }}
               value={selectedTenant} onChange={(e) => { setSelectedTenant(e.target.value); setPage(1) }}>
-              <option value="">Select tenant...</option>
+              <option value="">{t('cdr.selectTenant')}</option>
               {tenants?.items?.map((t) => (
                 <option key={t.id} value={t.id}>{t.name} ({t.slug})</option>
               ))}
@@ -151,26 +165,26 @@ export default function CDR() {
 
         <button className={`${s.btn} ${s.btnSecondary}`} onClick={handleExportCSV}
           disabled={!data?.items?.length} id="export-cdr-btn">
-          <Download size={16} aria-hidden="true" /> Export CSV
+          <Download size={16} aria-hidden="true" /> {t('cdr.exportCsv')}
         </button>
       </section>
 
       {!selectedTenant ? (
-        <p className={s.empty}>Select a tenant to view CDR history</p>
+        <p className={s.empty}>{t('cdr.selectToView')}</p>
       ) : isLoading ? (
-        <p className={s.loading}>Loading CDR...</p>
+        <p className={s.loading}>{t('cdr.loading')}</p>
       ) : (
         <article className={s.tableWrap}>
           <table className={s.table}>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Source</th>
-                <th>Destination</th>
-                <th>Duration</th>
-                <th>Billsec</th>
-                <th>Disposition</th>
-                <th>Recording</th>
+                <th>{t('cdr.date')}</th>
+                <th>{t('cdr.source')}</th>
+                <th>{t('cdr.destination')}</th>
+                <th>{t('cdr.duration')}</th>
+                <th>{t('cdr.billsec')}</th>
+                <th>{t('cdr.disposition')}</th>
+                <th>{t('cdr.recording')}</th>
               </tr>
             </thead>
             <tbody>
@@ -199,7 +213,7 @@ export default function CDR() {
                             setPlayingId(r.id)
                           }
                         }}
-                        aria-label={playingId === r.id ? 'Stop recording' : 'Play recording'}
+                        aria-label={playingId === r.id ? t('cdr.stopRecording') : t('cdr.playRecording')}
                       >
                         {playingId === r.id
                           ? <Square size={14} aria-hidden="true" />
@@ -211,7 +225,7 @@ export default function CDR() {
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan={7} className={s.empty}>No CDR records</td></tr>
+                <tr><td colSpan={7} className={s.empty}>{t('cdr.noRecords')}</td></tr>
               )}
             </tbody>
           </table>
@@ -227,16 +241,16 @@ export default function CDR() {
 
           {data && data.pages > 1 && (
             <footer className={s.pagination}>
-              <span>Page {data.page} of {data.pages} ({data.total} records)</span>
+              <span>{t('common.page', { current: data.page, total: data.pages, count: data.total })}</span>
               <section className={s.paginationBtns}>
                 <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                   disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-                  aria-label="Previous page">
+                  aria-label={t('tenantDetails.events.prevPageAria')}>
                   <ChevronLeft size={14} aria-hidden="true" />
                 </button>
                 <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                   disabled={page >= data.pages} onClick={() => setPage((p) => p + 1)}
-                  aria-label="Next page">
+                  aria-label={t('tenantDetails.events.nextPageAria')}>
                   <ChevronRight size={14} aria-hidden="true" />
                 </button>
               </section>
@@ -250,39 +264,39 @@ export default function CDR() {
         <Dialog.Portal>
           <Dialog.Overlay className={s.dialogOverlay} />
           <Dialog.Content className={s.dialogContent} aria-describedby="cdr-detail-desc">
-            <Dialog.Title className={s.dialogTitle}>Call Detail Record</Dialog.Title>
-            <p id="cdr-detail-desc" className="sr-only">Detailed information about the selected call</p>
+            <Dialog.Title className={s.dialogTitle}>{t('cdr.detailDialog.title')}</Dialog.Title>
+            <p id="cdr-detail-desc" className="sr-only">{t('cdr.detailDialog.description')}</p>
 
             {selectedRecord && (
               <article className={styles.detailGrid}>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Date & Time</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.date')}</span>
                   <span className={styles.detailValue}>
                     {formatDate(selectedRecord.calldate)}
                   </span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Caller ID</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.callerId')}</span>
                   <span className={styles.detailValue}>{selectedRecord.clid || '—'}</span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Source</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.source')}</span>
                   <span className={styles.detailValue}>{selectedRecord.src || '—'}</span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Destination</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.destination')}</span>
                   <span className={styles.detailValue}>{selectedRecord.dst || '—'}</span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Duration</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.duration')}</span>
                   <span className={styles.detailValue}>{formatDuration(selectedRecord.duration)}</span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Billable Seconds</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.billableSeconds')}</span>
                   <span className={styles.detailValue}>{formatDuration(selectedRecord.billsec)}</span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Disposition</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.disposition')}</span>
                   <span className={styles.detailValue}>
                     <span className={`${styles.disposition} ${styles[dispositionColor(selectedRecord.disposition)]}`}>
                       {selectedRecord.disposition || '—'}
@@ -290,27 +304,27 @@ export default function CDR() {
                   </span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Context</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.context')}</span>
                   <span className={styles.detailValue}><code>{selectedRecord.dcontext || '—'}</code></span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Channel</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.channel')}</span>
                   <span className={styles.detailValue}><code>{selectedRecord.channel || '—'}</code></span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Destination Channel</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.dstChannel')}</span>
                   <span className={styles.detailValue}><code>{selectedRecord.dstchannel || '—'}</code></span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Last Application</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.lastApp')}</span>
                   <span className={styles.detailValue}><code>{selectedRecord.lastapp || '—'}</code></span>
                 </section>
                 <section className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Account Code</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.accountCode')}</span>
                   <span className={styles.detailValue}>{selectedRecord.accountcode || '—'}</span>
                 </section>
                 <section className={`${styles.detailItem} ${styles.fullWidth}`}>
-                  <span className={styles.detailLabel}>Unique ID</span>
+                  <span className={styles.detailLabel}>{t('cdr.detailDialog.uniqueId')}</span>
                   <span className={styles.detailValue}><code>{selectedRecord.uniqueid || '—'}</code></span>
                 </section>
               </article>
@@ -318,7 +332,7 @@ export default function CDR() {
 
             <footer className={s.dialogActions}>
               <Dialog.Close asChild>
-                <button className={`${s.btn} ${s.btnSecondary}`}>Close</button>
+                <button className={`${s.btn} ${s.btnSecondary}`}>{t('cdr.detailDialog.close')}</button>
               </Dialog.Close>
             </footer>
           </Dialog.Content>

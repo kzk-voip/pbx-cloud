@@ -109,7 +109,7 @@ export default function TenantCallRoutes({ tenantId }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!form.trunk_id) {
-      alert('Please select a trunk')
+      alert(t('callRoutes.selectTrunkAlert', 'Please select a trunk'))
       return
     }
     if (editingRoute) {
@@ -120,7 +120,7 @@ export default function TenantCallRoutes({ tenantId }) {
   }
 
   const handleDelete = (id, name) => {
-    if (window.confirm(t('common.confirmDelete', { item: name }) || `Delete call route ${name}?`)) {
+    if (window.confirm(t('common.confirmDelete', { item: name }))) {
       deleteMutation.mutate(id)
     }
   }
@@ -159,7 +159,7 @@ export default function TenantCallRoutes({ tenantId }) {
                   <input
                     id="route-name"
                     className={s.fieldInput}
-                    placeholder="Outbound via Trunk A"
+                    placeholder={t('callRoutes.placeholderName', 'Outbound via Trunk A')}
                     required
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -171,7 +171,7 @@ export default function TenantCallRoutes({ tenantId }) {
                   <input
                     id="route-pattern"
                     className={s.fieldInput}
-                    placeholder="_9X."
+                    placeholder={t('callRoutes.placeholderPattern', '_9X.')}
                     required
                     value={form.pattern}
                     onChange={(e) => setForm((f) => ({ ...f, pattern: e.target.value }))}
@@ -217,7 +217,7 @@ export default function TenantCallRoutes({ tenantId }) {
                     <input
                       id="route-prepend"
                       className={s.fieldInput}
-                      placeholder="00"
+                      placeholder={t('callRoutes.placeholderPrepend', '00')}
                       value={form.prefix_add}
                       onChange={(e) => setForm((f) => ({ ...f, prefix_add: e.target.value }))}
                     />
@@ -256,7 +256,7 @@ export default function TenantCallRoutes({ tenantId }) {
                     <button type="button" className={`${s.btn} ${s.btnSecondary}`}>{t('common.cancel')}</button>
                   </Dialog.Close>
                   <button type="submit" className={`${s.btn} ${s.btnPrimary}`} disabled={createMutation.isPending || updateMutation.isPending}>
-                    {createMutation.isPending || updateMutation.isPending ? t('common.saving') || 'Saving...' : t('common.save') || 'Save'}
+                    {createMutation.isPending || updateMutation.isPending ? t('common.saving') : t('common.save')}
                   </button>
                 </footer>
               </form>
@@ -275,7 +275,7 @@ export default function TenantCallRoutes({ tenantId }) {
               <th>{t('callRoutes.strip')}</th>
               <th>{t('callRoutes.prepend')}</th>
               <th>{t('callRoutes.priority')}</th>
-              <th>Status</th>
+              <th>{t('common.status')}</th>
               <th>{t('callRoutes.actions')}</th>
             </tr>
           </thead>
@@ -285,14 +285,14 @@ export default function TenantCallRoutes({ tenantId }) {
                 <tr key={route.id}>
                   <td><strong>{route.name}</strong></td>
                   <td style={{ fontFamily: 'var(--font-mono, monospace)' }}>{route.pattern}</td>
-                  <td>{trunkMap[route.trunk_id] || 'Unknown Trunk'}</td>
+                  <td>{trunkMap[route.trunk_id] || t('callRoutes.unknownTrunk', 'Unknown Trunk')}</td>
                   <td>{route.prefix_strip}</td>
                   <td>{route.prefix_add || '—'}</td>
                   <td>{route.priority}</td>
                   <td>
                     <StatusBadge
                       status={route.enabled ? 'active' : 'inactive'}
-                      label={route.enabled ? t('common.enabled') || 'Enabled' : t('common.disabled') || 'Disabled'}
+                      label={route.enabled ? t('common.enabled') : t('common.disabled')}
                     />
                   </td>
                   <td>
@@ -307,7 +307,7 @@ export default function TenantCallRoutes({ tenantId }) {
                       <button
                         className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                         onClick={() => handleDelete(route.id, route.name)}
-                        aria-label={t('callRoutes.deleteRoute') || 'Delete Route'}
+                        aria-label={t('callRoutes.deleteRoute', 'Delete Route')}
                       >
                         <Trash2 size={14} aria-hidden="true" />
                       </button>
@@ -318,7 +318,7 @@ export default function TenantCallRoutes({ tenantId }) {
             ) : (
               <tr>
                 <td colSpan={8} className={s.empty}>
-                  {trunks.length === 0 ? 'Create a trunk first to manage outbound routing.' : t('callRoutes.noRoutes')}
+                  {trunks.length === 0 ? t('callRoutes.createTrunkFirst', 'Create a trunk first to manage outbound routing.') : t('callRoutes.noRoutes')}
                 </td>
               </tr>
             )}

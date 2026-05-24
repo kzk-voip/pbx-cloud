@@ -162,7 +162,7 @@ export default function Dashboard() {
                   stroke="var(--color-primary)"
                   strokeWidth={2}
                   fill="url(#callGradient)"
-                  name="Active Calls"
+                  name={t('dashboard.activeCalls')}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -197,7 +197,7 @@ export default function Dashboard() {
                     axisLine={{ stroke: 'var(--border-color)' }}
                   />
                   <Tooltip contentStyle={chartTooltipStyle} />
-                  <Bar dataKey="calls" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Calls" />
+                  <Bar dataKey="calls" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name={t('reports.calls')} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -273,7 +273,7 @@ export default function Dashboard() {
                   axisLine={{ stroke: 'var(--border-color)' }}
                 />
                 <Tooltip contentStyle={chartTooltipStyle} />
-                <Bar dataKey="calls" fill="url(#hourGradient)" radius={[4, 4, 0, 0]} name="Calls" />
+                <Bar dataKey="calls" fill="url(#hourGradient)" radius={[4, 4, 0, 0]} name={t('reports.calls')} />
               </BarChart>
             </ResponsiveContainer>
           ) : (

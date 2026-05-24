@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Phone,
   PhoneOff,
@@ -27,6 +28,7 @@ function formatTime(seconds) {
 }
 
 export default function SoftphoneWidget({ embedded = false, onClose }) {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(embedded)
   const [isMinimized, setIsMinimized] = useState(false)
   const [dialInput, setDialInput] = useState('')
@@ -71,7 +73,7 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
       <button
         className={styles.fab}
         onClick={() => setIsOpen(true)}
-        aria-label="Open softphone"
+        aria-label={t('softphone.open')}
       >
         <Phone size={24} aria-hidden="true" />
         {state === 'registered' && <span className={styles.fabDot} />}
@@ -84,26 +86,26 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
   return (
     <aside
       className={`${styles.widget} ${isMinimized ? styles.minimized : ''} ${embedded ? styles.embedded : ''}`}
-      aria-label="Softphone"
+      aria-label={t('softphone.title')}
     >
       {/* Header */}
       <header className={styles.header}>
         <span className={styles.headerTitle}>
           <Phone size={16} aria-hidden="true" />
-          Softphone
+          {t('softphone.title')}
         </span>
         <section className={styles.headerActions}>
           <button
             className={styles.headerBtn}
             onClick={() => setIsMinimized((m) => !m)}
-            aria-label={isMinimized ? 'Expand' : 'Minimize'}
+            aria-label={isMinimized ? t('softphone.expand') : t('softphone.minimize')}
           >
             {isMinimized ? <ChevronUp size={14} aria-hidden="true" /> : <Minus size={14} aria-hidden="true" />}
           </button>
           <button
             className={styles.headerBtn}
             onClick={() => { setIsOpen(false); onClose?.() }}
-            aria-label="Close softphone"
+            aria-label={t('softphone.close')}
           >
             <X size={14} aria-hidden="true" />
           </button>
@@ -116,13 +118,13 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
           <section className={styles.status}>
             <span className={`${styles.statusDot} ${styles[`dot_${state}`]}`} />
             <span className={styles.statusText}>
-              {state === 'idle' && 'Not connected'}
-              {state === 'registering' && 'Connecting...'}
-              {state === 'registered' && 'Ready'}
-              {state === 'calling' && (callInfo?.direction === 'incoming' ? 'Incoming call...' : 'Calling...')}
+              {state === 'idle' && t('softphone.notConnected')}
+              {state === 'registering' && t('softphone.connecting')}
+              {state === 'registered' && t('softphone.ready')}
+              {state === 'calling' && (callInfo?.direction === 'incoming' ? t('softphone.incomingCall') : t('softphone.calling'))}
               {state === 'in_call' && formatTime(callDuration)}
-              {state === 'on_hold' && `On Hold — ${formatTime(callDuration)}`}
-              {state === 'error' && (error || 'Error')}
+              {state === 'on_hold' && t('softphone.onHold', { time: formatTime(callDuration) })}
+              {state === 'error' && (error || t('softphone.error'))}
             </span>
           </section>
 
@@ -131,10 +133,10 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
             <article className={styles.incomingBanner}>
               <p className={styles.callerId}>{callInfo.remoteUri}</p>
               <section className={styles.incomingActions}>
-                <button className={`${styles.callBtn} ${styles.answerBtn}`} onClick={answer} aria-label="Answer call">
+                <button className={`${styles.callBtn} ${styles.answerBtn}`} onClick={answer} aria-label={t('softphone.answer')}>
                   <PhoneIncoming size={18} aria-hidden="true" />
                 </button>
-                <button className={`${styles.callBtn} ${styles.hangupBtn}`} onClick={hangup} aria-label="Reject call">
+                <button className={`${styles.callBtn} ${styles.hangupBtn}`} onClick={hangup} aria-label={t('softphone.reject')}>
                   <PhoneOff size={18} aria-hidden="true" />
                 </button>
               </section>
@@ -147,16 +149,16 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
               <p className={styles.callerId}>{callInfo?.remoteUri || dialInput}</p>
               <section className={styles.callActions}>
                 {state === 'in_call' && (
-                  <button className={styles.controlBtn} onClick={hold} aria-label="Hold call">
+                  <button className={styles.controlBtn} onClick={hold} aria-label={t('softphone.hold')}>
                     <Pause size={16} aria-hidden="true" />
                   </button>
                 )}
                 {state === 'on_hold' && (
-                  <button className={styles.controlBtn} onClick={unhold} aria-label="Resume call">
+                  <button className={styles.controlBtn} onClick={unhold} aria-label={t('softphone.resume')}>
                     <Play size={16} aria-hidden="true" />
                   </button>
                 )}
-                <button className={`${styles.callBtn} ${styles.hangupBtn}`} onClick={hangup} aria-label="Hang up">
+                <button className={`${styles.callBtn} ${styles.hangupBtn}`} onClick={hangup} aria-label={t('softphone.hangup')}>
                   <PhoneOff size={18} aria-hidden="true" />
                 </button>
               </section>
@@ -169,7 +171,7 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
               <input
                 className={styles.dialInput}
                 type="tel"
-                placeholder="Enter number..."
+                placeholder={t('softphone.placeholderNumber')}
                 value={dialInput}
                 onChange={(e) => setDialInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleDial()}
@@ -190,7 +192,7 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
                 className={`${styles.callBtn} ${styles.dialBtn}`}
                 onClick={handleDial}
                 disabled={!dialInput.trim()}
-                aria-label="Make call"
+                aria-label={t('softphone.makeCall')}
               >
                 <Phone size={18} aria-hidden="true" />
               </button>
@@ -204,14 +206,14 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
                 <form className={styles.configForm} onSubmit={(e) => { e.preventDefault(); register() }}>
                   <input
                     className={styles.configInput}
-                    placeholder="wss://host:8443"
+                    placeholder={t('softphone.placeholderWs')}
                     value={sipConfig.wsUri}
                     onChange={(e) => setSipConfig((c) => ({ ...c, wsUri: e.target.value }))}
                     id="softphone-ws-uri"
                   />
                   <input
                     className={styles.configInput}
-                    placeholder="sip:user@domain"
+                    placeholder={t('softphone.placeholderSip')}
                     value={sipConfig.sipUri}
                     onChange={(e) => setSipConfig((c) => ({ ...c, sipUri: e.target.value }))}
                     id="softphone-sip-uri"
@@ -219,13 +221,13 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
                   <input
                     className={styles.configInput}
                     type="password"
-                    placeholder="SIP password"
+                    placeholder={t('softphone.placeholderPass')}
                     value={sipConfig.password}
                     onChange={(e) => setSipConfig((c) => ({ ...c, password: e.target.value }))}
                     id="softphone-password"
                   />
                   <button type="submit" className={`${styles.callBtn} ${styles.connectBtn}`}>
-                    Connect
+                    {t('softphone.connect')}
                   </button>
                 </form>
               ) : (
@@ -233,7 +235,7 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
                   className={`${styles.callBtn} ${styles.connectBtn}`}
                   onClick={() => setShowConfig(true)}
                 >
-                  Configure & Connect
+                  {t('softphone.configureConnect')}
                 </button>
               )}
             </section>
@@ -241,7 +243,7 @@ export default function SoftphoneWidget({ embedded = false, onClose }) {
 
           {state === 'registered' && !isInCall && (
             <button className={styles.disconnectBtn} onClick={unregister}>
-              Disconnect
+              {t('softphone.disconnect')}
             </button>
           )}
         </section>

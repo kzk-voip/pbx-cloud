@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Plus, Edit2, Trash2, ShieldAlert } from 'lucide-react'
+import { Plus, Edit2, Trash2 } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import client from '../../api/client'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
@@ -97,7 +97,7 @@ export default function TenantInboundRules({ tenantId }) {
   }
 
   const handleDelete = (id, did) => {
-    if (window.confirm(t('common.confirmDelete', { item: did }) || `Delete rule for ${did}?`)) {
+    if (window.confirm(t('common.confirmDelete', { item: did }))) {
       deleteMutation.mutate(id)
     }
   }
@@ -129,7 +129,7 @@ export default function TenantInboundRules({ tenantId }) {
                   <input
                     id="rule-did"
                     className={s.fieldInput}
-                    placeholder="+14155551234"
+                    placeholder={t('inboundRules.placeholderDid', '+14155551234')}
                     required
                     value={form.did_number}
                     onChange={(e) => setForm((f) => ({ ...f, did_number: e.target.value }))}
@@ -156,7 +156,7 @@ export default function TenantInboundRules({ tenantId }) {
                   <input
                     id="rule-dest-value"
                     className={s.fieldInput}
-                    placeholder="101"
+                    placeholder={t('inboundRules.placeholderDest', '101')}
                     required
                     value={form.destination_value}
                     onChange={(e) => setForm((f) => ({ ...f, destination_value: e.target.value }))}
@@ -195,7 +195,7 @@ export default function TenantInboundRules({ tenantId }) {
                     <button type="button" className={`${s.btn} ${s.btnSecondary}`}>{t('common.cancel')}</button>
                   </Dialog.Close>
                   <button type="submit" className={`${s.btn} ${s.btnPrimary}`} disabled={createMutation.isPending || updateMutation.isPending}>
-                    {createMutation.isPending || updateMutation.isPending ? t('common.saving') || 'Saving...' : t('common.save') || 'Save'}
+                    {createMutation.isPending || updateMutation.isPending ? t('common.saving') : t('common.save')}
                   </button>
                 </footer>
               </form>
@@ -212,7 +212,7 @@ export default function TenantInboundRules({ tenantId }) {
               <th>{t('inboundRules.destType')}</th>
               <th>{t('inboundRules.destValue')}</th>
               <th>{t('inboundRules.priority')}</th>
-              <th>Status</th>
+              <th>{t('common.status')}</th>
               <th>{t('inboundRules.actions')}</th>
             </tr>
           </thead>
@@ -231,7 +231,7 @@ export default function TenantInboundRules({ tenantId }) {
                   <td>
                     <StatusBadge
                       status={rule.enabled ? 'active' : 'inactive'}
-                      label={rule.enabled ? t('common.enabled') || 'Enabled' : t('common.disabled') || 'Disabled'}
+                      label={rule.enabled ? t('common.enabled') : t('common.disabled')}
                     />
                   </td>
                   <td>
@@ -246,7 +246,7 @@ export default function TenantInboundRules({ tenantId }) {
                       <button
                         className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                         onClick={() => handleDelete(rule.id, rule.did_number)}
-                        aria-label={t('inboundRules.deleteRule') || 'Delete Rule'}
+                        aria-label={t('inboundRules.deleteRule', 'Delete Rule')}
                       >
                         <Trash2 size={14} aria-hidden="true" />
                       </button>

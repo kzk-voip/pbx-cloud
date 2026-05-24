@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import AIAssistantWidget from '../AIAssistant/AIAssistantWidget'
@@ -7,14 +8,15 @@ import useWebSocket from '../../hooks/useWebSocket'
 import styles from './Layout.module.css'
 
 const pageTitles = {
-  '/dashboard': 'Dashboard',
-  '/tenants': 'Tenants',
-  '/active-calls': 'Active Calls',
-  '/cdr': 'CDR History',
-  '/profile': 'Profile',
+  '/dashboard': 'sidebar.dashboard',
+  '/tenants': 'sidebar.tenants',
+  '/active-calls': 'sidebar.activeCalls',
+  '/cdr': 'sidebar.cdr',
+  '/profile': 'sidebar.profile',
 }
 
 export default function Layout() {
+  const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
 
@@ -22,9 +24,10 @@ export default function Layout() {
   useWebSocket({ enabled: true })
 
   // Resolve page title from pathname
-  const title = Object.entries(pageTitles).find(([path]) =>
+  const titleKey = Object.entries(pageTitles).find(([path]) =>
     location.pathname.startsWith(path)
-  )?.[1] || 'PBX Cloud'
+  )?.[1]
+  const title = titleKey ? t(titleKey) : 'PBX Cloud'
 
   return (
     <section className={styles.layout}>

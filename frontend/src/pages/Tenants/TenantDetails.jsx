@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Plus, Trash2, KeyRound, Edit, Eye, EyeOff, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -27,6 +28,7 @@ const EMPTY_USER_FORM = { username: '', password: '', role: 'user', extension_id
 const EMPTY_USER_EDIT_FORM = { username: '', password: '', role: 'user', extension_id: '', is_active: true }
 
 export default function TenantDetails() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -104,9 +106,9 @@ export default function TenantDetails() {
       queryClient.invalidateQueries({ queryKey: ['events', id] })
       setCredentials(data)
       setExtForm(EMPTY_EXT_FORM)
-      toast.success('Extension created')
+      toast.success(t('tenantDetails.extensions.createdSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to create extension'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.extensions.createdFailed')),
   })
 
   const deleteExtMutation = useMutation({
@@ -114,9 +116,9 @@ export default function TenantDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['extensions', id] })
       queryClient.invalidateQueries({ queryKey: ['events', id] })
-      toast.success('Extension deleted')
+      toast.success(t('tenantDetails.extensions.deletedSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete extension'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.extensions.deletedFailed')),
   })
 
   const updateExtMutation = useMutation({
@@ -126,9 +128,9 @@ export default function TenantDetails() {
       queryClient.invalidateQueries({ queryKey: ['extensions', id] })
       queryClient.invalidateQueries({ queryKey: ['events', id] })
       closeExtEditDialog()
-      toast.success('Extension updated')
+      toast.success(t('tenantDetails.extensions.updatedSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to update extension'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.extensions.updatedFailed')),
   })
 
   const resetPasswordMutation = useMutation({
@@ -137,9 +139,9 @@ export default function TenantDetails() {
     onSuccess: (data) => {
       setCredentials(data)
       setExtDialogOpen(true)
-      toast.success('Password reset')
+      toast.success(t('tenantDetails.extensions.resetSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to reset password'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.extensions.resetFailed')),
   })
 
   // ==================== Trunk Mutations ====================
@@ -151,9 +153,9 @@ export default function TenantDetails() {
       queryClient.invalidateQueries({ queryKey: ['trunks', id] })
       queryClient.invalidateQueries({ queryKey: ['events', id] })
       closeTrunkDialog()
-      toast.success('Trunk created')
+      toast.success(t('tenantDetails.trunks.createdSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to create trunk'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.trunks.createdFailed')),
   })
 
   const updateTrunkMutation = useMutation({
@@ -162,9 +164,9 @@ export default function TenantDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trunks', id] })
       closeTrunkDialog()
-      toast.success('Trunk updated')
+      toast.success(t('tenantDetails.trunks.updatedSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to update trunk'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.trunks.updatedFailed')),
   })
 
   const deleteTrunkMutation = useMutation({
@@ -172,9 +174,9 @@ export default function TenantDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trunks', id] })
       queryClient.invalidateQueries({ queryKey: ['events', id] })
-      toast.success('Trunk deleted')
+      toast.success(t('tenantDetails.trunks.deletedSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete trunk'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.trunks.deletedFailed')),
   })
 
   // ==================== Handlers ====================
@@ -270,9 +272,9 @@ export default function TenantDetails() {
       queryClient.invalidateQueries({ queryKey: ['events', id] })
       setUserForm(EMPTY_USER_FORM)
       setUserDialogOpen(false)
-      toast.success('User created')
+      toast.success(t('tenantDetails.users.createdSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to create user'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.users.createdFailed')),
   })
 
   const updateUserMutation = useMutation({
@@ -283,9 +285,9 @@ export default function TenantDetails() {
       queryClient.invalidateQueries({ queryKey: ['events', id] })
       setUserEditDialogOpen(false)
       setEditingUserId(null)
-      toast.success('User updated')
+      toast.success(t('tenantDetails.users.updatedSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to update user'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.users.updatedFailed')),
   })
 
   const deleteUserMutation = useMutation({
@@ -293,9 +295,9 @@ export default function TenantDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', id] })
       queryClient.invalidateQueries({ queryKey: ['events', id] })
-      toast.success('User deleted')
+      toast.success(t('tenantDetails.users.deletedSuccess'))
     },
-    onError: (err) => toast.error(err.response?.data?.detail || 'Failed to delete user'),
+    onError: (err) => toast.error(err.response?.data?.detail || t('tenantDetails.users.deletedFailed')),
   })
 
   const handleCreateUser = (e) => {
@@ -328,9 +330,9 @@ export default function TenantDetails() {
 
   // ==================== Render ====================
 
-  if (isLoading) return <p className={s.loading}>Loading tenant...</p>
+  if (isLoading) return <p className={s.loading}>{t('tenantDetails.loading')}</p>
   if (error) return <p className={s.error}>{error.message}</p>
-  if (!tenant) return <p className={s.empty}>Tenant not found</p>
+  if (!tenant) return <p className={s.empty}>{t('tenantDetails.notFound')}</p>
 
   const isTrunkPending = createTrunkMutation.isPending || updateTrunkMutation.isPending
 
@@ -338,7 +340,7 @@ export default function TenantDetails() {
     <>
       <header className={styles.header}>
         <button className={`${s.btn} ${s.btnSecondary}`} onClick={() => navigate('/tenants')}>
-          <ArrowLeft size={16} aria-hidden="true" /> Back
+          <ArrowLeft size={16} aria-hidden="true" /> {t('tenantDetails.back')}
         </button>
         <section>
           <h2 className={styles.tenantName}>{tenant.name}</h2>
@@ -348,37 +350,39 @@ export default function TenantDetails() {
         <button className={`${s.btn} ${s.btnSecondary}`}
           onClick={() => navigate(`/tenants/${id}/settings`)}
           style={{ marginLeft: 'auto' }}>
-          <Settings size={16} aria-hidden="true" /> Settings
+          <Settings size={16} aria-hidden="true" /> {t('tenantDetails.settings')}
         </button>
       </header>
 
       <Tabs.Root defaultValue="info" className={styles.tabs}>
-        <Tabs.List className={styles.tabsList} aria-label="Tenant details">
-          <Tabs.Trigger className={styles.tabsTrigger} value="info" id="tab-info">Info</Tabs.Trigger>
+        <Tabs.List className={styles.tabsList} aria-label={t('tenantDetails.tabs.title', 'Tenant details')}>
+          <Tabs.Trigger className={styles.tabsTrigger} value="info" id="tab-info">
+            {t('tenantDetails.tabs.info')}
+          </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="extensions" id="tab-extensions">
-            Extensions ({extensions?.items?.length || 0})
+            {t('tenantDetails.tabs.extensions')} ({extensions?.items?.length || 0})
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="trunks" id="tab-trunks">
-            Trunks ({trunks?.items?.length || 0})
+            {t('tenantDetails.tabs.trunks')} ({trunks?.items?.length || 0})
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="events" id="tab-events">
-            Events
+            {t('tenantDetails.tabs.events')}
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="reports" id="tab-reports">
-            Reports
+            {t('tenantDetails.tabs.reports')}
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="inbound-rules" id="tab-inbound-rules">
-            Inbound Rules
+            {t('tenantDetails.tabs.inboundRules')}
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="call-routes" id="tab-call-routes">
-            Call Routes
+            {t('tenantDetails.tabs.callRoutes')}
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="users" id="tab-users">
-            Users ({users?.items?.length || 0})
+            {t('tenantDetails.tabs.users')} ({users?.items?.length || 0})
           </Tabs.Trigger>
           {isSuperAdmin && (
             <Tabs.Trigger className={styles.tabsTrigger} value="ip-acl" id="tab-ip-acl">
-              IP ACL
+              {t('tenantDetails.tabs.ipAcl')}
             </Tabs.Trigger>
           )}
         </Tabs.List>
@@ -387,34 +391,34 @@ export default function TenantDetails() {
         <Tabs.Content className={styles.tabsContent} value="info">
           <article className={styles.infoGrid}>
             <section className={styles.infoItem}>
-              <span className={styles.infoLabel}>Slug</span>
+              <span className={styles.infoLabel}>{t('tenantDetails.info.slug')}</span>
               <span className={styles.infoValue}>{tenant.slug}</span>
             </section>
             <section className={styles.infoItem}>
-              <span className={styles.infoLabel}>Domain</span>
+              <span className={styles.infoLabel}>{t('tenantDetails.info.domain')}</span>
               <span className={styles.infoValue}>{tenant.domain}</span>
             </section>
             <section className={styles.infoItem}>
-              <span className={styles.infoLabel}>Max Extensions</span>
+              <span className={styles.infoLabel}>{t('tenantDetails.info.maxExtensions')}</span>
               <span className={styles.infoValue}>{tenant.max_extensions}</span>
             </section>
             <section className={styles.infoItem}>
-              <span className={styles.infoLabel}>Max Concurrent Calls</span>
+              <span className={styles.infoLabel}>{t('tenantDetails.info.maxConcurrentCalls')}</span>
               <span className={styles.infoValue}>{tenant.max_concurrent_calls}</span>
             </section>
             <section className={styles.infoItem}>
-              <span className={styles.infoLabel}>Codecs</span>
+              <span className={styles.infoLabel}>{t('tenantDetails.info.codecs')}</span>
               <span className={styles.infoValue}>{tenant.codecs}</span>
             </section>
             <section className={styles.infoItem}>
-              <span className={styles.infoLabel}>International Calls</span>
+              <span className={styles.infoLabel}>{t('tenantDetails.info.internationalCalls')}</span>
               <span className={styles.infoValue}>
                 <StatusBadge status={tenant.allow_international ? 'active' : 'inactive'}
-                  label={tenant.allow_international ? 'Allowed' : 'Blocked'} />
+                  label={tenant.allow_international ? t('tenantDetails.info.allowed') : t('tenantDetails.info.blocked')} />
               </span>
             </section>
             <section className={styles.infoItem}>
-              <span className={styles.infoLabel}>Created</span>
+              <span className={styles.infoLabel}>{t('tenantDetails.info.created')}</span>
               <span className={styles.infoValue}>{new Date(tenant.created_at).toLocaleString()}</span>
             </section>
           </article>
@@ -426,50 +430,50 @@ export default function TenantDetails() {
             <Dialog.Root open={extDialogOpen} onOpenChange={(open) => { setExtDialogOpen(open); if (!open) setCredentials(null) }}>
               <Dialog.Trigger asChild>
                 <button className={`${s.btn} ${s.btnPrimary}`} id="create-extension-btn">
-                  <Plus size={16} aria-hidden="true" /> Add Extension
+                  <Plus size={16} aria-hidden="true" /> {t('tenantDetails.extensions.addBtn')}
                 </button>
               </Dialog.Trigger>
               <Dialog.Portal>
                 <Dialog.Overlay className={s.dialogOverlay} />
                 <Dialog.Content className={s.dialogContent}>
                   <Dialog.Title className={s.dialogTitle}>
-                    {credentials ? 'SIP Credentials' : 'Create Extension'}
+                    {credentials ? t('tenantDetails.extensions.credentialsTitle') : t('tenantDetails.extensions.createTitle')}
                   </Dialog.Title>
 
                   {credentials ? (
                     <article className={s.credentialsBox}>
-                      <p><strong>SIP Username:</strong> {credentials.sip_username}</p>
-                      <p><strong>SIP Password:</strong> {credentials.sip_password}</p>
-                      <p><strong>SIP Domain:</strong> {credentials.sip_domain}</p>
-                      <p><strong>Extension:</strong> {credentials.extension_number}</p>
+                      <p><strong>{t('tenantDetails.extensions.username')}:</strong> {credentials.sip_username}</p>
+                      <p><strong>{t('tenantDetails.extensions.password')}:</strong> {credentials.sip_password}</p>
+                      <p><strong>{t('tenantDetails.extensions.domain')}:</strong> {credentials.sip_domain}</p>
+                      <p><strong>{t('tenantDetails.extensions.extension')}:</strong> {credentials.extension_number}</p>
                     </article>
                   ) : (
                     <form className={s.dialogForm} onSubmit={handleCreateExtension}>
                       <fieldset className={s.field}>
-                        <label className={s.fieldLabel} htmlFor="ext-number">Extension Number</label>
+                        <label className={s.fieldLabel} htmlFor="ext-number">{t('tenantDetails.extensions.numberField')}</label>
                         <input id="ext-number" className={s.fieldInput} placeholder="101" required
                           pattern="^\d+$" value={extForm.extension_number}
                           onChange={(e) => setExtForm((f) => ({ ...f, extension_number: e.target.value }))} />
                       </fieldset>
                       <fieldset className={s.field}>
-                        <label className={s.fieldLabel} htmlFor="ext-name">Display Name</label>
+                        <label className={s.fieldLabel} htmlFor="ext-name">{t('tenantDetails.extensions.nameField')}</label>
                         <input id="ext-name" className={s.fieldInput} placeholder="John Doe" required
                           value={extForm.display_name}
                           onChange={(e) => setExtForm((f) => ({ ...f, display_name: e.target.value }))} />
                       </fieldset>
                       <fieldset className={s.field}>
-                        <label className={s.fieldLabel} htmlFor="ext-email">Email (optional)</label>
+                        <label className={s.fieldLabel} htmlFor="ext-email">{t('tenantDetails.extensions.emailField')}</label>
                         <input id="ext-email" className={s.fieldInput} type="email" placeholder="john@example.com"
                           value={extForm.email}
                           onChange={(e) => setExtForm((f) => ({ ...f, email: e.target.value }))} />
                       </fieldset>
                       <footer className={s.dialogActions}>
                         <Dialog.Close asChild>
-                          <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                          <button type="button" className={`${s.btn} ${s.btnSecondary}`}>{t('common.cancel')}</button>
                         </Dialog.Close>
                         <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
                           disabled={createExtMutation.isPending}>
-                          {createExtMutation.isPending ? 'Creating...' : 'Create'}
+                          {createExtMutation.isPending ? t('tenantDetails.extensions.creating') : t('common.create')}
                         </button>
                       </footer>
                     </form>
@@ -478,7 +482,7 @@ export default function TenantDetails() {
                   {credentials && (
                     <footer className={s.dialogActions}>
                       <Dialog.Close asChild>
-                        <button className={`${s.btn} ${s.btnPrimary}`}>Close</button>
+                        <button className={`${s.btn} ${s.btnPrimary}`}>{t('common.close')}</button>
                       </Dialog.Close>
                     </footer>
                   )}
@@ -491,12 +495,12 @@ export default function TenantDetails() {
             <table className={s.table}>
               <thead>
                 <tr>
-                  <th>Extension</th>
-                  <th>Display Name</th>
-                  <th>SIP Username</th>
-                  <th>Email</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{t('tenantDetails.extensions.numberField')}</th>
+                  <th>{t('tenantDetails.extensions.nameField')}</th>
+                  <th>{t('tenantDetails.extensions.username')}</th>
+                  <th>{t('extensions.email')}</th>
+                  <th>{t('tenants.status')}</th>
+                  <th>{t('tenants.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -511,26 +515,26 @@ export default function TenantDetails() {
                       <section className={styles.actionBtns}>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => openEditExtension(ext)}
-                          aria-label={`Edit extension ${ext.extension_number}`}>
+                          aria-label={t('tenantDetails.extensions.editAria', { number: ext.extension_number })}>
                           <Edit size={14} aria-hidden="true" />
                         </button>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => resetPasswordMutation.mutate(ext.id)}
-                          aria-label={`Reset password for ${ext.extension_number}`}>
+                          aria-label={t('tenantDetails.extensions.resetPassAria', { number: ext.extension_number })}>
                           <KeyRound size={14} aria-hidden="true" />
                         </button>
                         <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                           onClick={() => {
-                            if (window.confirm(`Delete extension ${ext.extension_number}?`)) deleteExtMutation.mutate(ext.id)
+                            if (window.confirm(t('tenantDetails.extensions.confirmDelete', { number: ext.extension_number }))) deleteExtMutation.mutate(ext.id)
                           }}
-                          aria-label={`Delete extension ${ext.extension_number}`}>
+                          aria-label={t('tenantDetails.extensions.deleteAria', { number: ext.extension_number })}>
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </section>
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={6} className={s.empty}>No extensions</td></tr>
+                  <tr><td colSpan={6} className={s.empty}>{t('tenantDetails.extensions.noExtensions')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -541,28 +545,28 @@ export default function TenantDetails() {
             <Dialog.Portal>
               <Dialog.Overlay className={s.dialogOverlay} />
               <Dialog.Content className={s.dialogContent}>
-                <Dialog.Title className={s.dialogTitle}>Edit Extension</Dialog.Title>
+                <Dialog.Title className={s.dialogTitle}>{t('tenantDetails.extensions.editTitle')}</Dialog.Title>
                 <form className={s.dialogForm} onSubmit={handleUpdateExtension}>
                   <fieldset className={s.field}>
-                    <label className={s.fieldLabel} htmlFor="ext-edit-number">Extension Number</label>
+                    <label className={s.fieldLabel} htmlFor="ext-edit-number">{t('tenantDetails.extensions.numberField')}</label>
                     <input id="ext-edit-number" className={s.fieldInput} required
                       pattern="^\d+$" value={extEditForm.extension_number}
                       onChange={(e) => setExtEditForm((f) => ({ ...f, extension_number: e.target.value }))} />
                   </fieldset>
                   <fieldset className={s.field}>
-                    <label className={s.fieldLabel} htmlFor="ext-edit-name">Display Name</label>
+                    <label className={s.fieldLabel} htmlFor="ext-edit-name">{t('tenantDetails.extensions.nameField')}</label>
                     <input id="ext-edit-name" className={s.fieldInput} required
                       value={extEditForm.display_name}
                       onChange={(e) => setExtEditForm((f) => ({ ...f, display_name: e.target.value }))} />
                   </fieldset>
                   <fieldset className={s.field}>
-                    <label className={s.fieldLabel} htmlFor="ext-edit-email">Email</label>
+                    <label className={s.fieldLabel} htmlFor="ext-edit-email">{t('tenantDetails.extensions.emailFieldRequired')}</label>
                     <input id="ext-edit-email" className={s.fieldInput} type="email"
                       value={extEditForm.email}
                       onChange={(e) => setExtEditForm((f) => ({ ...f, email: e.target.value }))} />
                   </fieldset>
                   <fieldset className={s.field}>
-                    <label className={s.fieldLabel} htmlFor="ext-edit-password">SIP Password</label>
+                    <label className={s.fieldLabel} htmlFor="ext-edit-password">{t('tenantDetails.extensions.password')}</label>
                     <section className={styles.passwordField}>
                       <input id="ext-edit-password" className={s.fieldInput}
                         type={showExtPassword ? 'text' : 'password'}
@@ -571,7 +575,7 @@ export default function TenantDetails() {
                         onChange={(e) => setExtEditForm((f) => ({ ...f, password: e.target.value }))} />
                       <button type="button" className={styles.passwordToggle}
                         onClick={() => setShowExtPassword((v) => !v)}
-                        aria-label={showExtPassword ? 'Hide password' : 'Show password'}>
+                        aria-label={showExtPassword ? t('tenantDetails.extensions.hidePassword') : t('tenantDetails.extensions.showPassword')}>
                         {showExtPassword
                           ? <EyeOff size={16} aria-hidden="true" />
                           : <Eye size={16} aria-hidden="true" />}
@@ -582,16 +586,16 @@ export default function TenantDetails() {
                     <label className={styles.checkboxLabel}>
                       <input type="checkbox" checked={extEditForm.enabled}
                         onChange={(e) => setExtEditForm((f) => ({ ...f, enabled: e.target.checked }))} />
-                      <span>Enabled</span>
+                      <span>{t('extensions.enabled')}</span>
                     </label>
                   </fieldset>
                   <footer className={s.dialogActions}>
                     <Dialog.Close asChild>
-                      <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                      <button type="button" className={`${s.btn} ${s.btnSecondary}`}>{t('common.cancel')}</button>
                     </Dialog.Close>
                     <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
                       disabled={updateExtMutation.isPending}>
-                      {updateExtMutation.isPending ? 'Saving...' : 'Save'}
+                      {updateExtMutation.isPending ? t('tenantDetails.extensions.saving') : t('common.save')}
                     </button>
                   </footer>
                 </form>
@@ -607,39 +611,39 @@ export default function TenantDetails() {
               <Dialog.Trigger asChild>
                 <button className={`${s.btn} ${s.btnPrimary}`} onClick={openCreateTrunk}
                   id="create-trunk-btn">
-                  <Plus size={16} aria-hidden="true" /> Add Trunk
+                  <Plus size={16} aria-hidden="true" /> {t('tenantDetails.trunks.addBtn')}
                 </button>
               </Dialog.Trigger>
               <Dialog.Portal>
                 <Dialog.Overlay className={s.dialogOverlay} />
                 <Dialog.Content className={s.dialogContent}>
                   <Dialog.Title className={s.dialogTitle}>
-                    {editingTrunkId ? 'Edit SIP Trunk' : 'Create SIP Trunk'}
+                    {editingTrunkId ? t('tenantDetails.trunks.editTitle') : t('tenantDetails.trunks.createTitle')}
                   </Dialog.Title>
                   <form className={s.dialogForm} onSubmit={handleSubmitTrunk}>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="trunk-name">Name</label>
+                      <label className={s.fieldLabel} htmlFor="trunk-name">{t('tenantDetails.trunks.name')}</label>
                       <input id="trunk-name" className={s.fieldInput} required value={trunkForm.name}
                         onChange={(e) => setTrunkForm((f) => ({ ...f, name: e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="trunk-provider">Provider</label>
+                      <label className={s.fieldLabel} htmlFor="trunk-provider">{t('tenantDetails.trunks.provider')}</label>
                       <input id="trunk-provider" className={s.fieldInput} value={trunkForm.provider}
                         onChange={(e) => setTrunkForm((f) => ({ ...f, provider: e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="trunk-host">Host</label>
+                      <label className={s.fieldLabel} htmlFor="trunk-host">{t('tenantDetails.trunks.host')}</label>
                       <input id="trunk-host" className={s.fieldInput} required value={trunkForm.host}
-                        placeholder="sip.provider.com"
+                        placeholder={t('tenantDetails.trunks.placeholderHost')}
                         onChange={(e) => setTrunkForm((f) => ({ ...f, host: e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="trunk-port">Port</label>
+                      <label className={s.fieldLabel} htmlFor="trunk-port">{t('tenantDetails.trunks.port')}</label>
                       <input id="trunk-port" className={s.fieldInput} type="number" value={trunkForm.port}
                         onChange={(e) => setTrunkForm((f) => ({ ...f, port: +e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="trunk-transport">Transport</label>
+                      <label className={s.fieldLabel} htmlFor="trunk-transport">{t('tenantDetails.trunks.transport')}</label>
                       <select id="trunk-transport" className={s.fieldInput} value={trunkForm.transport}
                         onChange={(e) => setTrunkForm((f) => ({ ...f, transport: e.target.value }))}>
                         <option value="udp">UDP</option>
@@ -648,22 +652,22 @@ export default function TenantDetails() {
                       </select>
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="trunk-username">Username (optional)</label>
+                      <label className={s.fieldLabel} htmlFor="trunk-username">{t('tenantDetails.trunks.username')}</label>
                       <input id="trunk-username" className={s.fieldInput} value={trunkForm.username}
-                        placeholder="SIP auth username"
+                        placeholder={t('tenantDetails.trunks.placeholderUsername')}
                         onChange={(e) => setTrunkForm((f) => ({ ...f, username: e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="trunk-password">Password (optional)</label>
+                      <label className={s.fieldLabel} htmlFor="trunk-password">{t('tenantDetails.trunks.password')}</label>
                       <section className={styles.passwordField}>
                         <input id="trunk-password" className={s.fieldInput}
                           type={showPassword ? 'text' : 'password'}
                           value={trunkForm.password}
-                          placeholder={editingTrunkId ? 'Leave empty to keep current' : 'SIP auth password'}
+                          placeholder={editingTrunkId ? t('tenantDetails.trunks.placeholderPasswordEdit') : t('tenantDetails.trunks.placeholderPassword')}
                           onChange={(e) => setTrunkForm((f) => ({ ...f, password: e.target.value }))} />
                         <button type="button" className={styles.passwordToggle}
                           onClick={() => setShowPassword((v) => !v)}
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                          aria-label={showPassword ? t('tenantDetails.trunks.hidePassword') : t('tenantDetails.trunks.showPassword')}>
                           {showPassword
                             ? <EyeOff size={16} aria-hidden="true" />
                             : <Eye size={16} aria-hidden="true" />}
@@ -672,11 +676,11 @@ export default function TenantDetails() {
                     </fieldset>
                     <footer className={s.dialogActions}>
                       <Dialog.Close asChild>
-                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>{t('common.cancel')}</button>
                       </Dialog.Close>
                       <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
                         disabled={isTrunkPending}>
-                        {isTrunkPending ? 'Saving...' : (editingTrunkId ? 'Save' : 'Create')}
+                        {isTrunkPending ? t('tenantDetails.trunks.saving') : (editingTrunkId ? t('common.save') : t('common.create'))}
                       </button>
                     </footer>
                   </form>
@@ -689,14 +693,14 @@ export default function TenantDetails() {
             <table className={s.table}>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Provider</th>
-                  <th>Host</th>
-                  <th>Transport</th>
-                  <th>Channels</th>
-                  <th>Auth</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{t('tenantDetails.trunks.name')}</th>
+                  <th>{t('tenantDetails.trunks.provider')}</th>
+                  <th>{t('tenantDetails.trunks.host')}</th>
+                  <th>{t('tenantDetails.trunks.transport')}</th>
+                  <th>{t('trunks.maxChannels')}</th>
+                  <th>{t('tenantDetails.trunks.auth', 'Auth')}</th>
+                  <th>{t('tenants.status')}</th>
+                  <th>{t('tenants.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -707,27 +711,27 @@ export default function TenantDetails() {
                     <td>{trunk.host}:{trunk.port}</td>
                     <td>{trunk.transport.toUpperCase()}</td>
                     <td>{trunk.max_channels}</td>
-                    <td>{trunk.username ? 'Login/Pass' : 'IP-based'}</td>
+                    <td>{trunk.username ? t('tenantDetails.trunks.authLoginPass') : t('tenantDetails.trunks.authIpBased')}</td>
                     <td><StatusBadge status={trunk.enabled ? 'active' : 'inactive'} /></td>
                     <td>
                       <section className={styles.actionBtns}>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => openEditTrunk(trunk)}
-                          aria-label={`Edit trunk ${trunk.name}`}>
+                          aria-label={t('tenantDetails.trunks.editAria', { name: trunk.name })}>
                           <Edit size={14} aria-hidden="true" />
                         </button>
                         <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                           onClick={() => {
-                            if (window.confirm(`Delete trunk "${trunk.name}"?`)) deleteTrunkMutation.mutate(trunk.id)
+                            if (window.confirm(t('tenantDetails.trunks.confirmDelete', { name: trunk.name }))) deleteTrunkMutation.mutate(trunk.id)
                           }}
-                          aria-label={`Delete trunk ${trunk.name}`}>
+                          aria-label={t('tenantDetails.trunks.deleteAria', { name: trunk.name })}>
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </section>
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={8} className={s.empty}>No trunks</td></tr>
+                  <tr><td colSpan={8} className={s.empty}>{t('tenantDetails.trunks.noTrunks')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -738,15 +742,15 @@ export default function TenantDetails() {
         <Tabs.Content className={styles.tabsContent} value="events">
           <section className={styles.tabToolbar}>
             <fieldset className={s.searchGroup}>
-              <label htmlFor="event-filter" className="sr-only">Filter by action</label>
+              <label htmlFor="event-filter" className="sr-only">{t('tenantDetails.events.filterLabel')}</label>
               <select id="event-filter" className={s.fieldInput} style={{ height: 40, minWidth: 180 }}
                 value={eventsFilter} onChange={(e) => { setEventsFilter(e.target.value); setEventsPage(1) }}>
-                <option value="">All actions</option>
-                <option value="extension_created">Extension Created</option>
-                <option value="extension_deleted">Extension Deleted</option>
-                <option value="trunk_created">Trunk Created</option>
-                <option value="trunk_deleted">Trunk Deleted</option>
-                <option value="config_change">Config Change</option>
+                <option value="">{t('tenantDetails.events.allActions')}</option>
+                <option value="extension_created">{t('tenantDetails.events.actions.extension_created')}</option>
+                <option value="extension_deleted">{t('tenantDetails.events.actions.extension_deleted')}</option>
+                <option value="trunk_created">{t('tenantDetails.events.actions.trunk_created')}</option>
+                <option value="trunk_deleted">{t('tenantDetails.events.actions.trunk_deleted')}</option>
+                <option value="config_change">{t('tenantDetails.events.actions.config_change')}</option>
               </select>
             </fieldset>
           </section>
@@ -755,12 +759,12 @@ export default function TenantDetails() {
             <table className={s.table}>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Action</th>
-                  <th>Source</th>
-                  <th>IP</th>
-                  <th>Extension</th>
-                  <th>Details</th>
+                  <th>{t('tenantDetails.events.headers.date')}</th>
+                  <th>{t('tenantDetails.events.headers.action')}</th>
+                  <th>{t('tenantDetails.events.headers.source')}</th>
+                  <th>{t('tenantDetails.events.headers.ip')}</th>
+                  <th>{t('tenantDetails.events.headers.extension')}</th>
+                  <th>{t('tenantDetails.events.headers.details')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -776,14 +780,14 @@ export default function TenantDetails() {
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={6} className={s.empty}>No events recorded</td></tr>
+                  <tr><td colSpan={6} className={s.empty}>{t('tenantDetails.events.noEvents')}</td></tr>
                 )}
               </tbody>
             </table>
 
             {events && events.pages > 1 && (
               <footer className={s.pagination}>
-                <span>Page {events.page} of {events.pages} ({events.total} events)</span>
+                <span>{t('tenantDetails.events.pagination', { current: events.page, total: events.pages, count: events.total })}</span>
                 <section className={s.paginationBtns}>
                   <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                     disabled={eventsPage <= 1} onClick={() => setEventsPage((p) => p - 1)}
@@ -822,41 +826,41 @@ export default function TenantDetails() {
             <Dialog.Root open={userDialogOpen} onOpenChange={(open) => { setUserDialogOpen(open); if (!open) setUserForm(EMPTY_USER_FORM) }}>
               <Dialog.Trigger asChild>
                 <button className={`${s.btn} ${s.btnPrimary}`} id="create-user-btn">
-                  <Plus size={16} aria-hidden="true" /> Add User
+                  <Plus size={16} aria-hidden="true" /> {t('tenantDetails.users.addBtn')}
                 </button>
               </Dialog.Trigger>
               <Dialog.Portal>
                 <Dialog.Overlay className={s.dialogOverlay} />
                 <Dialog.Content className={s.dialogContent}>
-                  <Dialog.Title className={s.dialogTitle}>Create Web User</Dialog.Title>
+                  <Dialog.Title className={s.dialogTitle}>{t('tenantDetails.users.createTitle')}</Dialog.Title>
                   <form className={s.dialogForm} onSubmit={handleCreateUser}>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="user-username">Username</label>
+                      <label className={s.fieldLabel} htmlFor="user-username">{t('tenantDetails.users.username')}</label>
                       <input id="user-username" className={s.fieldInput} placeholder="john_doe" required
                         value={userForm.username}
                         onChange={(e) => setUserForm((f) => ({ ...f, username: e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="user-password">Password</label>
-                      <input id="user-password" className={s.fieldInput} type="password" placeholder="••••••••" required
+                      <label className={s.fieldLabel} htmlFor="user-password">{t('tenantDetails.users.password')}</label>
+                      <input id="user-password" className={s.fieldInput} type="password" placeholder={t('tenantDetails.users.passwordPlaceholder')} required
                         value={userForm.password}
                         onChange={(e) => setUserForm((f) => ({ ...f, password: e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="user-role">Role</label>
+                      <label className={s.fieldLabel} htmlFor="user-role">{t('tenantDetails.users.role')}</label>
                       <select id="user-role" className={s.fieldInput}
                         value={userForm.role}
                         onChange={(e) => setUserForm((f) => ({ ...f, role: e.target.value }))}>
-                        <option value="user">User</option>
-                        <option value="tenant_admin">Tenant Admin</option>
+                        <option value="user">{t('tenantDetails.users.roleUser')}</option>
+                        <option value="tenant_admin">{t('tenantDetails.users.roleAdmin')}</option>
                       </select>
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="user-extension">Linked Extension (Optional)</label>
+                      <label className={s.fieldLabel} htmlFor="user-extension">{t('tenantDetails.users.linkedExtension')}</label>
                       <select id="user-extension" className={s.fieldInput}
                         value={userForm.extension_id}
                         onChange={(e) => setUserForm((f) => ({ ...f, extension_id: e.target.value }))}>
-                        <option value="">None</option>
+                        <option value="">{t('tenantDetails.users.linkedExtensionNone')}</option>
                         {extensions?.items?.map((ext) => (
                           <option key={ext.id} value={ext.id}>
                             {ext.extension_number} - {ext.display_name}
@@ -866,11 +870,11 @@ export default function TenantDetails() {
                     </fieldset>
                     <footer className={s.dialogActions}>
                       <Dialog.Close asChild>
-                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>{t('common.cancel')}</button>
                       </Dialog.Close>
                       <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
                         disabled={createUserMutation.isPending}>
-                        {createUserMutation.isPending ? 'Creating...' : 'Create'}
+                        {createUserMutation.isPending ? t('tenantDetails.users.creating') : t('common.create')}
                       </button>
                     </footer>
                   </form>
@@ -882,35 +886,35 @@ export default function TenantDetails() {
               <Dialog.Portal>
                 <Dialog.Overlay className={s.dialogOverlay} />
                 <Dialog.Content className={s.dialogContent}>
-                  <Dialog.Title className={s.dialogTitle}>Edit Web User</Dialog.Title>
+                  <Dialog.Title className={s.dialogTitle}>{t('tenantDetails.users.editTitle')}</Dialog.Title>
                   <form className={s.dialogForm} onSubmit={handleUpdateUser}>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="user-edit-username">Username</label>
+                      <label className={s.fieldLabel} htmlFor="user-edit-username">{t('tenantDetails.users.username')}</label>
                       <input id="user-edit-username" className={s.fieldInput} placeholder="john_doe" required
                         value={userEditForm.username}
                         onChange={(e) => setUserEditForm((f) => ({ ...f, username: e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="user-edit-password">Password (leave blank to keep current)</label>
-                      <input id="user-edit-password" className={s.fieldInput} type="password" placeholder="••••••••"
+                      <label className={s.fieldLabel} htmlFor="user-edit-password">{t('tenantDetails.users.passwordEditPlaceholder')}</label>
+                      <input id="user-edit-password" className={s.fieldInput} type="password" placeholder={t('tenantDetails.users.passwordPlaceholder')}
                         value={userEditForm.password}
                         onChange={(e) => setUserEditForm((f) => ({ ...f, password: e.target.value }))} />
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="user-edit-role">Role</label>
+                      <label className={s.fieldLabel} htmlFor="user-edit-role">{t('tenantDetails.users.role')}</label>
                       <select id="user-edit-role" className={s.fieldInput}
                         value={userEditForm.role}
                         onChange={(e) => setUserEditForm((f) => ({ ...f, role: e.target.value }))}>
-                        <option value="user">User</option>
-                        <option value="tenant_admin">Tenant Admin</option>
+                        <option value="user">{t('tenantDetails.users.roleUser')}</option>
+                        <option value="tenant_admin">{t('tenantDetails.users.roleAdmin')}</option>
                       </select>
                     </fieldset>
                     <fieldset className={s.field}>
-                      <label className={s.fieldLabel} htmlFor="user-edit-extension">Linked Extension (Optional)</label>
+                      <label className={s.fieldLabel} htmlFor="user-edit-extension">{t('tenantDetails.users.linkedExtension')}</label>
                       <select id="user-edit-extension" className={s.fieldInput}
                         value={userEditForm.extension_id}
                         onChange={(e) => setUserEditForm((f) => ({ ...f, extension_id: e.target.value }))}>
-                        <option value="">None</option>
+                        <option value="">{t('tenantDetails.users.linkedExtensionNone')}</option>
                         {extensions?.items?.map((ext) => (
                           <option key={ext.id} value={ext.id}>
                             {ext.extension_number} - {ext.display_name}
@@ -922,16 +926,16 @@ export default function TenantDetails() {
                       <label className={styles.checkboxLabel} htmlFor="user-edit-active" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <input id="user-edit-active" type="checkbox" checked={userEditForm.is_active}
                           onChange={(e) => setUserEditForm((f) => ({ ...f, is_active: e.target.checked }))} />
-                        <span>Active Account</span>
+                        <span>{t('tenantDetails.users.activeAccount')}</span>
                       </label>
                     </fieldset>
                     <footer className={s.dialogActions}>
                       <Dialog.Close asChild>
-                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>Cancel</button>
+                        <button type="button" className={`${s.btn} ${s.btnSecondary}`}>{t('common.cancel')}</button>
                       </Dialog.Close>
                       <button type="submit" className={`${s.btn} ${s.btnPrimary}`}
                         disabled={updateUserMutation.isPending}>
-                        {updateUserMutation.isPending ? 'Saving...' : 'Save'}
+                        {updateUserMutation.isPending ? t('tenantDetails.users.saving') : t('common.save')}
                       </button>
                     </footer>
                   </form>
@@ -944,20 +948,20 @@ export default function TenantDetails() {
             <table className={s.table}>
               <thead>
                 <tr>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th>Linked Extension</th>
-                  <th>Status</th>
-                  <th>Created At</th>
-                  <th style={{ width: 100 }}>Actions</th>
+                  <th>{t('tenantDetails.users.headers.username')}</th>
+                  <th>{t('tenantDetails.users.headers.role')}</th>
+                  <th>{t('tenantDetails.users.headers.linkedExt')}</th>
+                  <th>{t('tenantDetails.users.headers.status')}</th>
+                  <th>{t('tenantDetails.users.headers.created')}</th>
+                  <th style={{ width: 100 }}>{t('tenantDetails.users.headers.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {users?.items?.length ? users.items.map((u) => (
                   <tr key={u.id}>
                     <td><strong>{u.username}</strong></td>
-                    <td style={{ textTransform: 'capitalize' }}>{u.role.replace('_', ' ')}</td>
-                    <td>{u.extension_number ? `${u.extension_number}` : 'None'}</td>
+                    <td>{u.role === 'tenant_admin' ? t('tenantDetails.users.roleAdmin') : t('tenantDetails.users.roleUser')}</td>
+                    <td>{u.extension_number ? `${u.extension_number}` : t('tenantDetails.users.linkedExtensionNone')}</td>
                     <td>
                       <StatusBadge status={u.is_active ? 'active' : 'inactive'} />
                     </td>
@@ -965,22 +969,22 @@ export default function TenantDetails() {
                     <td>
                       <section className={s.tableActions}>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnIcon}`}
-                          onClick={() => openEditUser(u)} title="Edit user" aria-label="Edit user">
+                          onClick={() => openEditUser(u)} title={t('tenantDetails.users.editAria')} aria-label={t('tenantDetails.users.editAria')}>
                           <Edit size={14} aria-hidden="true" />
                         </button>
                         <button className={`${s.btn} ${s.btnDanger} ${s.btnIcon}`}
                           onClick={() => {
-                            if (window.confirm(`Are you sure you want to delete user ${u.username}?`)) {
+                            if (window.confirm(t('tenantDetails.users.confirmDelete', { username: u.username }))) {
                               deleteUserMutation.mutate(u.id)
                             }
-                          }} title="Delete user" aria-label="Delete user">
+                          }} title={t('tenantDetails.users.deleteAria')} aria-label={t('tenantDetails.users.deleteAria')}>
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </section>
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={6} className={s.empty}>No users found</td></tr>
+                  <tr><td colSpan={6} className={s.empty}>{t('tenantDetails.users.noUsers')}</td></tr>
                 )}
               </tbody>
             </table>

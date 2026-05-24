@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import client from '../../api/client'
 import useAuthStore from '../../store/authStore'
 import s from '../shared.module.css'
 
 export default function ActiveCalls() {
+  const { t } = useTranslation()
   const { user } = useAuthStore()
   const isSuperAdmin = user?.role === 'super_admin'
 
@@ -41,10 +43,10 @@ export default function ActiveCalls() {
       <section className={s.toolbar}>
         {isSuperAdmin && (
           <fieldset className={s.searchGroup}>
-            <label htmlFor="calls-tenant-select" className="sr-only">Select Tenant</label>
+            <label htmlFor="calls-tenant-select" className="sr-only">{t('activeCalls.labelTenant')}</label>
             <select id="calls-tenant-select" className={s.fieldInput} style={{ height: 40 }}
               value={selectedTenant} onChange={(e) => setSelectedTenant(e.target.value)}>
-              <option value="">Select tenant...</option>
+              <option value="">{t('activeCalls.selectTenant')}</option>
               {tenants?.items?.map((t) => (
                 <option key={t.id} value={t.id}>{t.name} ({t.slug})</option>
               ))}
@@ -55,28 +57,28 @@ export default function ActiveCalls() {
         <button className={`${s.btn} ${s.btnSecondary}`} onClick={() => refetch()}
           disabled={isFetching} id="refresh-calls-btn">
           <RefreshCw size={16} className={isFetching ? 'spin' : ''} aria-hidden="true" />
-          {isFetching ? 'Refreshing...' : 'Refresh'}
+          {isFetching ? t('activeCalls.refreshing') : t('activeCalls.refresh')}
         </button>
       </section>
 
       {!selectedTenant ? (
-        <p className={s.empty}>Select a tenant to view active calls</p>
+        <p className={s.empty}>{t('activeCalls.empty')}</p>
       ) : isLoading ? (
-        <p className={s.loading}>Loading active calls...</p>
+        <p className={s.loading}>{t('activeCalls.loading')}</p>
       ) : (
         <>
           <p style={{ marginBottom: 'var(--space-2)', color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            {data?.count || 0} active channel(s) • Auto-refreshing every 5s
+            {t('activeCalls.activeCount', { count: data?.count || 0 })}
           </p>
           <article className={s.tableWrap}>
             <table className={s.table}>
               <thead>
                 <tr>
-                  <th>Channel</th>
-                  <th>Caller ID</th>
-                  <th>Connected</th>
-                  <th>Duration</th>
-                  <th>State</th>
+                  <th>{t('activeCalls.table.channel')}</th>
+                  <th>{t('activeCalls.table.callerId')}</th>
+                  <th>{t('activeCalls.table.connected')}</th>
+                  <th>{t('activeCalls.table.duration')}</th>
+                  <th>{t('activeCalls.table.state')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -89,7 +91,7 @@ export default function ActiveCalls() {
                     <td>{ch.state || ch.State || '—'}</td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={5} className={s.empty}>No active calls</td></tr>
+                  <tr><td colSpan={5} className={s.empty}>{t('activeCalls.noCalls')}</td></tr>
                 )}
               </tbody>
             </table>
