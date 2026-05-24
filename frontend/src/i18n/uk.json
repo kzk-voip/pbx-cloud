@@ -396,6 +396,7 @@
     "empty": "Немає обмежень по IP — дозволено всі IP",
     "toastAdded": "IP додано до ACL тенанта",
     "toastRemoved": "IP видалено з ACL тенанта",
+    "addBtn": "Додати",
     "removeAria": "Видалити {{ip}}"
   },
   "tenantDetails": {
