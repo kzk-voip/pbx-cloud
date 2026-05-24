@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import useAuthStore from './store/authStore'
 import Layout from './components/Layout/Layout'
 import PrivateRoute from './components/PrivateRoute/PrivateRoute'
@@ -36,7 +37,22 @@ function DefaultRedirect() {
 }
 
 export default function App() {
-  const { fetchUser, isAuthenticated } = useAuthStore()
+  const { fetchUser, isAuthenticated, user } = useAuthStore()
+  const { i18n } = useTranslation()
+
+  // Restore user locale when user is loaded or changes
+  useEffect(() => {
+    if (user?.username) {
+      const userLocale = localStorage.getItem(`pbx-locale:${user.username}`)
+      if (userLocale) {
+        if (i18n.language !== userLocale) {
+          i18n.changeLanguage(userLocale)
+        }
+      } else {
+        localStorage.setItem(`pbx-locale:${user.username}`, i18n.language || 'en')
+      }
+    }
+  }, [user?.username, i18n])
 
   // On mount — restore user session from stored token
   useEffect(() => {

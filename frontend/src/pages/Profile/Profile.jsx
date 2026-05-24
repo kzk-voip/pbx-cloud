@@ -71,7 +71,11 @@ export default function Profile() {
   }
 
   const handleLanguageChange = (e) => {
-    i18n.changeLanguage(e.target.value)
+    const newLang = e.target.value
+    i18n.changeLanguage(newLang)
+    if (user?.username) {
+      localStorage.setItem(`pbx-locale:${user.username}`, newLang)
+    }
   }
 
   return (
