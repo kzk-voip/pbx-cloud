@@ -62,6 +62,7 @@ export default function TenantDetails() {
   const [userEditDialogOpen, setUserEditDialogOpen] = useState(false)
   const [userEditForm, setUserEditForm] = useState(EMPTY_USER_EDIT_FORM)
   const [editingUserId, setEditingUserId] = useState(null)
+  const [showUserPassword, setShowUserPassword] = useState(false)
 
   // ==================== Queries ====================
 
@@ -830,7 +831,7 @@ export default function TenantDetails() {
         {/* ==================== USERS TAB ==================== */}
         <Tabs.Content className={styles.tabsContent} value="users">
           <section className={styles.tabToolbar}>
-            <Dialog.Root open={userDialogOpen} onOpenChange={(open) => { setUserDialogOpen(open); if (!open) setUserForm(EMPTY_USER_FORM) }}>
+            <Dialog.Root open={userDialogOpen} onOpenChange={(open) => { setUserDialogOpen(open); if (!open) { setUserForm(EMPTY_USER_FORM); setShowUserPassword(false) } }}>
               <Dialog.Trigger asChild>
                 <button className={`${s.btn} ${s.btnPrimary}`} id="create-user-btn">
                   <Plus size={16} aria-hidden="true" /> {t('tenantDetails.users.addBtn')}
@@ -849,9 +850,20 @@ export default function TenantDetails() {
                     </fieldset>
                     <fieldset className={s.field}>
                       <label className={s.fieldLabel} htmlFor="user-password">{t('tenantDetails.users.password')}</label>
-                      <input id="user-password" className={s.fieldInput} type="password" placeholder={t('tenantDetails.users.passwordPlaceholder')} required
-                        value={userForm.password}
-                        onChange={(e) => setUserForm((f) => ({ ...f, password: e.target.value }))} />
+                      <section className={styles.passwordField}>
+                        <input id="user-password" className={s.fieldInput}
+                          type={showUserPassword ? 'text' : 'password'}
+                          placeholder={t('tenantDetails.users.passwordPlaceholder')} required
+                          value={userForm.password}
+                          onChange={(e) => setUserForm((f) => ({ ...f, password: e.target.value }))} />
+                        <button type="button" className={styles.passwordToggle}
+                          onClick={() => setShowUserPassword((v) => !v)}
+                          aria-label={showUserPassword ? t('tenantDetails.extensions.hidePassword') : t('tenantDetails.extensions.showPassword')}>
+                          {showUserPassword
+                            ? <EyeOff size={16} aria-hidden="true" />
+                            : <Eye size={16} aria-hidden="true" />}
+                        </button>
+                      </section>
                     </fieldset>
                     <fieldset className={s.field}>
                       <label className={s.fieldLabel} htmlFor="user-role">{t('tenantDetails.users.role')}</label>
@@ -889,7 +901,7 @@ export default function TenantDetails() {
               </Dialog.Portal>
             </Dialog.Root>
 
-            <Dialog.Root open={userEditDialogOpen} onOpenChange={(open) => { if (!open) setUserEditDialogOpen(false) }}>
+            <Dialog.Root open={userEditDialogOpen} onOpenChange={(open) => { if (!open) { setUserEditDialogOpen(false); setShowUserPassword(false) } }}>
               <Dialog.Portal>
                 <Dialog.Overlay className={s.dialogOverlay} />
                 <Dialog.Content className={s.dialogContent}>
@@ -903,9 +915,20 @@ export default function TenantDetails() {
                     </fieldset>
                     <fieldset className={s.field}>
                       <label className={s.fieldLabel} htmlFor="user-edit-password">{t('tenantDetails.users.passwordEditPlaceholder')}</label>
-                      <input id="user-edit-password" className={s.fieldInput} type="password" placeholder={t('tenantDetails.users.passwordPlaceholder')}
-                        value={userEditForm.password}
-                        onChange={(e) => setUserEditForm((f) => ({ ...f, password: e.target.value }))} />
+                      <section className={styles.passwordField}>
+                        <input id="user-edit-password" className={s.fieldInput}
+                          type={showUserPassword ? 'text' : 'password'}
+                          placeholder={t('tenantDetails.users.passwordPlaceholder')}
+                          value={userEditForm.password}
+                          onChange={(e) => setUserEditForm((f) => ({ ...f, password: e.target.value }))} />
+                        <button type="button" className={styles.passwordToggle}
+                          onClick={() => setShowUserPassword((v) => !v)}
+                          aria-label={showUserPassword ? t('tenantDetails.extensions.hidePassword') : t('tenantDetails.extensions.showPassword')}>
+                          {showUserPassword
+                            ? <EyeOff size={16} aria-hidden="true" />
+                            : <Eye size={16} aria-hidden="true" />}
+                        </button>
+                      </section>
                     </fieldset>
                     <fieldset className={s.field}>
                       <label className={s.fieldLabel} htmlFor="user-edit-role">{t('tenantDetails.users.role')}</label>
