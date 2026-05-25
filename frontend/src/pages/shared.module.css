@@ -287,3 +287,10 @@
     animation: none;
   }
 }
+
+.actionBtns {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+

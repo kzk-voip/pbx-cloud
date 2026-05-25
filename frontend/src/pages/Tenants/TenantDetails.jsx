@@ -514,7 +514,7 @@ export default function TenantDetails() {
                     <td>{ext.email || '—'}</td>
                     <td><StatusBadge status={ext.enabled ? 'active' : 'inactive'} /></td>
                     <td>
-                      <section className={styles.actionBtns}>
+                      <section className={s.actionBtns}>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => openEditExtension(ext)}
                           aria-label={t('tenantDetails.extensions.editAria', { number: ext.extension_number })}>
@@ -716,7 +716,7 @@ export default function TenantDetails() {
                     <td>{trunk.username ? t('tenantDetails.trunks.authLoginPass') : t('tenantDetails.trunks.authIpBased')}</td>
                     <td><StatusBadge status={trunk.enabled ? 'active' : 'inactive'} /></td>
                     <td>
-                      <section className={styles.actionBtns}>
+                      <section className={s.actionBtns}>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => openEditTrunk(trunk)}
                           aria-label={t('tenantDetails.trunks.editAria', { name: trunk.name })}>
@@ -969,12 +969,12 @@ export default function TenantDetails() {
                     </td>
                     <td>{formatDate(u.created_at)}</td>
                     <td>
-                      <section className={s.tableActions}>
-                        <button className={`${s.btn} ${s.btnSecondary} ${s.btnIcon}`}
+                      <section className={s.actionBtns}>
+                        <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => openEditUser(u)} title={t('tenantDetails.users.editAria')} aria-label={t('tenantDetails.users.editAria')}>
                           <Edit size={14} aria-hidden="true" />
                         </button>
-                        <button className={`${s.btn} ${s.btnDanger} ${s.btnIcon}`}
+                        <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                           onClick={() => {
                             if (window.confirm(t('tenantDetails.users.confirmDelete', { username: u.username }))) {
                               deleteUserMutation.mutate(u.id)

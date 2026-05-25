@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Plus, Edit2, Trash2 } from 'lucide-react'
+import { Plus, Edit, Trash2 } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import client from '../../api/client'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
@@ -296,13 +296,13 @@ export default function TenantCallRoutes({ tenantId }) {
                     />
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <section className={s.actionBtns}>
                       <button
                         className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                         onClick={() => handleOpenEdit(route)}
                         aria-label={t('callRoutes.editRoute')}
                       >
-                        <Edit2 size={14} aria-hidden="true" />
+                        <Edit size={14} aria-hidden="true" />
                       </button>
                       <button
                         className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
@@ -311,7 +311,7 @@ export default function TenantCallRoutes({ tenantId }) {
                       >
                         <Trash2 size={14} aria-hidden="true" />
                       </button>
-                    </div>
+                    </section>
                   </td>
                 </tr>
               ))

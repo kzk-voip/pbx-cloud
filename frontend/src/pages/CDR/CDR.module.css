@@ -127,3 +127,37 @@
     transform: none;
   }
 }
+
+.recordingActions {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.downloadBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: color-mix(in srgb, var(--color-success) 15%, transparent);
+  color: var(--color-success);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.downloadBtn:hover {
+  background: color-mix(in srgb, var(--color-success) 25%, transparent);
+  transform: scale(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .downloadBtn:hover {
+    transform: none;
+  }
+}
+

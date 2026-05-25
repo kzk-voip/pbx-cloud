@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Download, ChevronLeft, ChevronRight, X, Play, Square } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
+import toast from 'react-hot-toast'
 import client from '../../api/client'
 import useAuthStore from '../../store/authStore'
 import useTimezone from '../../hooks/useTimezone'
@@ -15,6 +16,29 @@ function formatDuration(seconds) {
   const m = Math.floor((seconds % 3600) / 60)
   const sec = seconds % 60
   return [h, m, sec].map((v) => String(v).padStart(2, '0')).join(':')
+}
+
+function getRecordingFilename(record) {
+  const dateObj = new Date(record.calldate)
+  let formattedDate = ''
+  
+  if (isNaN(dateObj.getTime())) {
+    formattedDate = String(record.calldate || '').replace(/[^a-zA-Z0-9]/g, '_')
+  } else {
+    const pad = (num) => String(num).padStart(2, '0')
+    const yyyy = dateObj.getFullYear()
+    const mm = pad(dateObj.getMonth() + 1)
+    const dd = pad(dateObj.getDate())
+    const hh = pad(dateObj.getHours())
+    const min = pad(dateObj.getMinutes())
+    const ss = pad(dateObj.getSeconds())
+    formattedDate = `${yyyy}${mm}${dd}_${hh}${min}${ss}`
+  }
+  
+  const src = record.src || 'unknown'
+  const dst = record.dst || 'unknown'
+  
+  return `${formattedDate}_${src}_${dst}.wav`
 }
 
 function dispositionColor(disp) {
@@ -76,6 +100,26 @@ export default function CDR() {
   const [playingId, setPlayingId] = useState(null)
   const { formatDate } = useTimezone()
   const perPage = 20
+
+  const handleDownloadRecording = (e, record) => {
+    e.stopPropagation()
+    const toastId = toast.loading(t('cdr.downloading', 'Downloading recording...'))
+    client
+      .get(`/tenants/${selectedTenant}/cdr/${record.id}/recording`, { responseType: 'blob' })
+      .then((res) => {
+        const url = URL.createObjectURL(res.data)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = getRecordingFilename(record)
+        a.click()
+        URL.revokeObjectURL(url)
+        toast.dismiss(toastId)
+      })
+      .catch(() => {
+        toast.dismiss(toastId)
+        toast.error(t('cdr.downloadFailed', 'Failed to download recording'))
+      })
+  }
 
   // For non-super_admin, auto-set tenant to their own
   useEffect(() => {
@@ -195,16 +239,25 @@ export default function CDR() {
                   </td>
                   <td>
                     {r.has_recording ? (
-                      <button
-                        className={`${styles.playBtn} ${playingId === r.id ? styles.playBtnActive : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setPlayingId(r.id)
-                        }}
-                        aria-label={t('cdr.playRecording')}
-                      >
-                        <Play size={14} aria-hidden="true" />
-                      </button>
+                      <section className={styles.recordingActions}>
+                        <button
+                          className={`${styles.playBtn} ${playingId === r.id ? styles.playBtnActive : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setPlayingId(r.id)
+                          }}
+                          aria-label={t('cdr.playRecording')}
+                        >
+                          <Play size={14} aria-hidden="true" />
+                        </button>
+                        <button
+                          className={styles.downloadBtn}
+                          onClick={(e) => handleDownloadRecording(e, r)}
+                          aria-label={t('cdr.downloadRecording', 'Download Recording')}
+                        >
+                          <Download size={14} aria-hidden="true" />
+                        </button>
+                      </section>
                     ) : (
                       <span className={styles.noRecording}>—</span>
                     )}
