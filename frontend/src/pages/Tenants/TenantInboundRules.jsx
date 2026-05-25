@@ -242,6 +242,7 @@ export default function TenantInboundRules({ tenantId }) {
                         className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                         onClick={() => handleOpenEdit(rule)}
                         aria-label={t('inboundRules.editRule')}
+                        title={t('inboundRules.editRule')}
                       >
                         <Edit size={14} aria-hidden="true" />
                       </button>
@@ -249,6 +250,7 @@ export default function TenantInboundRules({ tenantId }) {
                         className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                         onClick={() => handleDelete(rule.id, rule.did_number)}
                         aria-label={t('inboundRules.deleteRule', 'Delete Rule')}
+                        title={t('inboundRules.deleteRule', 'Delete Rule')}
                       >
                         <Trash2 size={14} aria-hidden="true" />
                       </button>

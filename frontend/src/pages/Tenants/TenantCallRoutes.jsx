@@ -301,6 +301,7 @@ export default function TenantCallRoutes({ tenantId }) {
                         className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                         onClick={() => handleOpenEdit(route)}
                         aria-label={t('callRoutes.editRoute')}
+                        title={t('callRoutes.editRoute')}
                       >
                         <Edit size={14} aria-hidden="true" />
                       </button>
@@ -308,6 +309,7 @@ export default function TenantCallRoutes({ tenantId }) {
                         className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                         onClick={() => handleDelete(route.id, route.name)}
                         aria-label={t('callRoutes.deleteRoute', 'Delete Route')}
+                        title={t('callRoutes.deleteRoute', 'Delete Route')}
                       >
                         <Trash2 size={14} aria-hidden="true" />
                       </button>

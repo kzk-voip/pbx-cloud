@@ -517,19 +517,22 @@ export default function TenantDetails() {
                       <section className={s.actionBtns}>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => openEditExtension(ext)}
-                          aria-label={t('tenantDetails.extensions.editAria', { number: ext.extension_number })}>
+                          aria-label={t('tenantDetails.extensions.editAria', { number: ext.extension_number })}
+                          title={t('tenantDetails.extensions.editAria', { number: ext.extension_number })}>
                           <Edit size={14} aria-hidden="true" />
                         </button>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => resetPasswordMutation.mutate(ext.id)}
-                          aria-label={t('tenantDetails.extensions.resetPassAria', { number: ext.extension_number })}>
+                          aria-label={t('tenantDetails.extensions.resetPassAria', { number: ext.extension_number })}
+                          title={t('tenantDetails.extensions.resetPassAria', { number: ext.extension_number })}>
                           <KeyRound size={14} aria-hidden="true" />
                         </button>
                         <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                           onClick={() => {
                             if (window.confirm(t('tenantDetails.extensions.confirmDelete', { number: ext.extension_number }))) deleteExtMutation.mutate(ext.id)
                           }}
-                          aria-label={t('tenantDetails.extensions.deleteAria', { number: ext.extension_number })}>
+                          aria-label={t('tenantDetails.extensions.deleteAria', { number: ext.extension_number })}
+                          title={t('tenantDetails.extensions.deleteAria', { number: ext.extension_number })}>
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </section>
@@ -719,14 +722,16 @@ export default function TenantDetails() {
                       <section className={s.actionBtns}>
                         <button className={`${s.btn} ${s.btnSecondary} ${s.btnSmall}`}
                           onClick={() => openEditTrunk(trunk)}
-                          aria-label={t('tenantDetails.trunks.editAria', { name: trunk.name })}>
+                          aria-label={t('tenantDetails.trunks.editAria', { name: trunk.name })}
+                          title={t('tenantDetails.trunks.editAria', { name: trunk.name })}>
                           <Edit size={14} aria-hidden="true" />
                         </button>
                         <button className={`${s.btn} ${s.btnDanger} ${s.btnSmall}`}
                           onClick={() => {
                             if (window.confirm(t('tenantDetails.trunks.confirmDelete', { name: trunk.name }))) deleteTrunkMutation.mutate(trunk.id)
                           }}
-                          aria-label={t('tenantDetails.trunks.deleteAria', { name: trunk.name })}>
+                          aria-label={t('tenantDetails.trunks.deleteAria', { name: trunk.name })}
+                          title={t('tenantDetails.trunks.deleteAria', { name: trunk.name })}>
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </section>
