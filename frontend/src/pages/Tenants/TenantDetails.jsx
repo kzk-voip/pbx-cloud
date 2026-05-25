@@ -319,9 +319,16 @@ export default function TenantDetails() {
 
   const openEditUser = (u) => {
     setEditingUserId(u.id)
+    let linkedSipPassword = ''
+    if (u.extension_id && extensions?.items) {
+      const ext = extensions.items.find(e => e.id === u.extension_id)
+      if (ext && ext.sip_password) {
+        linkedSipPassword = ext.sip_password
+      }
+    }
     setUserEditForm({
       username: u.username,
-      password: '',
+      password: linkedSipPassword,
       role: u.role,
       extension_id: u.extension_id || '',
       is_active: u.is_active,
@@ -878,7 +885,17 @@ export default function TenantDetails() {
                       <label className={s.fieldLabel} htmlFor="user-extension">{t('tenantDetails.users.linkedExtension')}</label>
                       <select id="user-extension" className={s.fieldInput}
                         value={userForm.extension_id}
-                        onChange={(e) => setUserForm((f) => ({ ...f, extension_id: e.target.value }))}>
+                        onChange={(e) => {
+                          const extId = e.target.value
+                          let linkedSipPassword = userForm.password
+                          if (extId && extensions?.items) {
+                            const ext = extensions.items.find(item => item.id === extId)
+                            if (ext && ext.sip_password) {
+                              linkedSipPassword = ext.sip_password
+                            }
+                          }
+                          setUserForm((f) => ({ ...f, extension_id: extId, password: linkedSipPassword }))
+                        }}>
                         <option value="">{t('tenantDetails.users.linkedExtensionNone')}</option>
                         {extensions?.items?.map((ext) => (
                           <option key={ext.id} value={ext.id}>
@@ -943,7 +960,17 @@ export default function TenantDetails() {
                       <label className={s.fieldLabel} htmlFor="user-edit-extension">{t('tenantDetails.users.linkedExtension')}</label>
                       <select id="user-edit-extension" className={s.fieldInput}
                         value={userEditForm.extension_id}
-                        onChange={(e) => setUserEditForm((f) => ({ ...f, extension_id: e.target.value }))}>
+                        onChange={(e) => {
+                          const extId = e.target.value
+                          let linkedSipPassword = userEditForm.password
+                          if (extId && extensions?.items) {
+                            const ext = extensions.items.find(item => item.id === extId)
+                            if (ext && ext.sip_password) {
+                              linkedSipPassword = ext.sip_password
+                            }
+                          }
+                          setUserEditForm((f) => ({ ...f, extension_id: extId, password: linkedSipPassword }))
+                        }}>
                         <option value="">{t('tenantDetails.users.linkedExtensionNone')}</option>
                         {extensions?.items?.map((ext) => (
                           <option key={ext.id} value={ext.id}>
