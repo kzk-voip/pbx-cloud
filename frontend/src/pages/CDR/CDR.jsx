@@ -32,7 +32,7 @@ function getRecordingFilename(record) {
     const hh = pad(dateObj.getHours())
     const min = pad(dateObj.getMinutes())
     const ss = pad(dateObj.getSeconds())
-    formattedDate = `${yyyy}${mm}${dd}_${hh}${min}${ss}`
+    formattedDate = `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
   }
   
   const src = record.src || 'unknown'
