@@ -49,7 +49,7 @@
   <!-- 2. Receive 401 Unauthorized Auth Challenge from Asterisk -->
   <recv response="401" auth="true"></recv>
 
-  <!-- 3. ACK the 401 challenge -->
+  <!-- 3. ACK the 401 challenge (must match branch of CSeq 1 INVITE) -->
   <send>
     <![CDATA[
       ACK sip:[service]@[field1] SIP/2.0
@@ -64,11 +64,11 @@
     ]]>
   </send>
 
-  <!-- 4. Send second INVITE with valid authentication credentials -->
+  <!-- 4. Send second INVITE with valid authentication credentials (new branch ID) -->
   <send retrans="500">
     <![CDATA[
       INVITE sip:[service]@[field1] SIP/2.0
-      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]auth
       From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
       To: <sip:[service]@[field1]>
       Call-ID: [call_id]
@@ -96,11 +96,11 @@
   <!-- 5. Receive 200 OK when target answers -->
   <recv response="200" rtd="true"></recv>
 
-  <!-- 6. ACK the 200 OK -->
+  <!-- 6. ACK the 200 OK (must match branch of CSeq 2 INVITE) -->
   <send>
     <![CDATA[
       ACK sip:[service]@[field1] SIP/2.0
-      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]auth
       From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
       To: <sip:[service]@[field1]>[peer_tag_param]
       Call-ID: [call_id]
@@ -114,11 +114,11 @@
   <!-- 7. Keep the call active for 15 seconds (shows up on dashboard) -->
   <pause milliseconds="15000" />
 
-  <!-- 8. Send BYE to terminate the call -->
+  <!-- 8. Send BYE to terminate the call (new branch ID) -->
   <send>
     <![CDATA[
       BYE sip:[service]@[field1] SIP/2.0
-      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]bye
       From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
       To: <sip:[service]@[field1]>[peer_tag_param]
       Call-ID: [call_id]
