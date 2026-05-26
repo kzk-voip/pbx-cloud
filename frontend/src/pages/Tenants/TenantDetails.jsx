@@ -14,6 +14,7 @@ import TenantReports from './TenantReports'
 import TenantInboundRules from './TenantInboundRules'
 import TenantCallRoutes from './TenantCallRoutes'
 import TenantIpAcl from './TenantIpAcl'
+import TenantRingGroups from './TenantRingGroups'
 import s from '../shared.module.css'
 import styles from './TenantDetails.module.css'
 
@@ -389,6 +390,9 @@ export default function TenantDetails() {
           </Tabs.Trigger>
           <Tabs.Trigger className={styles.tabsTrigger} value="users" id="tab-users">
             {t('tenantDetails.tabs.users')} ({users?.items?.length || 0})
+          </Tabs.Trigger>
+          <Tabs.Trigger className={styles.tabsTrigger} value="ring-groups" id="tab-ring-groups">
+            {t('tenantDetails.tabs.ringGroups')}
           </Tabs.Trigger>
           {isSuperAdmin && (
             <Tabs.Trigger className={styles.tabsTrigger} value="ip-acl" id="tab-ip-acl">
@@ -1054,6 +1058,11 @@ export default function TenantDetails() {
             <TenantIpAcl tenantId={id} />
           </Tabs.Content>
         )}
+
+        {/* ==================== RING GROUPS TAB ==================== */}
+        <Tabs.Content className={styles.tabsContent} value="ring-groups">
+          <TenantRingGroups tenantId={id} />
+        </Tabs.Content>
       </Tabs.Root>
     </>
   )

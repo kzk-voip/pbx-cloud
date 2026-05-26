@@ -413,7 +413,8 @@
       "inboundRules": "Inbound Rules",
       "callRoutes": "Call Routes",
       "users": "Users",
-      "ipAcl": "IP ACL"
+      "ipAcl": "IP ACL",
+      "ringGroups": "Ring Groups"
     },
     "info": {
       "slug": "Slug",
@@ -543,6 +544,41 @@
         "linkedExt": "Linked Extension",
         "status": "Status",
         "created": "Created At",
+        "actions": "Actions"
+      }
+    },
+    "ringGroups": {
+      "addBtn": "Add Ring Group",
+      "createTitle": "Create Ring Group",
+      "editTitle": "Edit Ring Group",
+      "name": "Name",
+      "number": "Group Number",
+      "strategy": "Strategy",
+      "timeout": "Timeout (sec)",
+      "strategyRingall": "Ring All (simultaneous)",
+      "strategyRoundrobin": "Round Robin (sequential)",
+      "strategyRandom": "Random (sequential)",
+      "members": "Members",
+      "membersList": "Group Members",
+      "searchExtensions": "Search extensions...",
+      "noMembers": "No members added",
+      "noGroups": "No ring groups configured",
+      "createdSuccess": "Ring group created",
+      "createdFailed": "Failed to create ring group",
+      "updatedSuccess": "Ring group updated",
+      "updatedFailed": "Failed to update ring group",
+      "deletedSuccess": "Ring group deleted",
+      "deletedFailed": "Failed to delete ring group",
+      "confirmDelete": "Are you sure you want to delete ring group {{number}}?",
+      "editAria": "Edit ring group {{number}}",
+      "deleteAria": "Delete ring group {{number}}",
+      "saving": "Saving...",
+      "headers": {
+        "name": "Name",
+        "number": "Number",
+        "strategy": "Strategy",
+        "timeout": "Timeout",
+        "memberCount": "Members Count",
         "actions": "Actions"
       }
     }

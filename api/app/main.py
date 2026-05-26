@@ -14,7 +14,7 @@ from app.config import settings
 from app.context import client_ip_var
 from app.database import async_session
 from app.redis import init_redis, close_redis
-from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist, ws, events, reports, inbound_rules, call_routes, users, internal, ip_whitelist, tenant_ip_acl, assistant
+from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist, ws, events, reports, inbound_rules, call_routes, users, internal, ip_whitelist, tenant_ip_acl, assistant, ring_groups
 from app.services import kamailio_service
 
 # Configure logging for all app.* loggers
@@ -157,6 +157,7 @@ app.include_router(internal.router)
 app.include_router(ip_whitelist.router)
 app.include_router(tenant_ip_acl.router)
 app.include_router(assistant.router)
+app.include_router(ring_groups.router)
 
 from prometheus_fastapi_instrumentator import Instrumentator
 Instrumentator().instrument(app).expose(app)

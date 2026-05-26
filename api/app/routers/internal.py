@@ -18,6 +18,7 @@ from app.models.tenant import Tenant
 from app.models.inbound_rule import InboundRule
 from app.models.call_route import CallRoute
 from app.models.trunk import Trunk
+from app.models.ring_group import RingGroup
 
 router = APIRouter(prefix="/internal", tags=["Internal"])
 
@@ -137,3 +138,57 @@ async def outbound_lookup(
                 )
 
     return PlainTextResponse("none")
+
+
+@router.get("/ring-group-lookup", response_class=PlainTextResponse)
+async def ring_group_lookup(
+    slug: str,
+    number: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Asterisk dialplan: lookup ring group by tenant slug and group number.
+    Returns plain text: "strategy:timeout:dial_string" (e.g. "ringall:30:PJSIP/stark_101&PJSIP/stark_102")
+    or empty string if none/inactive.
+    """
+    _check_localhost(request)
+
+    tenant = await _get_tenant_by_slug(db, slug)
+    if tenant is None:
+        return PlainTextResponse("")
+
+    result = await db.execute(
+        select(RingGroup).where(
+            RingGroup.tenant_id == tenant.id,
+            RingGroup.number == number,
+        )
+    )
+    group = result.unique().scalar_one_or_none()
+    if group is None:
+        return PlainTextResponse("")
+
+    # Filter extensions that are active/enabled
+    active_members = [m for m in group.members if m.extension and m.extension.enabled]
+    if not active_members:
+        return PlainTextResponse("")
+
+    import random
+    if group.strategy == "random":
+        shuffled = list(active_members)
+        random.shuffle(shuffled)
+        targets = [f"PJSIP/{slug}_{m.extension.extension_number}" for m in shuffled]
+    else:
+        # Priority order (ringall and roundrobin/sequential)
+        targets = [f"PJSIP/{slug}_{m.extension.extension_number}" for m in active_members]
+
+    # Convert strategy for Asterisk dialplan: roundrobin/random are sequential, ringall is parallel
+    strategy_val = group.strategy
+    if strategy_val in ("roundrobin", "random"):
+        strategy_val = "sequential"
+    else:
+        strategy_val = "ringall"
+
+    dial_string = "&".join(targets)
+    return PlainTextResponse(f"{strategy_val}:{group.timeout}:{dial_string}")
+

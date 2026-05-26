@@ -413,7 +413,8 @@
       "inboundRules": "Вхідні правила",
       "callRoutes": "Вихідні маршрути",
       "users": "Користувачі",
-      "ipAcl": "IP ACL"
+      "ipAcl": "IP ACL",
+      "ringGroups": "Групи виклику"
     },
     "info": {
       "slug": "Slug",
@@ -543,6 +544,41 @@
         "linkedExt": "Пов'язаний екстеншен",
         "status": "Статус",
         "created": "Створено",
+        "actions": "Дії"
+      }
+    },
+    "ringGroups": {
+      "addBtn": "Додати групу виклику",
+      "createTitle": "Створити групу виклику",
+      "editTitle": "Редагувати групу виклику",
+      "name": "Назва",
+      "number": "Номер групи",
+      "strategy": "Стратегія",
+      "timeout": "Таймаут (сек)",
+      "strategyRingall": "Дзвонити всім (одночасно)",
+      "strategyRoundrobin": "Послідовно (roundrobin)",
+      "strategyRandom": "Послідовно випадково (random)",
+      "members": "Учасники",
+      "membersList": "Учасники групи",
+      "searchExtensions": "Пошук екстеншенів...",
+      "noMembers": "Учасників не додано",
+      "noGroups": "Немає налаштованих груп виклику",
+      "createdSuccess": "Групу виклику створено",
+      "createdFailed": "Не вдалося створити групу виклику",
+      "updatedSuccess": "Групу виклику оновлено",
+      "updatedFailed": "Не вдалося оновити групу виклику",
+      "deletedSuccess": "Групу виклику видалено",
+      "deletedFailed": "Не вдалося видалити групу виклику",
+      "confirmDelete": "Ви дійсно хочете видалити групу виклику {{number}}?",
+      "editAria": "Редагувати групу виклику {{number}}",
+      "deleteAria": "Видалити групу виклику {{number}}",
+      "saving": "Збереження...",
+      "headers": {
+        "name": "Назва",
+        "number": "Номер",
+        "strategy": "Стратегія",
+        "timeout": "Таймаут",
+        "memberCount": "Кількість учасників",
         "actions": "Дії"
       }
     }
