@@ -23,7 +23,7 @@
   <!-- 1. Send initial INVITE (unauthenticated) -->
   <send retrans="500">
     <![CDATA[
-      INVITE sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      INVITE sip:[service]@[field1] SIP/2.0
       Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
       From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
       To: <sip:[service]@[field1]>
@@ -52,7 +52,7 @@
   <!-- 3. ACK the 401 challenge -->
   <send>
     <![CDATA[
-      ACK sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      ACK sip:[service]@[field1] SIP/2.0
       Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
       From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
       To: <sip:[service]@[field1]>[peer_tag_param]
@@ -67,7 +67,7 @@
   <!-- 4. Send second INVITE with valid authentication credentials -->
   <send retrans="500">
     <![CDATA[
-      INVITE sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      INVITE sip:[service]@[field1] SIP/2.0
       Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
       From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
       To: <sip:[service]@[field1]>
@@ -99,7 +99,7 @@
   <!-- 6. ACK the 200 OK -->
   <send>
     <![CDATA[
-      ACK sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      ACK sip:[service]@[field1] SIP/2.0
       Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
       From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
       To: <sip:[service]@[field1]>[peer_tag_param]
@@ -117,7 +117,7 @@
   <!-- 8. Send BYE to terminate the call -->
   <send>
     <![CDATA[
-      BYE sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      BYE sip:[service]@[field1] SIP/2.0
       Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
       From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
       To: <sip:[service]@[field1]>[peer_tag_param]
