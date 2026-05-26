@@ -145,7 +145,18 @@ async def main():
                 
             extensions_data.append((sip_id, STRESS_TENANT_DOMAIN, sip_password))
             
-        # 3. Write users.csv file
+        # 3. Always sync stress domain to Kamailio htable dynamically
+        try:
+            from app.services import kamailio_service
+            synced = await kamailio_service.add_tenant_domain(STRESS_TENANT_DOMAIN, STRESS_TENANT_SLUG)
+            if synced:
+                logger.info("Successfully synced/confirmed stress domain in Kamailio htable.")
+            else:
+                logger.warning("Failed to sync stress domain to Kamailio htable.")
+        except Exception as e:
+            logger.error(f"Error syncing domain to Kamailio: {e}")
+
+        # 4. Write users.csv file
         csv_lines = [
             "SEQUENTIAL",
             "username;domain;password"
