@@ -140,6 +140,16 @@ export default function TenantRingGroups({ tenantId }) {
     })
   }
 
+  const handleSetPriority = (currentIndex, newIndex) => {
+    if (newIndex < 0 || newIndex >= form.member_ids.length) return
+    setForm((f) => {
+      const ids = [...f.member_ids]
+      const item = ids.splice(currentIndex, 1)[0]
+      ids.splice(newIndex, 0, item)
+      return { ...f, member_ids: ids }
+    })
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!form.name.trim() || !form.number.trim()) return
@@ -332,9 +342,17 @@ export default function TenantRingGroups({ tenantId }) {
                               return (
                                 <div key={extId} className={styles.memberCard}>
                                   <section className={styles.memberInfo}>
-                                    <span className={styles.memberPriorityBadge}>#{idx + 1}</span>
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      max={form.member_ids.length}
+                                      value={idx + 1}
+                                      onChange={(e) => handleSetPriority(idx, Number(e.target.value) - 1)}
+                                      className={styles.priorityInput}
+                                      title={t('tenantDetails.ringGroups.changePriority', 'Change priority')}
+                                    />
                                     <span className={styles.memberText}>
-                                      {ext ? `${ext.extension_number}` : 'Extension'}
+                                      {ext ? `${ext.extension_number} - ${ext.display_name}` : 'Extension'}
                                     </span>
                                   </section>
                                   <section className={styles.reorderBtns}>
