@@ -222,7 +222,15 @@
     "maxConcurrentCalls": "Макс. одночасних дзвінків",
     "codecs": "Кодеки",
     "active": "Активний",
-    "allowInternational": "Дозволити міжнародні дзвінки"
+    "allowInternational": "Дозволити міжнародні дзвінки",
+    "recordingsStorageTitle": "Керування сховищем записів",
+    "storageUsed": "Використано пам'яті",
+    "storageUsedText": "Використано {{used}} МБ з {{limit}} МБ ({{pct}}%)",
+    "recordingsCleanupDays": "Поріг очистки по днях (0 = вимкнено)",
+    "recordingsCleanupPct": "Поріг заповнення сховища % (0 = вимкнено)",
+    "recordingsStorageLimitMb": "Виділений обсяг сховища (МБ)",
+    "cleanupDaysHint": "Записи, старші за вказану кількість днів, будуть автоматично видалені.",
+    "cleanupPctHint": "При заповненні сховища вище цього % ліміту, найстаріші записи будуть автоматично видалені."
   },
   "reports": {
     "title": "Звіти",
@@ -499,7 +507,8 @@
         "extension_deleted": "Екстеншен видалено",
         "trunk_created": "Транк створено",
         "trunk_deleted": "Транк видалено",
-        "config_change": "Зміна конфігурації"
+        "config_change": "Зміна конфігурації",
+        "recordings_cleanup": "Очищення сховища записів"
       },
       "headers": {
         "date": "Дата",

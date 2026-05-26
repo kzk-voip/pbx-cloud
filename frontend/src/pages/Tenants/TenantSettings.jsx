@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 import client from '../../api/client'
+import useAuthStore from '../../store/authStore'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
 import s from '../shared.module.css'
 import styles from './TenantSettings.module.css'
@@ -14,6 +15,8 @@ export default function TenantSettings() {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
+  const isSuperAdmin = user?.role === 'super_admin'
 
   const [form, setForm] = useState(null)
   const [dirty, setDirty] = useState(false)
@@ -30,6 +33,9 @@ export default function TenantSettings() {
           codecs: data.codecs,
           is_active: data.is_active,
           allow_international: data.allow_international,
+          recordings_cleanup_days: data.recordings_cleanup_days ?? 0,
+          recordings_cleanup_pct: data.recordings_cleanup_pct ?? 0,
+          recordings_storage_limit_mb: data.recordings_storage_limit_mb ?? 100,
         })
       }
     },
@@ -44,6 +50,9 @@ export default function TenantSettings() {
       codecs: tenant.codecs,
       is_active: tenant.is_active,
       allow_international: tenant.allow_international,
+      recordings_cleanup_days: tenant.recordings_cleanup_days ?? 0,
+      recordings_cleanup_pct: tenant.recordings_cleanup_pct ?? 0,
+      recordings_storage_limit_mb: tenant.recordings_storage_limit_mb ?? 100,
     })
   }
 
@@ -160,6 +169,89 @@ export default function TenantSettings() {
                   onChange={(e) => handleChange('allow_international', e.target.checked)} />
                 <span>{t('settings.allowInternational')}</span>
               </label>
+            </fieldset>
+          </section>
+        </article>
+
+        {/* Recordings Storage Cleanup Configuration */}
+        <article className={styles.card} style={{ gridColumn: 'span 2' }}>
+          <h3 className={styles.cardTitle}>{t('settings.recordingsStorageTitle')}</h3>
+          
+          {/* Storage Quota Progress Indicator */}
+          <section style={{ marginBottom: 'var(--space-2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: 'var(--font-size-sm)' }}>
+              <span>{t('settings.storageUsed')}</span>
+              <strong>
+                {t('settings.storageUsedText', {
+                  used: (tenant.recordings_storage_used_bytes / (1024 * 1024)).toFixed(2),
+                  limit: form.recordings_storage_limit_mb,
+                  pct: form.recordings_storage_limit_mb > 0 
+                    ? ((tenant.recordings_storage_used_bytes / (1024 * 1024 * form.recordings_storage_limit_mb)) * 100).toFixed(1)
+                    : 0
+                })}
+              </strong>
+            </div>
+            {/* Progress Bar */}
+            <div style={{
+              width: '100%',
+              height: '8px',
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-color)',
+              overflow: 'hidden',
+              display: 'flex'
+            }}>
+              <div style={{
+                width: `${Math.min(100, form.recordings_storage_limit_mb > 0 
+                  ? (tenant.recordings_storage_used_bytes / (1024 * 1024 * form.recordings_storage_limit_mb)) * 100
+                  : 0)}%`,
+                height: '100%',
+                background: (() => {
+                  const pct = form.recordings_storage_limit_mb > 0 
+                    ? (tenant.recordings_storage_used_bytes / (1024 * 1024 * form.recordings_storage_limit_mb)) * 100
+                    : 0
+                  if (pct > 90) return '#ef4444' // red
+                  if (pct > 75) return '#f59e0b' // orange
+                  return 'var(--primary-color)'  // green
+                })(),
+                transition: 'width var(--transition-fast) ease-out, background var(--transition-fast)'
+              }} />
+            </div>
+          </section>
+
+          <section className={styles.formGrid}>
+            {isSuperAdmin ? (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel} htmlFor="settings-rec-limit">{t('settings.recordingsStorageLimitMb')}</label>
+                <input id="settings-rec-limit" className={s.fieldInput} type="number"
+                  min={1} max={100000} value={form.recordings_storage_limit_mb}
+                  onChange={(e) => handleChange('recordings_storage_limit_mb', +e.target.value)} />
+              </fieldset>
+            ) : (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel}>{t('settings.recordingsStorageLimitMb')}</label>
+                <div className={s.fieldInput} style={{ background: 'var(--bg-input)', display: 'flex', alignItems: 'center', minHeight: '38px', color: 'var(--text-muted)' }}>
+                  {form.recordings_storage_limit_mb} MB (Read-Only for Tenant Admin)
+                </div>
+              </fieldset>
+            )}
+            <fieldset className={s.field}>
+              <label className={s.fieldLabel} htmlFor="settings-rec-days">{t('settings.recordingsCleanupDays')}</label>
+              <input id="settings-rec-days" className={s.fieldInput} type="number"
+                min={0} max={3650} value={form.recordings_cleanup_days}
+                onChange={(e) => handleChange('recordings_cleanup_days', +e.target.value)} />
+              <span style={{ marginTop: '4px', display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', lineHeight: 'var(--line-height-normal)' }}>
+                {t('settings.cleanupDaysHint')}
+              </span>
+            </fieldset>
+            <fieldset className={s.field}>
+              <label className={s.fieldLabel} htmlFor="settings-rec-pct">{t('settings.recordingsCleanupPct')}</label>
+              <input id="settings-rec-pct" className={s.fieldInput} type="number"
+                min={0} max={100} value={form.recordings_cleanup_pct}
+                onChange={(e) => handleChange('recordings_cleanup_pct', +e.target.value)} />
+              <span style={{ marginTop: '4px', display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', lineHeight: 'var(--line-height-normal)' }}>
+                {t('settings.cleanupPctHint')}
+              </span>
             </fieldset>
           </section>
         </article>

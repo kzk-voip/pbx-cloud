@@ -28,6 +28,9 @@ class Tenant(Base):
     codecs: Mapped[str] = mapped_column(String(200), nullable=False, server_default="ulaw,alaw")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
     allow_international: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    recordings_cleanup_days: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0", default=0)
+    recordings_cleanup_pct: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0", default=0)
+    recordings_storage_limit_mb: Mapped[int] = mapped_column(Integer, nullable=False, server_default="100", default=100)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("now()"))
 

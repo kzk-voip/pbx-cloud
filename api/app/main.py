@@ -16,6 +16,7 @@ from app.database import async_session
 from app.redis import init_redis, close_redis
 from app.routers import health, auth, tenants, extensions, trunks, cdr, calls, admin, blacklist, ws, events, reports, inbound_rules, call_routes, users, internal, ip_whitelist, tenant_ip_acl, assistant, ring_groups
 from app.services import kamailio_service
+from app.services.recordings_cleanup_service import schedule_recordings_cleanup_task
 
 # Configure logging for all app.* loggers
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s [%(name)s] %(message)s")
@@ -86,11 +87,15 @@ async def lifespan(app: FastAPI):
 
     # Start custom prometheus metrics collector
     metrics_task = asyncio.create_task(collect_asterisk_metrics())
+    
+    # Start periodic recordings cleanup task (runs at 00:00 and 12:00 UTC daily)
+    cleanup_task = asyncio.create_task(schedule_recordings_cleanup_task(async_session))
 
     yield
     
     # Shutdown
     metrics_task.cancel()
+    cleanup_task.cancel()
     await close_redis()
 
 

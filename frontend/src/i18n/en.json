@@ -222,7 +222,15 @@
     "maxConcurrentCalls": "Max Concurrent Calls",
     "codecs": "Codecs",
     "active": "Active",
-    "allowInternational": "Allow International Calls"
+    "allowInternational": "Allow International Calls",
+    "recordingsStorageTitle": "Recordings Storage Management",
+    "storageUsed": "Storage Used",
+    "storageUsedText": "{{used}} MB of {{limit}} MB used ({{pct}}%)",
+    "recordingsCleanupDays": "Cleanup Days (0 = disabled)",
+    "recordingsCleanupPct": "Cleanup Space Threshold % (0 = disabled)",
+    "recordingsStorageLimitMb": "Allocated Storage Limit (MB)",
+    "cleanupDaysHint": "Recordings older than this number of days will be deleted.",
+    "cleanupPctHint": "When storage exceeds this % of limit, oldest recordings are deleted."
   },
   "reports": {
     "title": "Reports",
@@ -499,7 +507,8 @@
         "extension_deleted": "Extension Deleted",
         "trunk_created": "Trunk Created",
         "trunk_deleted": "Trunk Deleted",
-        "config_change": "Config Change"
+        "config_change": "Config Change",
+        "recordings_cleanup": "Recordings Storage Cleanup"
       },
       "headers": {
         "date": "Date",
