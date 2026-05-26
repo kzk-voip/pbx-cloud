@@ -138,18 +138,36 @@ export default function TenantSettings() {
                 value={form.name}
                 onChange={(e) => handleChange('name', e.target.value)} />
             </fieldset>
-            <fieldset className={s.field}>
-              <label className={s.fieldLabel} htmlFor="settings-max-ext">{t('settings.maxExtensions')}</label>
-              <input id="settings-max-ext" className={s.fieldInput} type="number"
-                min={1} max={1000} value={form.max_extensions}
-                onChange={(e) => handleChange('max_extensions', +e.target.value)} />
-            </fieldset>
-            <fieldset className={s.field}>
-              <label className={s.fieldLabel} htmlFor="settings-max-calls">{t('settings.maxConcurrentCalls')}</label>
-              <input id="settings-max-calls" className={s.fieldInput} type="number"
-                min={1} max={500} value={form.max_concurrent_calls}
-                onChange={(e) => handleChange('max_concurrent_calls', +e.target.value)} />
-            </fieldset>
+            {isSuperAdmin ? (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel} htmlFor="settings-max-ext">{t('settings.maxExtensions')}</label>
+                <input id="settings-max-ext" className={s.fieldInput} type="number"
+                  min={1} max={1000} value={form.max_extensions}
+                  onChange={(e) => handleChange('max_extensions', +e.target.value)} />
+              </fieldset>
+            ) : (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel}>{t('settings.maxExtensions')}</label>
+                <div className={s.fieldInput} style={{ background: 'var(--bg-input)', display: 'flex', alignItems: 'center', minHeight: '38px', color: 'var(--text-muted)' }}>
+                  {form.max_extensions} ({t('settings.readOnlyTenantAdmin')})
+                </div>
+              </fieldset>
+            )}
+            {isSuperAdmin ? (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel} htmlFor="settings-max-calls">{t('settings.maxConcurrentCalls')}</label>
+                <input id="settings-max-calls" className={s.fieldInput} type="number"
+                  min={1} max={500} value={form.max_concurrent_calls}
+                  onChange={(e) => handleChange('max_concurrent_calls', +e.target.value)} />
+              </fieldset>
+            ) : (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel}>{t('settings.maxConcurrentCalls')}</label>
+                <div className={s.fieldInput} style={{ background: 'var(--bg-input)', display: 'flex', alignItems: 'center', minHeight: '38px', color: 'var(--text-muted)' }}>
+                  {form.max_concurrent_calls} ({t('settings.readOnlyTenantAdmin')})
+                </div>
+              </fieldset>
+            )}
             <fieldset className={s.field}>
               <label className={s.fieldLabel} htmlFor="settings-codecs">{t('settings.codecs')}</label>
               <input id="settings-codecs" className={s.fieldInput}
