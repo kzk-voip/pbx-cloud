@@ -143,7 +143,8 @@ async def main():
                 if auth_obj:
                     sip_password = auth_obj.password
                 
-            extensions_data.append((sip_id, STRESS_TENANT_DOMAIN, sip_password))
+            auth_str = f"[authentication username={sip_id} password={sip_password}]"
+            extensions_data.append((sip_id, STRESS_TENANT_DOMAIN, sip_password, auth_str))
             
         # 3. Always sync stress domain to Kamailio htable dynamically
         try:
@@ -159,10 +160,10 @@ async def main():
         # 4. Write users.csv file
         csv_lines = [
             "SEQUENTIAL",
-            "username;domain;password"
+            "username;domain;password;auth_string"
         ]
-        for sip_id, domain, pwd in extensions_data:
-            csv_lines.append(f"{sip_id};{domain};{pwd}")
+        for sip_id, domain, pwd, auth_str in extensions_data:
+            csv_lines.append(f"{sip_id};{domain};{pwd};{auth_str}")
             
         csv_content = "\n".join(csv_lines) + "\n"
         
