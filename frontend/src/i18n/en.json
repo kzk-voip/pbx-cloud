@@ -230,7 +230,9 @@
     "recordingsCleanupPct": "Cleanup Space Threshold % (0 = disabled)",
     "recordingsStorageLimitMb": "Allocated Storage Limit (MB)",
     "cleanupDaysHint": "Recordings older than this number of days will be deleted.",
-    "cleanupPctHint": "When storage exceeds this % of limit, oldest recordings are deleted."
+    "cleanupPctHint": "When storage exceeds this % of limit, oldest recordings are deleted.",
+    "readOnlyTenantAdmin": "Read-Only for Tenant Admin",
+    "days": "days"
   },
   "reports": {
     "title": "Reports",

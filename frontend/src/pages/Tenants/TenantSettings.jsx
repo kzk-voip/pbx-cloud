@@ -231,28 +231,52 @@ export default function TenantSettings() {
               <fieldset className={s.field}>
                 <label className={s.fieldLabel}>{t('settings.recordingsStorageLimitMb')}</label>
                 <div className={s.fieldInput} style={{ background: 'var(--bg-input)', display: 'flex', alignItems: 'center', minHeight: '38px', color: 'var(--text-muted)' }}>
-                  {form.recordings_storage_limit_mb} MB (Read-Only for Tenant Admin)
+                  {form.recordings_storage_limit_mb} MB ({t('settings.readOnlyTenantAdmin')})
                 </div>
               </fieldset>
             )}
-            <fieldset className={s.field}>
-              <label className={s.fieldLabel} htmlFor="settings-rec-days">{t('settings.recordingsCleanupDays')}</label>
-              <input id="settings-rec-days" className={s.fieldInput} type="number"
-                min={0} max={3650} value={form.recordings_cleanup_days}
-                onChange={(e) => handleChange('recordings_cleanup_days', +e.target.value)} />
-              <span style={{ marginTop: '4px', display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', lineHeight: 'var(--line-height-normal)' }}>
-                {t('settings.cleanupDaysHint')}
-              </span>
-            </fieldset>
-            <fieldset className={s.field}>
-              <label className={s.fieldLabel} htmlFor="settings-rec-pct">{t('settings.recordingsCleanupPct')}</label>
-              <input id="settings-rec-pct" className={s.fieldInput} type="number"
-                min={0} max={100} value={form.recordings_cleanup_pct}
-                onChange={(e) => handleChange('recordings_cleanup_pct', +e.target.value)} />
-              <span style={{ marginTop: '4px', display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', lineHeight: 'var(--line-height-normal)' }}>
-                {t('settings.cleanupPctHint')}
-              </span>
-            </fieldset>
+            {isSuperAdmin ? (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel} htmlFor="settings-rec-days">{t('settings.recordingsCleanupDays')}</label>
+                <input id="settings-rec-days" className={s.fieldInput} type="number"
+                  min={0} max={3650} value={form.recordings_cleanup_days}
+                  onChange={(e) => handleChange('recordings_cleanup_days', +e.target.value)} />
+                <span style={{ marginTop: '4px', display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', lineHeight: 'var(--line-height-normal)' }}>
+                  {t('settings.cleanupDaysHint')}
+                </span>
+              </fieldset>
+            ) : (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel}>{t('settings.recordingsCleanupDays')}</label>
+                <div className={s.fieldInput} style={{ background: 'var(--bg-input)', display: 'flex', alignItems: 'center', minHeight: '38px', color: 'var(--text-muted)' }}>
+                  {form.recordings_cleanup_days} {t('settings.days')} ({t('settings.readOnlyTenantAdmin')})
+                </div>
+                <span style={{ marginTop: '4px', display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', lineHeight: 'var(--line-height-normal)' }}>
+                  {t('settings.cleanupDaysHint')}
+                </span>
+              </fieldset>
+            )}
+            {isSuperAdmin ? (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel} htmlFor="settings-rec-pct">{t('settings.recordingsCleanupPct')}</label>
+                <input id="settings-rec-pct" className={s.fieldInput} type="number"
+                  min={0} max={100} value={form.recordings_cleanup_pct}
+                  onChange={(e) => handleChange('recordings_cleanup_pct', +e.target.value)} />
+                <span style={{ marginTop: '4px', display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', lineHeight: 'var(--line-height-normal)' }}>
+                  {t('settings.cleanupPctHint')}
+                </span>
+              </fieldset>
+            ) : (
+              <fieldset className={s.field}>
+                <label className={s.fieldLabel}>{t('settings.recordingsCleanupPct')}</label>
+                <div className={s.fieldInput} style={{ background: 'var(--bg-input)', display: 'flex', alignItems: 'center', minHeight: '38px', color: 'var(--text-muted)' }}>
+                  {form.recordings_cleanup_pct}% ({t('settings.readOnlyTenantAdmin')})
+                </div>
+                <span style={{ marginTop: '4px', display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', lineHeight: 'var(--line-height-normal)' }}>
+                  {t('settings.cleanupPctHint')}
+                </span>
+              </fieldset>
+            )}
           </section>
         </article>
 
