@@ -520,6 +520,17 @@
         "extension": "Екстеншен",
         "details": "Деталі"
       },
+      "detailDialog": {
+        "title": "Деталі події",
+        "date": "Дата",
+        "action": "Дія",
+        "source": "Джерело",
+        "ip": "IP-адреса",
+        "extension": "Екстеншен",
+        "details": "Детальні дані",
+        "close": "Закрити",
+        "description": "Детальна інформація про вибрану подію аудиту"
+      },
       "noEvents": "Подій не зафіксовано",
       "pagination": "Сторінка {{current}} з {{total}} ({{count}} подій)"
     },

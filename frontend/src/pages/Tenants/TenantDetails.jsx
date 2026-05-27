@@ -56,6 +56,7 @@ export default function TenantDetails() {
   // --- Events state ---
   const [eventsPage, setEventsPage] = useState(1)
   const [eventsFilter, setEventsFilter] = useState('')
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
   // --- Users state ---
   const [userDialogOpen, setUserDialogOpen] = useState(false)
@@ -788,7 +789,7 @@ export default function TenantDetails() {
               </thead>
               <tbody>
                 {events?.items?.length > 0 ? events.items.map((evt) => (
-                  <tr key={evt.id}>
+                  <tr key={evt.id} className={s.clickableRow} onClick={() => setSelectedEvent(evt)}>
                     <td>{formatDate(evt.created_at)}</td>
                     <td><code>{evt.action}</code></td>
                     <td>{evt.source || '—'}</td>
@@ -822,6 +823,58 @@ export default function TenantDetails() {
               </footer>
             )}
           </article>
+
+          {/* Event Details Dialog */}
+          <Dialog.Root open={!!selectedEvent} onOpenChange={(open) => { if (!open) setSelectedEvent(null) }}>
+            <Dialog.Portal>
+              <Dialog.Overlay className={s.dialogOverlay} />
+              <Dialog.Content className={s.dialogContent} aria-describedby="event-detail-desc">
+                <Dialog.Title className={s.dialogTitle}>{t('tenantDetails.events.detailDialog.title')}</Dialog.Title>
+                <p id="event-detail-desc" className="sr-only">{t('tenantDetails.events.detailDialog.description')}</p>
+
+                {selectedEvent && (
+                  <article className={styles.detailGrid}>
+                    <section className={styles.detailItem}>
+                      <span className={styles.detailLabel}>{t('tenantDetails.events.detailDialog.date')}</span>
+                      <span className={styles.detailValue}>
+                        {formatDate(selectedEvent.created_at)}
+                      </span>
+                    </section>
+                    <section className={styles.detailItem}>
+                      <span className={styles.detailLabel}>{t('tenantDetails.events.detailDialog.action')}</span>
+                      <span className={styles.detailValue}><code>{selectedEvent.action}</code></span>
+                    </section>
+                    <section className={styles.detailItem}>
+                      <span className={styles.detailLabel}>{t('tenantDetails.events.detailDialog.source')}</span>
+                      <span className={styles.detailValue}>{selectedEvent.source || '—'}</span>
+                    </section>
+                    <section className={styles.detailItem}>
+                      <span className={styles.detailLabel}>{t('tenantDetails.events.detailDialog.ip')}</span>
+                      <span className={styles.detailValue}>{selectedEvent.ip || '—'}</span>
+                    </section>
+                    <section className={`${styles.detailItem} ${styles.fullWidth}`}>
+                      <span className={styles.detailLabel}>{t('tenantDetails.events.detailDialog.extension')}</span>
+                      <span className={styles.detailValue}>{selectedEvent.extension || '—'}</span>
+                    </section>
+                    <section className={`${styles.detailItem} ${styles.fullWidth}`}>
+                      <span className={styles.detailLabel}>{t('tenantDetails.events.detailDialog.details')}</span>
+                      <span className={styles.detailValue}>
+                        {selectedEvent.details ? (
+                          <pre>{JSON.stringify(selectedEvent.details, null, 2)}</pre>
+                        ) : '—'}
+                      </span>
+                    </section>
+                  </article>
+                )}
+
+                <footer className={s.dialogActions}>
+                  <Dialog.Close asChild>
+                    <button className={`${s.btn} ${s.btnSecondary}`}>{t('tenantDetails.events.detailDialog.close')}</button>
+                  </Dialog.Close>
+                </footer>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
         </Tabs.Content>
 
         {/* ==================== REPORTS TAB ==================== */}

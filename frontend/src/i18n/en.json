@@ -520,6 +520,17 @@
         "extension": "Extension",
         "details": "Details"
       },
+      "detailDialog": {
+        "title": "Event Details",
+        "date": "Date",
+        "action": "Action",
+        "source": "Source",
+        "ip": "IP Address",
+        "extension": "Extension",
+        "details": "Detail Data",
+        "close": "Close",
+        "description": "Detailed information about the selected audit event"
+      },
       "noEvents": "No events recorded",
       "pagination": "Page {{current}} of {{total}} ({{count}} events)"
     },
