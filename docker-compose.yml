@@ -132,7 +132,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     volumes:
       - ./api:/app
-      - ./recordings:/recordings:ro
+      - ./recordings:/recordings
     restart: unless-stopped
 
   frontend:
