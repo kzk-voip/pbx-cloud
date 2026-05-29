@@ -24,6 +24,7 @@ class CDRResponse(BaseModel):
     disposition: str | None
     accountcode: str | None
     uniqueid: str | None
+    has_recording: bool = False
 
     model_config = {"from_attributes": True}
 

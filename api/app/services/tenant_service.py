@@ -14,6 +14,7 @@ from app.models.tenant import Tenant
 from app.models.extension import Extension
 from app.schemas.tenant import TenantCreate, TenantUpdate, TenantResponse, TenantListResponse
 from app.services import kamailio_service
+from app.services.recordings_cleanup_service import get_tenant_storage_used_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,10 @@ async def _tenant_to_response(db: AsyncSession, tenant: Tenant) -> TenantRespons
         codecs=tenant.codecs,
         is_active=tenant.is_active,
         allow_international=tenant.allow_international,
+        recordings_cleanup_days=tenant.recordings_cleanup_days,
+        recordings_cleanup_pct=tenant.recordings_cleanup_pct,
+        recordings_storage_limit_mb=tenant.recordings_storage_limit_mb,
+        recordings_storage_used_bytes=get_tenant_storage_used_bytes(tenant.slug),
         created_at=tenant.created_at,
         updated_at=tenant.updated_at,
         extension_count=ext_count,
@@ -77,6 +82,9 @@ async def create_tenant(db: AsyncSession, data: TenantCreate) -> TenantResponse:
             max_extensions=data.max_extensions,
             max_concurrent_calls=data.max_concurrent_calls,
             codecs=data.codecs,
+            recordings_cleanup_days=data.recordings_cleanup_days,
+            recordings_cleanup_pct=data.recordings_cleanup_pct,
+            recordings_storage_limit_mb=data.recordings_storage_limit_mb,
         )
         db.add(tenant)
         await db.commit()

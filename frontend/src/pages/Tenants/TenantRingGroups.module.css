@@ -1,0 +1,217 @@
+.tabToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.strategyBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px var(--space-1);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+}
+
+.badgeRingall {
+  background: rgba(14, 165, 233, 0.15);
+  color: rgb(14, 165, 233);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.badgeRoundrobin {
+  background: rgba(168, 85, 247, 0.15);
+  color: rgb(168, 85, 247);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.badgeRandom {
+  background: rgba(245, 158, 11, 0.15);
+  color: rgb(245, 158, 11);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.fullWidth {
+  grid-column: span 2;
+}
+
+.membersLayout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  min-height: 250px;
+  max-height: 380px;
+}
+
+.membersPane {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.paneTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.paneList {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.extensionItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 6px var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.extensionItem:hover {
+  background: var(--bg-card-hover);
+}
+
+.checkboxInput {
+  margin-right: 4px;
+  cursor: pointer;
+}
+
+.memberCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  animation: slideIn var(--transition-fast) ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.memberInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.memberPriorityBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.memberText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reorderBtns {
+  display: flex;
+  gap: 4px;
+}
+
+.reorderBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.reorderBtn:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.reorderBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.helpText {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: var(--line-height-normal);
+}
+
+.priorityInput {
+  width: 36px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  -moz-appearance: textfield;
+}
+
+.priorityInput::-webkit-inner-spin-button,
+.priorityInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.priorityInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color);
+}
+

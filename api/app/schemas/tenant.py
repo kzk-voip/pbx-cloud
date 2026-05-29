@@ -19,6 +19,9 @@ class TenantCreate(BaseModel):
     max_concurrent_calls: int = Field(5, ge=1, le=500)
     codecs: str = Field("ulaw,alaw", max_length=200)
     allow_international: bool = Field(False, description="Allow international calls (00/011 prefix)")
+    recordings_cleanup_days: int = Field(0, ge=0, le=3650)
+    recordings_cleanup_pct: int = Field(0, ge=0, le=100)
+    recordings_storage_limit_mb: int = Field(100, ge=1, le=100000)
 
 
 class TenantUpdate(BaseModel):
@@ -28,6 +31,9 @@ class TenantUpdate(BaseModel):
     codecs: str | None = Field(None, max_length=200)
     is_active: bool | None = None
     allow_international: bool | None = None
+    recordings_cleanup_days: int | None = Field(None, ge=0, le=3650)
+    recordings_cleanup_pct: int | None = Field(None, ge=0, le=100)
+    recordings_storage_limit_mb: int | None = Field(None, ge=1, le=100000)
 
 
 class TenantResponse(BaseModel):
@@ -40,6 +46,10 @@ class TenantResponse(BaseModel):
     codecs: str
     is_active: bool
     allow_international: bool
+    recordings_cleanup_days: int
+    recordings_cleanup_pct: int
+    recordings_storage_limit_mb: int
+    recordings_storage_used_bytes: int = 0
     created_at: datetime
     updated_at: datetime
     extension_count: int = 0

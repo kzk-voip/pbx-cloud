@@ -5,6 +5,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rtpengine:
+        condition: service_started
     environment:
       - EXTERNAL_IP=${EXTERNAL_IP}
     volumes:
@@ -36,6 +38,7 @@ services:
       - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
       - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
       - ./asterisk/etc/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf
+      - ./recordings:/var/spool/asterisk/recordings
     restart: unless-stopped
 
   asterisk-2:
@@ -61,6 +64,7 @@ services:
       - ./asterisk/etc/asterisk/cdr_pgsql.conf:/etc/asterisk/cdr_pgsql.conf
       - ./asterisk/etc/asterisk/manager.conf:/etc/asterisk/manager.conf
       - ./asterisk/etc/asterisk/asterisk.conf:/etc/asterisk/asterisk.conf
+      - ./recordings:/var/spool/asterisk/recordings
     restart: unless-stopped
 
   postgres:
@@ -125,18 +129,38 @@ services:
       - AMI_PORT=5038
       - AMI_USERNAME=${AMI_USERNAME:-admin}
       - AMI_PASSWORD=${AMI_PASSWORD:-changeme}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     volumes:
       - ./api:/app
+      - ./recordings:/recordings
     restart: unless-stopped
 
-  nginx:
-    image: nginx:alpine
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     network_mode: host
     depends_on:
       - api
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - nginx_logs:/var/log/nginx
+    restart: unless-stopped
+
+  rtpengine:
+    image: drachtio/rtpengine:latest
+    network_mode: host
+    environment:
+      - EXTERNAL_IP=${EXTERNAL_IP}
+    command: >
+      rtpengine
+      --interface=${EXTERNAL_IP}
+      --listen-ng=127.0.0.1:22222
+      --listen-http=127.0.0.1:18080
+      --port-min=30000
+      --port-max=40000
+      --log-level=6
+      --foreground=true
+      --no-fallback
     restart: unless-stopped
 
   sipp:

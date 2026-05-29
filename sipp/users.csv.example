@@ -1,0 +1,4 @@
+SEQUENTIAL
+username;domain;password
+acme_101;acme.pbx.local;your_super_secure_sip_password
+acme_102;acme.pbx.local;another_secure_password

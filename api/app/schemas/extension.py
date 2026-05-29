@@ -18,9 +18,13 @@ class ExtensionCreate(BaseModel):
 
 
 class ExtensionUpdate(BaseModel):
+    extension_number: str | None = Field(None, min_length=1, max_length=10, pattern=r"^\d+$",
+                                         description="New extension number (digits only)")
     display_name: str | None = Field(None, min_length=1, max_length=100)
     email: str | None = Field(None, max_length=255)
     enabled: bool | None = None
+    password: str | None = Field(None, min_length=8, max_length=128,
+                                 description="New SIP password. Leave empty to keep current.")
 
 
 class ExtensionResponse(BaseModel):
@@ -32,6 +36,7 @@ class ExtensionResponse(BaseModel):
     enabled: bool
     created_at: datetime
     sip_username: str  # e.g. "stark_401"
+    sip_password: str | None = None
 
     model_config = {"from_attributes": True}
 

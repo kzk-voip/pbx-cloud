@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE scenario SYSTEM "sipp.dtd">
+<!--
+  Authenticated Call Scenario
+  
+  Generates a real call by performing MD5 challenge response authentication
+  against Asterisk and keeping the call active for 15 seconds.
+  
+  Loads credentials from an injection file (-inf /sipp/users.csv):
+    SEQUENTIAL
+    username;domain;password
+    acme_101;acme.pbx.local;your_password
+
+  Usage:
+    docker compose --profile testing run sipp \
+      sipp -sf /sipp/auth_call.xml \
+      -inf /sipp/users.csv \
+      -s acme_102 -r 1 -l 5 -m 10 \
+      127.0.0.1:5060
+-->
+<scenario name="Authenticated Call UAC">
+
+  <!-- 1. Send initial INVITE (unauthenticated) -->
+  <send retrans="500">
+    <![CDATA[
+      INVITE sip:[service]@[field1] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
+      To: <sip:[service]@[field1]>
+      Call-ID: [call_id]
+      CSeq: 1 INVITE
+      Contact: sip:[field0]@[local_ip]:[local_port]
+      Max-Forwards: 70
+      Content-Type: application/sdp
+      Content-Length: [len]
+
+      v=0
+      o=user1 53655765 2353687637 IN IP[local_ip_type] [local_ip]
+      s=-
+      c=IN IP[media_ip_type] [media_ip]
+      t=0 0
+      m=audio [media_port] RTP/AVP 0
+      a=rtpmap:0 PCMU/8000
+    ]]>
+  </send>
+
+  <recv response="100" optional="true"></recv>
+
+  <!-- 2. Receive 401 Unauthorized Auth Challenge from Asterisk -->
+  <recv response="401" auth="true"></recv>
+
+  <!-- 3. ACK the 401 challenge (must match branch of CSeq 1 INVITE) -->
+  <send>
+    <![CDATA[
+      ACK sip:[service]@[field1] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
+      To: <sip:[service]@[field1]>[peer_tag_param]
+      Call-ID: [call_id]
+      CSeq: 1 ACK
+      Contact: sip:[field0]@[local_ip]:[local_port]
+      Max-Forwards: 70
+      Content-Length: 0
+    ]]>
+  </send>
+
+  <!-- 4. Send second INVITE with valid authentication credentials (new branch ID) -->
+  <send retrans="500">
+    <![CDATA[
+      INVITE sip:[service]@[field1] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]auth
+      From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
+      To: <sip:[service]@[field1]>
+      Call-ID: [call_id]
+      CSeq: 2 INVITE
+      Contact: sip:[field0]@[local_ip]:[local_port]
+      [field3]
+      Max-Forwards: 70
+      Content-Type: application/sdp
+      Content-Length: [len]
+
+      v=0
+      o=user1 53655765 2353687637 IN IP[local_ip_type] [local_ip]
+      s=-
+      c=IN IP[media_ip_type] [media_ip]
+      t=0 0
+      m=audio [media_port] RTP/AVP 0
+      a=rtpmap:0 PCMU/8000
+    ]]>
+  </send>
+
+  <recv response="100" optional="true"></recv>
+  <recv response="180" optional="true"></recv>
+  <recv response="183" optional="true"></recv>
+
+  <!-- 5. Receive 200 OK when target answers -->
+  <recv response="200" rtd="true"></recv>
+
+  <!-- 6. ACK the 200 OK (must match branch of CSeq 2 INVITE) -->
+  <send>
+    <![CDATA[
+      ACK sip:[service]@[field1] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]auth
+      From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
+      To: <sip:[service]@[field1]>[peer_tag_param]
+      Call-ID: [call_id]
+      CSeq: 2 ACK
+      Contact: sip:[field0]@[local_ip]:[local_port]
+      Max-Forwards: 70
+      Content-Length: 0
+    ]]>
+  </send>
+
+  <!-- 7. Keep the call active for 15 seconds (shows up on dashboard) -->
+  <pause milliseconds="15000" />
+
+  <!-- 8. Send BYE to terminate the call (new branch ID) -->
+  <send>
+    <![CDATA[
+      BYE sip:[service]@[field1] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]bye
+      From: "[field0]" <sip:[field0]@[field1]>;tag=[pid]SIPpTag[call_number]
+      To: <sip:[service]@[field1]>[peer_tag_param]
+      Call-ID: [call_id]
+      CSeq: 3 BYE
+      Max-Forwards: 70
+      Content-Length: 0
+    ]]>
+  </send>
+
+  <!-- 9. Receive 200 OK for BYE -->
+  <recv response="200"></recv>
+
+</scenario>
