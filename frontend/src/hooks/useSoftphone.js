@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import toast from 'react-hot-toast'
+
 
 /**
  * useSoftphone — JsSIP-based WebRTC softphone hook.
@@ -174,11 +176,19 @@ export default function useSoftphone({
             setState('registered')
           })
 
-          session.on('failed', () => {
+          session.on('failed', (e) => {
+            console.error('[Softphone] Session FAILED:', e?.cause)
             sessionRef.current = null
             setCallInfo(null)
             stopTimer()
             setState('registered')
+            if (e?.cause) {
+              setError(e.cause)
+              const errorMsg = e.cause === 'User Denied Media Access'
+                ? 'Доступ до мікрофона заблоковано в браузері!'
+                : `Дзвінок завершився збоєм: ${e.cause}`;
+              toast.error(errorMsg)
+            }
           })
 
           session.on('accepted', () => {
@@ -271,6 +281,11 @@ export default function useSoftphone({
       stopTimer()
       setState('registered')
       setError(e.cause || 'Call failed')
+
+      const errorMsg = e.cause === 'User Denied Media Access'
+        ? 'Доступ до мікрофона заблоковано в браузері!'
+        : `Дзвінок завершився збоєм: ${e.cause || 'Unknown error'}`;
+      toast.error(errorMsg)
     })
 
     // Early track attachment via peerconnection event
