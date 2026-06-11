@@ -247,6 +247,10 @@ export default function useSoftphone({
     } catch (err) {
       console.error('[Softphone] call() threw:', err)
       setError(err.message || 'Call failed')
+      const errorMsg = err.message === 'User Denied Media Access'
+        ? 'Доступ до мікрофона заблоковано в браузері!'
+        : `Не вдалося ініціювати дзвінок: ${err.message || 'невідома помилка'}`;
+      toast.error(errorMsg)
       return
     }
 
@@ -310,9 +314,18 @@ export default function useSoftphone({
     ensureAudioUnlocked()
 
     if (sessionRef.current && state === 'calling' && callInfo?.direction === 'incoming') {
-      sessionRef.current.answer({
-        mediaConstraints: { audio: true, video: false },
-      })
+      try {
+        sessionRef.current.answer({
+          mediaConstraints: { audio: true, video: false },
+        })
+      } catch (err) {
+        console.error('[Softphone] answer() threw:', err)
+        setError(err.message || 'Failed to answer call')
+        const errorMsg = err.message === 'User Denied Media Access'
+          ? 'Доступ до мікрофона заблоковано в браузері!'
+          : `Не вдалося відповісти на дзвінок: ${err.message || 'невідома помилка'}`;
+        toast.error(errorMsg)
+      }
     }
   }, [state, callInfo, ensureAudioUnlocked])
 
