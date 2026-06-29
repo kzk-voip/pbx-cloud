@@ -13,6 +13,7 @@ sed -i "s|\${EXTERNAL_IP}|${EXTERNAL_IP:-127.0.0.1}|g" /tmp/kamailio.cfg
 # Copy dispatcher.list (fix CRLF)
 cp /etc/kamailio/dispatcher.list /tmp/dispatcher.list
 sed -i 's/\r$//' /tmp/dispatcher.list
+sed -i "s|\${EXTERNAL_IP}|${EXTERNAL_IP:-127.0.0.1}|g" /tmp/dispatcher.list
 
 # Update dispatcher.list path in config to use the writable copy
 sed -i 's|/etc/kamailio/dispatcher.list|/tmp/dispatcher.list|g' /tmp/kamailio.cfg
