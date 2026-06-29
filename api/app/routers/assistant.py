@@ -183,12 +183,11 @@ async def _call_gemini(messages: list[ChatMessage], user_role: str) -> dict:
 
     url = (
         "https://generativelanguage.googleapis.com/v1beta/"
-        f"models/{_GEMINI_MODEL}:generateContent"
+        f"models/{_GEMINI_MODEL}:generateContent?key={api_key}"
     )
 
     headers = {
         "Content-Type": "application/json",
-        "X-goog-api-key": api_key,
     }
 
     try:
