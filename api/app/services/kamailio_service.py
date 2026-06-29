@@ -169,3 +169,149 @@ async def unblacklist_ip(ip: str) -> bool:
         return True
     logger.warning(f"Failed to remove IP from Kamailio blacklist: {ip}")
     return False
+
+
+async def is_ip_blacklisted(ip: str) -> bool:
+    """Check if an IP is in the Kamailio blacklist."""
+    # We dump the blacklist and check locally since htable.get over JSONRPC might not be standard
+    result = await dump_blacklist()
+    if result and "result" in result:
+        for slot in result["result"]:
+            if "slot" in slot:
+                for item in slot["slot"]:
+                    if item.get("name") == ip:
+                        return True
+    return False
+
+
+# ---- Global IP Whitelist Management ----
+
+async def dump_whitelist() -> dict | None:
+    """Dump all entries from the ipwhitelist htable."""
+    return await _send_jsonrpc("htable.dump", ["ipwhitelist"])
+
+
+async def whitelist_ip(ip: str) -> bool:
+    """Add an IP to the Kamailio global whitelist (immune from pike/blacklist)."""
+    response = await _send_jsonrpc("htable.seti", ["ipwhitelist", ip, 1])
+    if response and "result" in response:
+        logger.info(f"Whitelisted IP in Kamailio: {ip}")
+        return True
+    logger.warning(f"Failed to whitelist IP in Kamailio: {ip}")
+    return False
+
+
+async def unwhitelist_ip(ip: str) -> bool:
+    """Remove an IP from the Kamailio global whitelist."""
+    response = await _send_jsonrpc("htable.delete", ["ipwhitelist", ip])
+    if response and "result" in response:
+        logger.info(f"Removed IP from Kamailio whitelist: {ip}")
+        return True
+    logger.warning(f"Failed to remove IP from Kamailio whitelist: {ip}")
+    return False
+
+
+async def sync_global_whitelist_from_db(db_session) -> int:
+    """
+    Load all global whitelist IPs from DB and sync to Kamailio htable.
+    Called on API startup.
+    """
+    from sqlalchemy import select
+    from app.models.global_ip_whitelist import GlobalIpWhitelist
+
+    result = await db_session.execute(select(GlobalIpWhitelist))
+    entries = result.scalars().all()
+
+    synced = 0
+    for entry in entries:
+        success = await whitelist_ip(entry.ip_address)
+        if success:
+            synced += 1
+
+    logger.info(f"Kamailio whitelist sync: {synced}/{len(entries)} IPs synced")
+    return synced
+
+
+# ---- Tenant IP ACL Management ----
+# htable key format: "tenant_slug::ip" = 1  (allowed IP)
+# htable key format: "tenant_slug::*" = 1   (ACL marker = enabled)
+
+async def set_tenant_acl_marker(slug: str, enabled: bool) -> bool:
+    """Set or remove the ACL-enabled marker for a tenant."""
+    key = f"{slug}::*"
+    if enabled:
+        response = await _send_jsonrpc("htable.seti", ["tenant_acl", key, 1])
+    else:
+        response = await _send_jsonrpc("htable.delete", ["tenant_acl", key])
+    return response is not None and "result" in (response or {})
+
+
+async def add_tenant_acl_ip(slug: str, ip: str) -> bool:
+    """Add an IP to a tenant's ACL in the Kamailio htable."""
+    key = f"{slug}::{ip}"
+    response = await _send_jsonrpc("htable.seti", ["tenant_acl", key, 1])
+    if response and "result" in response:
+        logger.info(f"Tenant ACL: added {ip} for {slug}")
+        return True
+    return False
+
+
+async def remove_tenant_acl_ip(slug: str, ip: str) -> bool:
+    """Remove an IP from a tenant's ACL in the Kamailio htable."""
+    key = f"{slug}::{ip}"
+    response = await _send_jsonrpc("htable.delete", ["tenant_acl", key])
+    return response is not None and "result" in (response or {})
+
+
+async def clear_tenant_acl(slug: str) -> None:
+    """Remove all ACL entries for a tenant from Kamailio htable."""
+    # Dump htable and find entries matching this tenant
+    result = await _send_jsonrpc("htable.dump", ["tenant_acl"])
+    if result and "result" in result:
+        for slot in result["result"]:
+            if "slot" in slot:
+                for item in slot["slot"]:
+                    name = item.get("name", "")
+                    if name.startswith(f"{slug}::") and name != f"{slug}::*":
+                        await _send_jsonrpc("htable.delete", ["tenant_acl", name])
+
+
+async def sync_tenant_acls_from_db(db_session) -> int:
+    """
+    Load all tenant IP ACLs from DB and sync to Kamailio htable.
+    Called on API startup.
+    """
+    from sqlalchemy import select
+    from app.models.tenant import Tenant
+    from app.models.tenant_ip_acl import TenantIpAcl
+
+    # Get all tenants that have ACL entries
+    result = await db_session.execute(
+        select(TenantIpAcl.tenant_id).distinct()
+    )
+    tenant_ids = [row[0] for row in result.all()]
+
+    synced = 0
+    for tenant_id in tenant_ids:
+        # Get tenant slug
+        tenant_result = await db_session.execute(
+            select(Tenant).where(Tenant.id == tenant_id)
+        )
+        tenant = tenant_result.scalar_one_or_none()
+        if not tenant:
+            continue
+
+        # Get all ACL entries
+        entries_result = await db_session.execute(
+            select(TenantIpAcl).where(TenantIpAcl.tenant_id == tenant_id)
+        )
+        entries = entries_result.scalars().all()
+
+        if entries:
+            await set_tenant_acl_marker(tenant.slug, True)
+            for entry in entries:
+                await add_tenant_acl_ip(tenant.slug, entry.ip_address)
+            synced += len(entries)
+
+    logger.info(f"Kamailio tenant ACL sync: {synced} entries for {len(tenant_ids)} tenants")
+    return synced

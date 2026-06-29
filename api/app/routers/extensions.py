@@ -93,7 +93,10 @@ async def update_extension(
 ):
     """Update extension metadata."""
     _check_tenant_access(user, tenant_id)
-    ext = await extension_service.update_extension(db, tenant_id, ext_id, data)
+    try:
+        ext = await extension_service.update_extension(db, tenant_id, ext_id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     if ext is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Extension not found")
     return ext

@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import func, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.services import event_service
 
 from app.models.tenant import Tenant
 from app.models.trunk import Trunk
@@ -47,6 +48,10 @@ async def create_trunk(
         max_channels=data.max_channels,
     )
     db.add(trunk)
+    await event_service.log_event(
+        db, tenant_id, "trunk_created", source="api",
+        details={"name": data.name, "host": data.host, "provider": data.provider},
+    )
     await db.commit()
     await db.refresh(trunk)
     return TrunkResponse.model_validate(trunk)
@@ -99,5 +104,9 @@ async def delete_trunk(
         return False
 
     await db.execute(delete(Trunk).where(Trunk.id == trunk_id))
+    await event_service.log_event(
+        db, tenant_id, "trunk_deleted", source="api",
+        details={"name": trunk.name, "host": trunk.host},
+    )
     await db.commit()
     return True

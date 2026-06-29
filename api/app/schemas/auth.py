@@ -30,5 +30,13 @@ class UserResponse(BaseModel):
     tenant_id: uuid.UUID | None
     is_active: bool
     created_at: datetime
+    extension_id: uuid.UUID | None = None
+    extension_number: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(..., min_length=1, max_length=128)
+    new_password: str = Field(..., min_length=8, max_length=128)
+

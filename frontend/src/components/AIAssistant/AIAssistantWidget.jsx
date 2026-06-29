@@ -1,0 +1,280 @@
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
+import { MessageCircle, X, Send, Sparkles, Trash2 } from 'lucide-react'
+import client from '../../api/client'
+import useAuthStore from '../../store/authStore'
+import styles from './AIAssistantWidget.module.css'
+
+const SUGGESTIONS = {
+  en: [
+    'Where are extensions?',
+    'How to view call logs?',
+    'Where is CDR export?',
+    'Show me tenant settings',
+  ],
+  uk: [
+    'Де знайти екстеншени?',
+    'Як переглянути історію дзвінків?',
+    'Де експорт CDR?',
+    'Де налаштування тенанта?',
+  ],
+}
+
+export default function AIAssistantWidget() {
+  const { user } = useAuthStore()
+  const { t, i18n } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const messagesEndRef = useRef(null)
+  const inputRef = useRef(null)
+  const highlightedRef = useRef([])
+  const highlightTimerRef = useRef(null)
+
+  const lang = i18n.language?.startsWith('uk') ? 'uk' : 'en'
+  const suggestions = SUGGESTIONS[lang] || SUGGESTIONS.en
+
+  // ── Scroll to bottom on new messages ──
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, loading])
+
+  // ── Focus input on open ──
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 100)
+    }
+  }, [open])
+
+  // ── Highlight helpers (ref-based, no state, no re-renders) ──
+  const clearHighlights = useCallback(() => {
+    if (highlightTimerRef.current) {
+      clearTimeout(highlightTimerRef.current)
+      highlightTimerRef.current = null
+    }
+    highlightedRef.current.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) el.classList.remove('ai-spotlight')
+    })
+    highlightedRef.current = []
+  }, [])
+
+  const applyHighlights = useCallback((highlights) => {
+    clearHighlights()
+    if (!highlights?.length) return
+
+    const applied = []
+    highlights.forEach(({ element_id }) => {
+      const el = document.getElementById(element_id)
+      if (el) {
+        el.classList.add('ai-spotlight')
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        applied.push(element_id)
+      }
+    })
+    highlightedRef.current = applied
+    console.log('[AI Assistant] Highlights applied:', applied)
+
+    // Auto-remove after 6 seconds
+    if (applied.length > 0) {
+      highlightTimerRef.current = setTimeout(() => {
+        applied.forEach((id) => {
+          const el = document.getElementById(id)
+          if (el) el.classList.remove('ai-spotlight')
+        })
+        highlightedRef.current = []
+      }, 6000)
+    }
+  }, [clearHighlights])
+
+  // ── Clean up highlights on unmount only ──
+  useEffect(() => {
+    return () => clearHighlights()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Send message ──
+  const sendMessage = async (text) => {
+    if (!text.trim() || loading) return
+
+    const userMsg = { role: 'user', content: text.trim() }
+    const newMessages = [...messages, userMsg]
+    setMessages(newMessages)
+    setInput('')
+    setLoading(true)
+
+    try {
+      const { data } = await client.post('/assistant/chat', {
+        messages: newMessages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+      })
+
+      const botMsg = { role: 'assistant', content: data.reply }
+      setMessages((prev) => [...prev, botMsg])
+
+      // Apply spotlight highlights
+      console.log('[AI Assistant] Response highlights:', data.highlights)
+      if (data.highlights?.length) {
+        applyHighlights(data.highlights)
+      }
+    } catch (err) {
+      const errorMsg = {
+        role: 'assistant',
+        content: t('aiAssistant.errorMsg'),
+      }
+      setMessages((prev) => [...prev, errorMsg])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    sendMessage(input)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage(input)
+    }
+  }
+
+  const handleClear = () => {
+    setMessages([])
+    clearHighlights()
+  }
+
+  const handleSuggestion = (text) => {
+    sendMessage(text)
+  }
+
+  const toggleOpen = () => {
+    setOpen((v) => !v)
+    if (open) clearHighlights()
+  }
+
+  // Hide widget for super_admin
+  if (user?.role === 'super_admin') return null
+
+  return createPortal(
+    <>
+      {/* Chat Window */}
+      {open && (
+        <section
+          className={styles.chatWindow}
+          role="complementary"
+        >
+          {/* Header */}
+          <header className={styles.chatHeader}>
+            <span className={styles.chatHeaderIcon}>
+              <Sparkles size={18} aria-hidden="true" />
+            </span>
+            <section className={styles.chatHeaderInfo}>
+              <p className={styles.chatHeaderTitle}>{t('aiAssistant.title')}</p>
+              <p className={styles.chatHeaderSubtitle}>{t('aiAssistant.subtitle')}</p>
+            </section>
+            {messages.length > 0 && (
+              <button
+                className={styles.chatClearBtn}
+                onClick={handleClear}
+                aria-label={t('aiAssistant.clearChat')}
+              >
+                <Trash2 size={16} aria-hidden="true" />
+              </button>
+            )}
+          </header>
+
+          {/* Messages or Greeting */}
+          {messages.length === 0 ? (
+            <section className={styles.greeting}>
+              <span className={styles.greetingIcon}>
+                <Sparkles size={28} aria-hidden="true" />
+              </span>
+              <p className={styles.greetingTitle}>
+                {t('aiAssistant.greetingTitle')}
+              </p>
+              <p className={styles.greetingText}>
+                {t('aiAssistant.greetingText')}
+              </p>
+              <nav className={styles.suggestions} aria-label="Suggested questions">
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    className={styles.suggestion}
+                    onClick={() => handleSuggestion(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </nav>
+            </section>
+          ) : (
+            <section className={styles.messages} aria-live="polite">
+              {messages.map((msg, i) => (
+                <article
+                  key={i}
+                  className={`${styles.message} ${
+                    msg.role === 'user' ? styles.messageUser : styles.messageBot
+                  }`}
+                >
+                  {msg.content}
+                </article>
+              ))}
+              {loading && (
+                <span className={styles.typing} aria-label={t('aiAssistant.typing')}>
+                  <span className={styles.typingDot} />
+                  <span className={styles.typingDot} />
+                  <span className={styles.typingDot} />
+                </span>
+              )}
+              <span ref={messagesEndRef} />
+            </section>
+          )}
+
+          {/* Input */}
+          <form className={styles.inputArea} onSubmit={handleSubmit}>
+            <textarea
+              ref={inputRef}
+              className={styles.input}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={t('aiAssistant.inputPlaceholder')}
+              rows={1}
+              disabled={loading}
+              id="ai-assistant-input"
+            />
+            <button
+              type="submit"
+              className={styles.sendBtn}
+              disabled={!input.trim() || loading}
+              aria-label={t('aiAssistant.send')}
+              id="ai-assistant-send"
+            >
+              <Send size={18} aria-hidden="true" />
+            </button>
+          </form>
+        </section>
+      )}
+
+      {/* Floating Action Button */}
+      <button
+        className={`${styles.fab} ${open ? styles.fabOpen : ''}`}
+        onClick={toggleOpen}
+        aria-label={open ? t('aiAssistant.close') : t('aiAssistant.open')}
+        id="ai-assistant-fab"
+      >
+        {open ? (
+          <X size={24} aria-hidden="true" />
+        ) : (
+          <MessageCircle size={24} aria-hidden="true" />
+        )}
+      </button>
+    </>,
+    document.body
+  )
+}

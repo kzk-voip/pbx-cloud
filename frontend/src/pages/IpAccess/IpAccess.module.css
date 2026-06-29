@@ -1,0 +1,148 @@
+.page {
+  padding: var(--space-4);
+}
+
+.header {
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.sectionIcon {
+  color: var(--color-primary);
+}
+
+.sectionBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-muted);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dangerBadge {
+  background: var(--color-error-muted);
+  color: var(--color-error);
+}
+
+.addForm {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.formField:first-child {
+  max-width: 240px;
+}
+
+.formLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.formInput {
+  height: 40px;
+  padding: 0 var(--space-2);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono, monospace);
+  transition: border-color var(--transition-fast);
+}
+
+.formInput:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-muted);
+}
+
+.formInput::placeholder {
+  color: var(--text-muted);
+  font-family: var(--font-family);
+}
+
+.ipCell {
+  font-family: var(--font-mono, monospace);
+  font-weight: var(--font-weight-medium);
+}
+
+.warningBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-warning-muted, hsl(45, 100%, 95%));
+  border-bottom: 1px solid var(--border-color);
+  color: var(--color-warning, hsl(45, 90%, 40%));
+  font-size: var(--font-size-sm);
+}
+
+[data-theme="dark"] .warningBanner {
+  background: hsl(45, 50%, 12%);
+  color: hsl(45, 90%, 65%);
+}
+
+.warningIcon {
+  flex-shrink: 0;
+}

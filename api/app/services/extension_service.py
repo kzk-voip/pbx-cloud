@@ -5,17 +5,24 @@ When an extension is created, the service automatically provisions
 the corresponding ps_endpoints, ps_auths, and ps_aors records
 so the SIP client can register immediately without Asterisk restart.
 
+Also auto-provisions a web User so the agent can log in to the
+web UI (including WebRTC softphone) using SIP credentials.
+
 Phase 5: Redis cache invalidation on create/update/delete.
 """
 
+import logging
 import secrets
 import uuid
 
 from sqlalchemy import func, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.services import event_service
+from app.services.auth_service import hash_password
 
 from app.models.tenant import Tenant
 from app.models.extension import Extension
+from app.models.user import User
 from app.models.ara import PjsipEndpoint, PjsipAuth, PjsipAor
 from app.redis import redis_client
 from app.services.ara_cache_service import invalidate_endpoint
@@ -26,6 +33,8 @@ from app.schemas.extension import (
     ExtensionCredentials,
     ExtensionListResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _make_sip_id(tenant_slug: str, ext_number: str) -> str:
@@ -38,7 +47,7 @@ def _generate_password() -> str:
     return secrets.token_urlsafe(16)
 
 
-def _ext_to_response(ext: Extension, tenant_slug: str) -> ExtensionResponse:
+def _ext_to_response(ext: Extension, tenant_slug: str, sip_password: str | None = None) -> ExtensionResponse:
     """Convert Extension ORM to response with sip_username."""
     return ExtensionResponse(
         id=ext.id,
@@ -49,6 +58,7 @@ def _ext_to_response(ext: Extension, tenant_slug: str) -> ExtensionResponse:
         enabled=ext.enabled,
         created_at=ext.created_at,
         sip_username=_make_sip_id(tenant_slug, ext.extension_number),
+        sip_password=sip_password,
     )
 
 
@@ -109,6 +119,7 @@ async def create_extension(
         id=sip_id,
         tenant_id=tenant_id,
         max_contacts=1,
+        remove_existing=True,
         support_path=True,
         qualify_frequency=30,
     )
@@ -137,15 +148,40 @@ async def create_extension(
         allow=tenant.codecs.split(",")[0] if tenant.codecs else "ulaw",
         direct_media=False,
         force_rport=True,
-        rewrite_contact=False,
+        rewrite_contact=True,
         rtp_symmetric=True,
         dtmf_mode="rfc4733",
         callerid=callerid,
     )
     db.add(endpoint)
 
+    await event_service.log_event(
+        db, tenant_id, "extension_created", source="api",
+        extension=data.extension_number,
+        details={"display_name": data.display_name, "sip_id": sip_id},
+    )
     await db.commit()
     await db.refresh(extension)
+
+    # Auto-create web User for this extension so the agent can
+    # immediately log in to the web UI / WebRTC softphone.
+    try:
+        web_user = User(
+            tenant_id=tenant_id,
+            extension_id=extension.id,
+            username=sip_id,
+            password_hash=hash_password(sip_password),
+            role="user",
+            is_active=True,
+        )
+        db.add(web_user)
+        await db.commit()
+        logger.info(f"Auto-created web user '{sip_id}' for extension {data.extension_number}")
+    except Exception as e:
+        # Don't fail the extension creation if user creation fails
+        # (e.g. username already exists from a previous cycle)
+        await db.rollback()
+        logger.warning(f"Could not auto-create web user for {sip_id}: {e}")
 
     # Invalidate ARA cache for this endpoint
     if redis_client:
@@ -164,7 +200,7 @@ async def create_extension(
 async def list_extensions(
     db: AsyncSession, tenant_id: uuid.UUID
 ) -> ExtensionListResponse:
-    """List all extensions for a tenant."""
+    """List all extensions for a tenant with SIP passwords."""
     tenant = await _get_tenant_or_raise(db, tenant_id)
 
     result = await db.execute(
@@ -174,7 +210,23 @@ async def list_extensions(
     )
     extensions = result.scalars().all()
 
-    items = [_ext_to_response(ext, tenant.slug) for ext in extensions]
+    # Batch-fetch passwords from ps_auths
+    sip_ids = [_make_sip_id(tenant.slug, ext.extension_number) for ext in extensions]
+    auth_result = await db.execute(
+        select(PjsipAuth).where(PjsipAuth.id.in_(sip_ids))
+    ) if sip_ids else None
+    password_map = {}
+    if auth_result:
+        for auth in auth_result.scalars().all():
+            password_map[auth.id] = auth.password
+
+    items = [
+        _ext_to_response(
+            ext, tenant.slug,
+            sip_password=password_map.get(_make_sip_id(tenant.slug, ext.extension_number))
+        )
+        for ext in extensions
+    ]
 
     return ExtensionListResponse(items=items, total=len(items))
 
@@ -182,7 +234,7 @@ async def list_extensions(
 async def get_extension(
     db: AsyncSession, tenant_id: uuid.UUID, ext_id: uuid.UUID
 ) -> ExtensionResponse | None:
-    """Get a single extension by ID."""
+    """Get a single extension by ID with SIP password."""
     tenant = await _get_tenant_or_raise(db, tenant_id)
 
     result = await db.execute(
@@ -195,13 +247,19 @@ async def get_extension(
     if ext is None:
         return None
 
-    return _ext_to_response(ext, tenant.slug)
+    sip_id = _make_sip_id(tenant.slug, ext.extension_number)
+    auth_result = await db.execute(
+        select(PjsipAuth).where(PjsipAuth.id == sip_id)
+    )
+    auth = auth_result.scalar_one_or_none()
+
+    return _ext_to_response(ext, tenant.slug, sip_password=auth.password if auth else None)
 
 
 async def update_extension(
     db: AsyncSession, tenant_id: uuid.UUID, ext_id: uuid.UUID, data: ExtensionUpdate
 ) -> ExtensionResponse | None:
-    """Update extension metadata (display_name, email, enabled)."""
+    """Update extension metadata, number, and/or password."""
     tenant = await _get_tenant_or_raise(db, tenant_id)
 
     result = await db.execute(
@@ -215,28 +273,113 @@ async def update_extension(
         return None
 
     update_data = data.model_dump(exclude_unset=True)
+    old_sip_id = _make_sip_id(tenant.slug, ext.extension_number)
+    password_change = update_data.pop("password", None)
+    number_change = update_data.get("extension_number")
+
+    # If extension_number is changing, check uniqueness
+    if number_change and number_change != ext.extension_number:
+        existing = await db.execute(
+            select(Extension).where(
+                Extension.tenant_id == tenant_id,
+                Extension.extension_number == number_change,
+            )
+        )
+        if existing.scalar_one_or_none() is not None:
+            raise ValueError(f"Extension {number_change} already exists for this tenant")
+
+    # Apply simple field updates (display_name, email, enabled, extension_number)
     for field, value in update_data.items():
         setattr(ext, field, value)
 
-    # If display_name changed, update callerid in ps_endpoints too
-    if "display_name" in update_data:
-        sip_id = _make_sip_id(tenant.slug, ext.extension_number)
-        ep_result = await db.execute(
-            select(PjsipEndpoint).where(PjsipEndpoint.id == sip_id)
+    new_sip_id = _make_sip_id(tenant.slug, ext.extension_number)
+
+    if number_change and number_change != ext.extension_number or number_change and old_sip_id != new_sip_id:
+        # Extension number changed — need to recreate ARA records with new SIP ID
+
+        # Get old password before deleting
+        old_auth_result = await db.execute(
+            select(PjsipAuth).where(PjsipAuth.id == old_sip_id)
         )
-        endpoint = ep_result.scalar_one_or_none()
-        if endpoint:
-            endpoint.callerid = f'"{data.display_name}" <{ext.extension_number}>'
+        old_auth = old_auth_result.scalar_one_or_none()
+        current_password = old_auth.password if old_auth else _generate_password()
+
+        # Delete old ARA records
+        await db.execute(delete(PjsipEndpoint).where(PjsipEndpoint.id == old_sip_id))
+        await db.execute(delete(PjsipAuth).where(PjsipAuth.id == old_sip_id))
+        await db.execute(delete(PjsipAor).where(PjsipAor.id == old_sip_id))
+
+        # Create new ARA records with new SIP ID
+        sip_password = password_change or current_password
+
+        aor = PjsipAor(
+            id=new_sip_id,
+            tenant_id=tenant_id,
+            max_contacts=1,
+            remove_existing=True,
+            support_path=True,
+            qualify_frequency=30,
+        )
+        db.add(aor)
+
+        auth = PjsipAuth(
+            id=new_sip_id,
+            tenant_id=tenant_id,
+            auth_type="userpass",
+            username=new_sip_id,
+            password=sip_password,
+        )
+        db.add(auth)
+
+        callerid = f'"{ext.display_name or new_sip_id}" <{ext.extension_number}>'
+        endpoint = PjsipEndpoint(
+            id=new_sip_id,
+            tenant_id=tenant_id,
+            transport="transport-udp",
+            aors=new_sip_id,
+            auth=new_sip_id,
+            context="from-kamailio",
+            disallow="all",
+            allow=tenant.codecs.split(",")[0] if tenant.codecs else "ulaw",
+            direct_media=False,
+            force_rport=True,
+            rewrite_contact=True,
+            rtp_symmetric=True,
+            dtmf_mode="rfc4733",
+            callerid=callerid,
+        )
+        db.add(endpoint)
+
+        # Invalidate old cache
+        if redis_client:
+            await invalidate_endpoint(redis_client, old_sip_id)
+    else:
+        # No number change — just update callerid and/or password in place
+        if "display_name" in update_data:
+            ep_result = await db.execute(
+                select(PjsipEndpoint).where(PjsipEndpoint.id == old_sip_id)
+            )
+            endpoint = ep_result.scalar_one_or_none()
+            if endpoint:
+                endpoint.callerid = f'"{data.display_name}" <{ext.extension_number}>'
+
+        if password_change:
+            auth_result = await db.execute(
+                select(PjsipAuth).where(PjsipAuth.id == old_sip_id)
+            )
+            auth = auth_result.scalar_one_or_none()
+            if auth:
+                auth.password = password_change
 
     await db.commit()
     await db.refresh(ext)
 
-    # Invalidate ARA cache for updated endpoint
-    sip_id_for_cache = _make_sip_id(tenant.slug, ext.extension_number)
+    # Invalidate ARA cache for new/current endpoint
     if redis_client:
-        await invalidate_endpoint(redis_client, sip_id_for_cache)
+        await invalidate_endpoint(redis_client, new_sip_id)
 
     return _ext_to_response(ext, tenant.slug)
+
 
 
 async def delete_extension(
@@ -257,6 +400,11 @@ async def delete_extension(
 
     sip_id = _make_sip_id(tenant.slug, ext.extension_number)
 
+    # Remove linked web User (auto-created on extension creation)
+    await db.execute(
+        delete(User).where(User.extension_id == ext_id)
+    )
+
     # Remove ARA records
     await db.execute(delete(PjsipEndpoint).where(PjsipEndpoint.id == sip_id))
     await db.execute(delete(PjsipAuth).where(PjsipAuth.id == sip_id))
@@ -265,6 +413,11 @@ async def delete_extension(
     # Remove extension metadata
     await db.execute(delete(Extension).where(Extension.id == ext_id))
 
+    await event_service.log_event(
+        db, tenant_id, "extension_deleted", source="api",
+        extension=ext.extension_number,
+        details={"display_name": ext.display_name, "sip_id": sip_id},
+    )
     await db.commit()
 
     # Invalidate ARA cache for deleted endpoint
@@ -300,7 +453,16 @@ async def reset_password(
     auth = auth_result.scalar_one_or_none()
     if auth:
         auth.password = new_password
-        await db.commit()
+
+    # Sync web User password so agent can also log in with new password
+    user_result = await db.execute(
+        select(User).where(User.extension_id == ext.id)
+    )
+    linked_user = user_result.scalar_one_or_none()
+    if linked_user:
+        linked_user.password_hash = hash_password(new_password)
+
+    await db.commit()
 
     # Invalidate ARA cache for password-reset endpoint
     if redis_client:
